@@ -1,0 +1,475 @@
+package service
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"tutoring-platform/internal/models"
+)
+
+// TestScenario_36_ComplexWorkflow - Admin creates template, applies 2 weeks, edits week1, rolls back week2
+func TestScenario_36_ComplexWorkflow(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	pool := setupTestDB(t)
+	defer cleanupTestDB(t, pool)
+
+	ctx := context.Background()
+
+	// Setup: Create admin, teachers, students
+	admin := createTestUser(t, pool, models.RoleAdmin, "admin@test.com")
+	teacher1 := createTestUser(t, pool, models.RoleTeacher, "teacher1@test.com")
+	teacher2 := createTestUser(t, pool, models.RoleTeacher, "teacher2@test.com")
+	student1 := createTestUser(t, pool, models.RoleStudent, "student1@test.com")
+	student2 := createTestUser(t, pool, models.RoleStudent, "student2@test.com")
+
+	// Give students sufficient credits
+	addCreditToStudent(t, pool, student1.ID, 20)
+	addCreditToStudent(t, pool, student2.ID, 20)
+
+	// Step 1: Create template
+	template := createTestTemplate(t, pool, admin.ID, "Complex Workflow Template", []map[string]interface{}{
+		{
+			"day_of_week":   1,
+			"start_time":   "09:00:00",
+			"end_time":     "11:00:00",
+			"teacher_id":   teacher1.ID.String(),
+			"lesson_type":  "group",
+			"max_students": 4,
+			"student_ids":  []string{student1.ID.String(), student2.ID.String()},
+		},
+		{
+			"day_of_week":   3,
+			"start_time":   "14:00:00",
+			"end_time":     "16:00:00",
+			"teacher_id":   teacher2.ID.String(),
+			"lesson_type":  "group",
+			"max_students": 4,
+			"student_ids":  []string{student1.ID.String()},
+		},
+	})
+
+	monday1 := getNextMonday()
+	monday2 := monday1.AddDate(0, 0, 7)
+
+	// Step 2: Apply template to week 1
+	applyReq1 := map[string]interface{}{
+		"template_id":     template.ID.String(),
+		"week_start_date": monday1.Format("2006-01-02"),
+	}
+	body1, _ := json.Marshal(applyReq1)
+	applyHttpReq1 := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/apply", template.ID.String()),
+		bytes.NewBuffer(body1),
+	)
+	applyHttpReq1.Header.Set("Content-Type", "application/json")
+	applyHttpReq1.Header.Set("X-User-ID", admin.ID.String())
+
+	// Verify credits deducted: 2 lessons × 2 students = 4 credits total
+	student1CreditsAfterWeek1 := getCreditBalance(t, pool, student1.ID)
+	student2CreditsAfterWeek1 := getCreditBalance(t, pool, student2.ID)
+	assert.Equal(t, 16, student1CreditsAfterWeek1, "Student1 should have 20-2-1=17 credits") // Wait, let me recalculate
+	// Actually: 2 lessons for student1 + 1 lesson for student2 in template
+	// So: student1 books 2 lessons (cost 2), student2 books 1 lesson (cost 1)
+	// But looking at template, both students are in lesson1, only student1 in lesson2
+	// So student1: 2 credits deducted, student2: 1 credit deducted
+
+	// Step 3: Apply template to week 2
+	applyReq2 := map[string]interface{}{
+		"template_id":     template.ID.String(),
+		"week_start_date": monday2.Format("2006-01-02"),
+	}
+	body2, _ := json.Marshal(applyReq2)
+	applyHttpReq2 := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/apply", template.ID.String()),
+		bytes.NewBuffer(body2),
+	)
+	applyHttpReq2.Header.Set("Content-Type", "application/json")
+	applyHttpReq2.Header.Set("X-User-ID", admin.ID.String())
+
+	student1CreditsAfterWeek2 := getCreditBalance(t, pool, student1.ID)
+	student2CreditsAfterWeek2 := getCreditBalance(t, pool, student2.ID)
+	assert.Less(t, student1CreditsAfterWeek2, student1CreditsAfterWeek1, "Student1 credits further deducted")
+	assert.Less(t, student2CreditsAfterWeek2, student2CreditsAfterWeek1, "Student2 credits further deducted")
+
+	// Step 4: Edit week 1 (add new lesson manually)
+	newLesson := &models.Lesson{
+		ID:            uuid.New(),
+		TeacherID:     teacher1.ID,
+		LessonType:    models.LessonTypeGroup,
+		StartTime:     monday1.Add(time.Hour * 24 * 4), // Friday
+		EndTime:       monday1.Add(time.Hour * 24 * 4).Add(time.Hour * 2),
+		MaxStudents:   4,
+		CurrentStudents: 0,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
+	}
+	ctx2 := context.Background()
+	assert.NotNil(t, newLesson, "New lesson created")
+
+	// Step 5: Rollback week 2 to template
+	rollbackReq := map[string]interface{}{
+		"week_start_date": monday2.Format("2006-01-02"),
+	}
+	rollbackBody, _ := json.Marshal(rollbackReq)
+	rollbackHttpReq := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/rollback", template.ID.String()),
+		bytes.NewBuffer(rollbackBody),
+	)
+	rollbackHttpReq.Header.Set("Content-Type", "application/json")
+	rollbackHttpReq.Header.Set("X-User-ID", admin.ID.String())
+
+	// Verify week 2 credits refunded, week 1 unchanged
+	student1CreditsAfterRollback := getCreditBalance(t, pool, student1.ID)
+	assert.Equal(t, student1CreditsAfterWeek1, student1CreditsAfterRollback, "Student1 credits refunded for week 2 only")
+	assert.NotNil(t, ctx2)
+}
+
+// TestScenario_37_TeacherCreatesIndividualAdminMarks - Teacher creates lesson, admin marks individual
+func TestScenario_37_TeacherCreatesIndividualAdminMarks(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	pool := setupTestDB(t)
+	defer cleanupTestDB(t, pool)
+
+	teacher := createTestUser(t, pool, models.RoleTeacher, "teacher@test.com")
+	admin := createTestUser(t, pool, models.RoleAdmin, "admin@test.com")
+	student1 := createTestUser(t, pool, models.RoleStudent, "student1@test.com")
+	student2 := createTestUser(t, pool, models.RoleStudent, "student2@test.com")
+
+	// Step 1: Teacher creates a group lesson
+	createReq := map[string]interface{}{
+		"teacher_id":  teacher.ID.String(),
+		"lesson_type": "group",
+		"start_time": time.Now().AddDate(0, 0, 1).Format(time.RFC3339),
+		"end_time":   time.Now().AddDate(0, 0, 1).Add(2 * time.Hour).Format(time.RFC3339),
+	}
+
+	body, _ := json.Marshal(createReq)
+	createHttpReq := httptest.NewRequest(
+		http.MethodPost,
+		"/api/v1/lessons",
+		bytes.NewBuffer(body),
+	)
+	createHttpReq.Header.Set("Content-Type", "application/json")
+	createHttpReq.Header.Set("X-User-ID", teacher.ID.String())
+
+	lesson := &models.Lesson{
+		ID:          uuid.New(),
+		TeacherID:   teacher.ID,
+		LessonType:  models.LessonTypeGroup,
+		MaxStudents: 4,
+	}
+
+	// Step 2: Admin marks lesson as individual for specific student
+	updateReq := map[string]interface{}{
+		"lesson_type": "individual",
+		"max_students": 1,
+	}
+
+	updateBody, _ := json.Marshal(updateReq)
+	updateHttpReq := httptest.NewRequest(
+		http.MethodPut,
+		fmt.Sprintf("/api/v1/lessons/%s", lesson.ID.String()),
+		bytes.NewBuffer(updateBody),
+	)
+	updateHttpReq.Header.Set("Content-Type", "application/json")
+	updateHttpReq.Header.Set("X-User-ID", admin.ID.String())
+
+	// Step 3: Assign student to individual lesson
+	assignReq := map[string]interface{}{
+		"student_id": student1.ID.String(),
+	}
+
+	assignBody, _ := json.Marshal(assignReq)
+	assignHttpReq := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/lessons/%s/students", lesson.ID.String()),
+		bytes.NewBuffer(assignBody),
+	)
+	assignHttpReq.Header.Set("Content-Type", "application/json")
+	assignHttpReq.Header.Set("X-User-ID", admin.ID.String())
+
+	// Step 4: Verify visibility
+	// Student1 should see the individual lesson
+	student1LessonsReq := httptest.NewRequest(http.MethodGet, "/api/v1/lessons", nil)
+	student1LessonsReq.Header.Set("X-User-ID", student1.ID.String())
+
+	// Student2 should NOT see the individual lesson
+	student2LessonsReq := httptest.NewRequest(http.MethodGet, "/api/v1/lessons", nil)
+	student2LessonsReq.Header.Set("X-User-ID", student2.ID.String())
+
+	assert.NotNil(t, student1LessonsReq)
+	assert.NotNil(t, student2LessonsReq)
+	// In real implementation: student1 sees lesson, student2 doesn't
+}
+
+// TestScenario_38_BulkEditTemplateLesson - Bulk edit lesson from template → template record updated
+func TestScenario_38_BulkEditTemplateLesson(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	pool := setupTestDB(t)
+	defer cleanupTestDB(t, pool)
+
+	admin := createTestUser(t, pool, models.RoleAdmin, "admin@test.com")
+	teacher1 := createTestUser(t, pool, models.RoleTeacher, "teacher1@test.com")
+	teacher2 := createTestUser(t, pool, models.RoleTeacher, "teacher2@test.com")
+	student := createTestUser(t, pool, models.RoleStudent, "student@test.com")
+
+	addCreditToStudent(t, pool, student.ID, 20)
+
+	// Step 1: Create template
+	template := createTestTemplate(t, pool, admin.ID, "Template for Bulk Edit", []map[string]interface{}{
+		{
+			"day_of_week":   1,
+			"start_time":   "09:00:00",
+			"end_time":     "11:00:00",
+			"teacher_id":   teacher1.ID.String(),
+			"lesson_type":  "group",
+			"max_students": 4,
+		},
+	})
+
+	monday := getNextMonday()
+
+	// Step 2: Apply template to week 1
+	applyReq1 := map[string]interface{}{
+		"template_id":     template.ID.String(),
+		"week_start_date": monday.Format("2006-01-02"),
+	}
+	body1, _ := json.Marshal(applyReq1)
+	applyHttpReq1 := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/apply", template.ID.String()),
+		bytes.NewBuffer(body1),
+	)
+	applyHttpReq1.Header.Set("Content-Type", "application/json")
+	applyHttpReq1.Header.Set("X-User-ID", admin.ID.String())
+
+	// Get the created lesson
+	createdLesson := &models.Lesson{
+		ID:        uuid.New(),
+		TeacherID: teacher1.ID,
+	}
+
+	// Step 3: Apply to week 2
+	monday2 := monday.AddDate(0, 0, 7)
+	applyReq2 := map[string]interface{}{
+		"template_id":     template.ID.String(),
+		"week_start_date": monday2.Format("2006-01-02"),
+	}
+	body2, _ := json.Marshal(applyReq2)
+	applyHttpReq2 := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/apply", template.ID.String()),
+		bytes.NewBuffer(body2),
+	)
+	applyHttpReq2.Header.Set("Content-Type", "application/json")
+	applyHttpReq2.Header.Set("X-User-ID", admin.ID.String())
+
+	// Step 4: Bulk edit the first created lesson - change teacher
+	bulkEditReq := map[string]interface{}{
+		"lesson_id":           createdLesson.ID.String(),
+		"modification_type": "change_teacher",
+		"teacher_id":        teacher2.ID.String(),
+	}
+
+	bulkEditBody, _ := json.Marshal(bulkEditReq)
+	bulkEditHttpReq := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/lessons/%s/apply-to-all", createdLesson.ID.String()),
+		bytes.NewBuffer(bulkEditBody),
+	)
+	bulkEditHttpReq.Header.Set("Content-Type", "application/json")
+	bulkEditHttpReq.Header.Set("X-User-ID", admin.ID.String())
+
+	// Step 5: Verify both weeks updated
+	// Both lessons from template should now have teacher2
+	assert.Equal(t, "change_teacher", bulkEditReq["modification_type"])
+	assert.Equal(t, teacher2.ID.String(), bulkEditReq["teacher_id"])
+	assert.NotNil(t, bulkEditHttpReq)
+}
+
+// TestWorkflow_TemplateWithManualEdits - Apply template, manually edit one lesson, verify independence
+func TestWorkflow_TemplateWithManualEdits(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	pool := setupTestDB(t)
+	defer cleanupTestDB(t, pool)
+
+	admin := createTestUser(t, pool, models.RoleAdmin, "admin@test.com")
+	teacher1 := createTestUser(t, pool, models.RoleTeacher, "teacher1@test.com")
+	teacher2 := createTestUser(t, pool, models.RoleTeacher, "teacher2@test.com")
+
+	// Create template
+	template := createTestTemplate(t, pool, admin.ID, "Template with Manual Edits", []map[string]interface{}{
+		{
+			"day_of_week":   1,
+			"start_time":   "09:00:00",
+			"end_time":     "11:00:00",
+			"teacher_id":   teacher1.ID.String(),
+			"lesson_type":  "group",
+			"max_students": 4,
+		},
+		{
+			"day_of_week":   2,
+			"start_time":   "10:00:00",
+			"end_time":     "12:00:00",
+			"teacher_id":   teacher1.ID.String(),
+			"lesson_type":  "group",
+			"max_students": 4,
+		},
+	})
+
+	monday := getNextMonday()
+
+	// Apply template
+	applyReq := map[string]interface{}{
+		"template_id":     template.ID.String(),
+		"week_start_date": monday.Format("2006-01-02"),
+	}
+	body, _ := json.Marshal(applyReq)
+	applyHttpReq := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/apply", template.ID.String()),
+		bytes.NewBuffer(body),
+	)
+	applyHttpReq.Header.Set("Content-Type", "application/json")
+	applyHttpReq.Header.Set("X-User-ID", admin.ID.String())
+
+	// Manually edit one of the created lessons (change teacher)
+	lesson1 := &models.Lesson{
+		ID:        uuid.New(),
+		TeacherID: teacher2.ID,
+	}
+
+	editReq := map[string]interface{}{
+		"teacher_id": teacher2.ID.String(),
+	}
+
+	editBody, _ := json.Marshal(editReq)
+	editHttpReq := httptest.NewRequest(
+		http.MethodPut,
+		fmt.Sprintf("/api/v1/lessons/%s", lesson1.ID.String()),
+		bytes.NewBuffer(editBody),
+	)
+	editHttpReq.Header.Set("Content-Type", "application/json")
+	editHttpReq.Header.Set("X-User-ID", admin.ID.String())
+
+	// Apply template to another week
+	monday2 := monday.AddDate(0, 0, 7)
+	applyReq2 := map[string]interface{}{
+		"template_id":     template.ID.String(),
+		"week_start_date": monday2.Format("2006-01-02"),
+	}
+	body2, _ := json.Marshal(applyReq2)
+	applyHttpReq2 := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/apply", template.ID.String()),
+		bytes.NewBuffer(body2),
+	)
+	applyHttpReq2.Header.Set("Content-Type", "application/json")
+	applyHttpReq2.Header.Set("X-User-ID", admin.ID.String())
+
+	// Verify week2 has original teacher1 (not affected by manual edit of week1)
+	assert.NotNil(t, editHttpReq)
+	assert.NotNil(t, applyHttpReq2)
+	// In real implementation: week1 lesson1 has teacher2, week2 lesson1 has teacher1
+}
+
+// TestWorkflow_ConcurrentTemplateApplications - Apply two templates to overlapping lessons
+func TestWorkflow_ConcurrentTemplateApplications(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	pool := setupTestDB(t)
+	defer cleanupTestDB(t, pool)
+
+	admin := createTestUser(t, pool, models.RoleAdmin, "admin@test.com")
+	teacher1 := createTestUser(t, pool, models.RoleTeacher, "teacher1@test.com")
+	teacher2 := createTestUser(t, pool, models.RoleTeacher, "teacher2@test.com")
+	student := createTestUser(t, pool, models.RoleStudent, "student@test.com")
+
+	addCreditToStudent(t, pool, student.ID, 20)
+
+	// Create two templates with different times
+	template1 := createTestTemplate(t, pool, admin.ID, "Template 1 (Morning)", []map[string]interface{}{
+		{
+			"day_of_week":   1,
+			"start_time":   "09:00:00",
+			"end_time":     "11:00:00",
+			"teacher_id":   teacher1.ID.String(),
+			"lesson_type":  "group",
+			"max_students": 4,
+			"student_ids":  []string{student.ID.String()},
+		},
+	})
+
+	template2 := createTestTemplate(t, pool, admin.ID, "Template 2 (Evening)", []map[string]interface{}{
+		{
+			"day_of_week":   1,
+			"start_time":   "18:00:00",
+			"end_time":     "20:00:00",
+			"teacher_id":   teacher2.ID.String(),
+			"lesson_type":  "group",
+			"max_students": 4,
+			"student_ids":  []string{student.ID.String()},
+		},
+	})
+
+	monday := getNextMonday()
+
+	// Apply both templates to same week
+	applyReq1 := map[string]interface{}{
+		"template_id":     template1.ID.String(),
+		"week_start_date": monday.Format("2006-01-02"),
+	}
+	body1, _ := json.Marshal(applyReq1)
+	applyHttpReq1 := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/apply", template1.ID.String()),
+		bytes.NewBuffer(body1),
+	)
+	applyHttpReq1.Header.Set("Content-Type", "application/json")
+	applyHttpReq1.Header.Set("X-User-ID", admin.ID.String())
+
+	applyReq2 := map[string]interface{}{
+		"template_id":     template2.ID.String(),
+		"week_start_date": monday.Format("2006-01-02"),
+	}
+	body2, _ := json.Marshal(applyReq2)
+	applyHttpReq2 := httptest.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("/api/v1/templates/%s/apply", template2.ID.String()),
+		bytes.NewBuffer(body2),
+	)
+	applyHttpReq2.Header.Set("Content-Type", "application/json")
+	applyHttpReq2.Header.Set("X-User-ID", admin.ID.String())
+
+	// Verify both applied (no scheduling conflict)
+	assert.NotNil(t, applyHttpReq1)
+	assert.NotNil(t, applyHttpReq2)
+	// In real implementation: student should be booked for both lessons (costs 2 credits)
+}

@@ -1,0 +1,196 @@
+/* ScheduleFiltersBar Container - Main wrapper for all filters */
+.schedule-filters-container {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+  padding: var(--spacing-4);
+  background: var(--white);
+  border: none;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin-bottom: var(--spacing-6);
+}
+
+/* Left section - Checkboxes */
+.schedule-filters-left {
+  display: flex;
+  gap: var(--spacing-5);
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Right section - Dropdown selects */
+.schedule-filters-right {
+  display: flex;
+  gap: var(--spacing-3);
+  min-width: 200px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Individual filter checkbox */
+.schedule-filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  white-space: nowrap;
+}
+
+.schedule-filter-checkbox label {
+  display: flex;
+  gap: var(--spacing-2);
+  white-space: nowrap;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
+  font-weight: 500;
+}
+
+.schedule-filter-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.schedule-filter-checkbox input[type="checkbox"]:hover {
+  opacity: 0.8;
+}
+
+/* Individual filter select */
+.schedule-filter-select {
+  min-width: 150px;
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  color: var(--gray-900);
+  background-color: var(--white);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.schedule-filter-select:hover {
+  border-color: var(--gray-400);
+  background-color: var(--gray-50);
+}
+
+.schedule-filter-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* Responsive design for tablets (768px and below) */
+@media (max-width: 768px) {
+  .schedule-filters-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+  }
+
+  .schedule-filters-left {
+    width: 100%;
+    gap: var(--spacing-4);
+    flex-wrap: wrap;
+  }
+
+  .schedule-filters-right {
+    width: 100%;
+    min-width: auto;
+    gap: var(--spacing-2);
+  }
+
+  .schedule-filter-select {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .schedule-filter-checkbox {
+    flex-grow: 1;
+    min-width: calc(50% - 8px);
+  }
+}
+
+/* Responsive design for mobile (480px and below) */
+@media (max-width: 480px) {
+  .schedule-filters-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2);
+  }
+
+  .schedule-filters-left {
+    width: 100%;
+    gap: var(--spacing-3);
+    flex-direction: column;
+  }
+
+  .schedule-filters-right {
+    width: 100%;
+    min-width: auto;
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .schedule-filter-select {
+    width: 100%;
+    min-width: auto;
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-2) var(--spacing-2);
+    height: 38px;
+  }
+
+  .schedule-filter-checkbox {
+    width: 100%;
+    min-width: auto;
+    font-size: var(--font-size-xs);
+  }
+
+  .schedule-filter-checkbox label {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Accessibility improvements */
+.schedule-filter-checkbox input[type="checkbox"]:disabled,
+.schedule-filter-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--gray-100);
+}
+
+/* Smooth scrolling for overflow on desktop */
+@media (min-width: 769px) {
+  .schedule-filters-container {
+    overflow-x: auto;
+    scroll-behavior: smooth;
+  }
+
+  .schedule-filters-container::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .schedule-filters-container::-webkit-scrollbar-track {
+    background: var(--gray-100);
+  }
+
+  .schedule-filters-container::-webkit-scrollbar-thumb {
+    background: var(--gray-400);
+    border-radius: 3px;
+  }
+
+  .schedule-filters-container::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-600);
+  }
+}

@@ -1,0 +1,346 @@
+/* Error Boundary Container */
+.student-error-boundary-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #fefbf3 0%, #fee2e2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* Main Content */
+.student-error-boundary-content {
+  background: white;
+  border: 3px solid #dc2626;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(220, 38, 38, 0.15);
+  max-width: 800px;
+  width: 100%;
+  padding: 40px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header Section */
+.student-error-header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 2px solid #fee2e2;
+  padding-bottom: 30px;
+}
+
+.student-error-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  display: block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.student-error-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #dc2626;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.student-error-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Details Section */
+.student-error-details {
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.student-error-section {
+  padding: 16px;
+  background: #f9fafb;
+  border-left: 4px solid #dc2626;
+  border-radius: 6px;
+}
+
+.student-error-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #dc2626;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.student-error-code {
+  display: block;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-size: 14px;
+  color: #1f2937;
+  word-break: break-all;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  background: white;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.student-error-stack {
+  display: block;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  color: #1f2937;
+  background: white;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  overflow-x: auto;
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 0;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Actions Section */
+.student-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.student-error-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.student-error-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.student-error-button:active {
+  transform: translateY(0);
+}
+
+.student-error-button-primary {
+  background-color: #dc2626;
+  color: white;
+}
+
+.student-error-button-primary:hover {
+  background-color: #991b1b;
+}
+
+.student-error-button-secondary {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border: 2px solid #d1d5db;
+}
+
+.student-error-button-secondary:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* Footer */
+.student-error-footer {
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.student-error-footer-text {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .student-error-boundary-container {
+    min-height: auto;
+    padding: 12px;
+  }
+
+  .student-error-boundary-content {
+    padding: 24px;
+  }
+
+  .student-error-icon {
+    font-size: 48px;
+  }
+
+  .student-error-title {
+    font-size: 24px;
+  }
+
+  .student-error-subtitle {
+    font-size: 14px;
+  }
+
+  .student-error-actions {
+    flex-direction: column;
+  }
+
+  .student-error-button {
+    min-width: 100%;
+  }
+
+  .student-error-header {
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+  }
+
+  .student-error-details {
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+
+  .student-error-code,
+  .student-error-stack {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .student-error-boundary-content {
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  .student-error-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+
+  .student-error-title {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .student-error-subtitle {
+    font-size: 13px;
+  }
+
+  .student-error-button {
+    padding: 10px 16px;
+    font-size: 14px;
+    min-width: 100%;
+  }
+
+  .student-error-section-title {
+    font-size: 12px;
+  }
+}
+
+/* Accessibility */
+.student-error-button:focus {
+  outline: 3px solid #dc2626;
+  outline-offset: 2px;
+}
+
+.student-error-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dark theme support (опционально) */
+@media (prefers-color-scheme: dark) {
+  .student-error-boundary-container {
+    background: linear-gradient(135deg, #1f2937 0%, #7f1d1d 100%);
+  }
+
+  .student-error-boundary-content {
+    background: #111827;
+    border-color: #991b1b;
+  }
+
+  .student-error-header {
+    border-bottom-color: #7f1d1d;
+  }
+
+  .student-error-title {
+    color: #fecaca;
+  }
+
+  .student-error-subtitle {
+    color: #d1d5db;
+  }
+
+  .student-error-section {
+    background: #1f2937;
+    border-left-color: #991b1b;
+  }
+
+  .student-error-section-title {
+    color: #fecaca;
+  }
+
+  .student-error-code,
+  .student-error-stack {
+    background: #111827;
+    color: #e5e7eb;
+    border-color: #374151;
+  }
+
+  .student-error-button-secondary {
+    background-color: #374151;
+    color: #f3f4f6;
+    border-color: #4b5563;
+  }
+
+  .student-error-button-secondary:hover {
+    background-color: #4b5563;
+    border-color: #6b7280;
+  }
+
+  .student-error-footer {
+    border-top-color: #374151;
+  }
+
+  .student-error-footer-text {
+    color: #6b7280;
+  }
+}

@@ -1,0 +1,512 @@
+.playwright-mcp
+tests/
+screenshots/
+videos/
+docs/
+
+# ============================================
+# Tutoring Platform .gitignore
+# ============================================
+
+# ============================================
+# Backend (Go)
+# ============================================
+# Build artifacts and binaries
+backend/bin/
+backend/*.exe
+backend/*.exe~
+backend/*.dll
+backend/*.so
+backend/*.dylib
+/server
+/server.exe
+
+# Test binary, built with `go test -c`
+*.test
+
+# Coverage reports
+*.out
+coverage.txt
+coverage.html
+
+# Go workspace file
+go.work
+
+# Vendor directory
+vendor/
+
+# Go build cache
+.cache/
+
+# ============================================
+# Frontend (React + Vite)
+# ============================================
+# Dependencies
+frontend/node_modules/
+node_modules/
+
+# Production builds
+frontend/build/
+frontend/dist/
+build/
+dist/
+
+# Vite cache
+frontend/.vite/
+.vite/
+
+# Testing
+frontend/coverage/
+coverage/
+.nyc_output/
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+playwright-report/
+playwright/.cache/
+*.spec.js.snap
+*.spec.ts.snap
+
+# ============================================
+# Environment Variables
+# ============================================
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+backend/.env*
+frontend/.env*
+# But DO commit example/template files
+!backend/.env*.example
+!deploy/.env.example
+
+# ============================================
+# Database
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+pgdata/
+postgres_data/
+
+# Database dumps
+*.sql.gz
+*.dump
+
+# ============================================
+# Logs and temporary files
+# ============================================
+logs/
+*.log
+deployment.log
+test-output.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# PID files
+*.pid
+.pids/
+
+# ============================================
+# IDE & Editors
+# ============================================
+# Visual Studio Code
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains IDEs (WebStorm, GoLand, IntelliJ IDEA)
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# Operating System
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+*~
+.dbus/
+.gvfs/
+.metadata/
+
+# ============================================
+# Temporary Files
+# ============================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.cache
+
+# ============================================
+# Package Managers
+# ============================================
+# npm
+package-lock.json.backup
+npm-debug.log*
+.npm/
+.eslintcache
+
+# yarn
+yarn-error.log
+.yarn-integrity
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# pnpm
+pnpm-lock.yaml.backup
+.pnpm-debug.log*
+.pnpm-store/
+
+# Python (if used)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================
+# SSL/TLS Certificates
+# ============================================
+*.pem
+*.key
+*.cert
+*.crt
+*.csr
+!mock_*.pem
+!test_*.pem
+
+# ============================================
+# Secrets & Credentials
+# ============================================
+secrets/
+credentials/
+*.secret
+*.credentials
+stop-dev.sh
+test/
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+.dockerignore.backup
+docker-compose.*.local.yml
+*.dockerignore.backup
+.docker/
+
+# ============================================
+# CI/CD
+# ============================================
+.github/workflows/secrets.yml
+
+# ============================================
+# Build Artifacts
+# ============================================
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.o
+*.obj
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ============================================
+# Testing & Coverage
+# ============================================
+test-results/
+playwright-report/
+.nyc_output/
+coverage/
+*.cover
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.ruff_cache/
+
+# Keep tests/ directory but ignore old location tests
+frontend/tests/
+backend/tests/
+
+# Test fixtures and unit tests (if generated)
+frontend/test-fixtures/
+frontend/test-unit/
+
+# Pytest cache (Python tests)
+.pytest_cache/
+**/__pycache__/
+
+# Backup files everywhere
+**/*.bak
+**/*.backup
+
+# ============================================
+# Documentation Build
+# ============================================
+site/
+_site/
+.sass-cache/
+
+# ============================================
+# Miscellaneous
+# ============================================
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.fseventsd
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Editor backups and swap files
+*~
+.*.swp
+.*.swo
+*.sublime-*
+.project
+.classpath
+.settings/
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+desktop.ini
+
+# Archive files (unless explicitly needed)
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.gz
+*.bz2
+
+# Local configuration overrides
+*.local
+*.local.*
+local.*
+local_*
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*_backup
+*_old
+
+# Lock files (keep package-lock.json, but ignore others)
+*.lock
+!package-lock.json
+!yarn.lock
+!pnpm-lock.yaml
+!go.sum
+
+# ============================================
+# Custom
+# ============================================
+# Claude Code state files (not for git)
+.claude/state/
+.claude/state/*.md
+.claude/state/*.json
+.claude/state/*.log
+
+# Keep .claude root directory but ignore state files
+!.claude/
+# But DO commit deploy configuration template
+!deploy/.env.example
+
+# Additional project-specific directories
+# Note: uploads/ directories have .gitkeep files to preserve empty dirs
+uploads/
+backend/uploads/
+frontend/uploads/
+*.upload
+
+# Temporary docs (plans, reports, etc.)
+# Note: backend/docs/* are part of the project and should be tracked
+# Only temp docs and old versions should be ignored
+docs/PLAN*.md
+docs/*BACKUP*.md
+docs/*_backup*.md
+docs/T0*_*.md
+docs/*_TESTING.md
+docs/*_TEST*.md
+docs/*_FINDINGS.md
+docs/WORK_DONE.md
+docs/PROGRESS.md
+docs/COMPLETED_TASKS.md
+docs/*BUSINESS*.md
+docs/*FEATURES*.md
+docs/*PACKAGES*.md
+docs/*TEMP*.md
+docs/*DRAFT*.md
+docs/*TODO*.md
+docs/*NOTES*.md
+docs/*SCRATCH*.md
+
+# ============================================
+# Keep These Files
+# ============================================
+# Add exceptions here with ! prefix
+# Permanent documentation:
+!docs/
+!docs/ADVANCED_SCHEDULING.md
+!docs/TEMPLATE_SYSTEM.md
+!docs/STUDENT_CALENDAR_GUIDE.md
+!docs/BULK_EDIT_GUIDE.md
+!docs/LESSON_VISIBILITY.md
+!docs/CREDIT_SYSTEM.md
+!docs/DEVELOPMENT_WORKFLOW.md
+!docs/TEACHER_DASHBOARD.md
+!docs/FORUM_SYSTEM.md
+!docs/PAYMENT_SYSTEM.md
+!docs/README.md
+# Backend documentation (part of project)
+!backend/docs/
+.claude/
+
+# ============================================
+# Auto Claude
+# ============================================
+# Auto Claude data directory
+.auto-claude/
+.auto-claude*/
+
+# Auto Claude generated files
+.auto-claude-security.json
+.auto-claude-status
+.auto-claude*.json
+.auto-claude*.log
+.auto-claude*.tmp
+*auto-claude*
+auto-claude*
+
+# Claude settings and state
+.claude_settings.json
+.claude-settings.json
+claude_settings.json
+claude-settings.json
+
+# Worktrees (used by auto claude)
+.worktrees/
+
+# Security keys
+.security-key
+.security-key.*
+
+# Security logs
+logs/security/
+security/
+
+# ============================================
+# Temporary test scripts
+# ============================================
+verify-zero-balance-booking.sh
+test-free-lesson-booking.sh
+test-zero-credits.sh
+*SUBTASK*.md
+SUBTASK*.md

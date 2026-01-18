@@ -1,0 +1,82 @@
+.admin-calendar-credits-display {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: var(--color-surface-secondary, #f5f5f5);
+  border-radius: 6px;
+  border-left: 2px solid var(--color-primary, #3b82f6);
+  margin: 0 8px;
+}
+
+.admin-calendar-credits-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-calendar-credits-icon {
+  color: var(--color-primary, #3b82f6);
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.admin-calendar-credits-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #666);
+  white-space: nowrap;
+}
+
+.admin-calendar-credits-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary, #1a1a1a);
+  min-width: 24px;
+  text-align: center;
+}
+
+.admin-calendar-credits-error {
+  font-size: 12px;
+  color: var(--color-error, #ef4444);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Responsive adjustments for tablet */
+@media (max-width: 1024px) {
+  .admin-calendar-credits-display {
+    padding: 5px 10px;
+    margin: 0 4px;
+  }
+
+  .admin-calendar-credits-label {
+    font-size: 12px;
+  }
+
+  .admin-calendar-credits-value {
+    font-size: 14px;
+  }
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .admin-calendar-credits-display {
+    padding: 4px 8px;
+    margin: 0 4px;
+    border-radius: 4px;
+  }
+
+  .admin-calendar-credits-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .admin-calendar-credits-label {
+    display: none;
+  }
+
+  .admin-calendar-credits-value {
+    font-size: 13px;
+  }
+}

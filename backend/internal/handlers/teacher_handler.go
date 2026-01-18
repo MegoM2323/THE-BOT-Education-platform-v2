@@ -1,0 +1,311 @@
+package handlers
+
+import (
+	"encoding/json"
+	"errors"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
+
+	"tutoring-platform/internal/middleware"
+	"tutoring-platform/internal/models"
+	"tutoring-platform/internal/repository"
+	"tutoring-platform/internal/service"
+	"tutoring-platform/internal/validator"
+	"tutoring-platform/pkg/response"
+)
+
+// TeacherHandler обрабатывает эндпоинты для преподавателей
+type TeacherHandler struct {
+	lessonService          *service.LessonService
+	bookingService         *service.BookingService
+	lessonBroadcastService *service.LessonBroadcastService
+	lessonRepo             *repository.LessonRepository
+	timeValidator          *validator.TimeValidator
+}
+
+// NewTeacherHandler создает новый TeacherHandler
+func NewTeacherHandler(
+	lessonService *service.LessonService,
+	bookingService *service.BookingService,
+	lessonBroadcastService *service.LessonBroadcastService,
+	lessonRepo *repository.LessonRepository,
+) *TeacherHandler {
+	return &TeacherHandler{
+		lessonService:          lessonService,
+		bookingService:         bookingService,
+		lessonBroadcastService: lessonBroadcastService,
+		lessonRepo:             lessonRepo,
+		timeValidator:          validator.NewTimeValidator(),
+	}
+}
+
+// SendLessonBroadcast обрабатывает POST /api/v1/teacher/lessons/:id/broadcast
+// Отправляет рассылку всем студентам занятия через Telegram
+func (h *TeacherHandler) SendLessonBroadcast(w http.ResponseWriter, r *http.Request) {
+	// Получаем текущего пользователя (teacher) из контекста
+	user, ok := middleware.GetUserFromContext(r.Context())
+	if !ok {
+		response.Unauthorized(w, "Authentication required")
+		return
+	}
+
+	// Проверяем что пользователь не удален/деактивирован
+	if user.IsDeleted() {
+		response.Unauthorized(w, "User account is deleted or deactivated")
+		return
+	}
+
+	// Проверяем что пользователь - преподаватель, методист или админ
+	if !user.IsTeacher() && !user.IsMethodologist() && !user.IsAdmin() {
+		response.Forbidden(w, "Only teachers, methodologists and admins can send lesson broadcasts")
+		return
+	}
+
+	// Извлекаем lesson_id из URL
+	lessonID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid lesson ID")
+		return
+	}
+
+	// Получаем занятие из БД
+	lesson, err := h.lessonService.GetLesson(r.Context(), lessonID)
+	if err != nil {
+		if errors.Is(err, repository.ErrLessonNotFound) {
+			response.NotFound(w, "Lesson not found")
+			return
+		}
+		log.Printf("[ERROR] Failed to retrieve lesson %s: %v\n", lessonID, err)
+		response.InternalError(w, "Failed to retrieve lesson")
+		return
+	}
+
+	// Проверяем что текущий teacher является владельцем занятия
+	if lesson.TeacherID != user.ID {
+		response.Forbidden(w, "You can only send broadcasts for your own lessons")
+		return
+	}
+
+	// Декодируем request body
+	var req models.TeacherLessonBroadcastRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid request body")
+		return
+	}
+
+	// Валидация сообщения
+	if err := req.Validate(); err != nil {
+		h.handleTeacherBroadcastError(w, err)
+		return
+	}
+
+	// Создаем рассылку урока с использованием LessonBroadcastService
+	// Этот сервис сам получит enrolled студентов и отправит им рассылку
+	broadcast, err := h.lessonBroadcastService.CreateLessonBroadcast(
+		r.Context(),
+		user.ID,  // sender - текущий teacher
+		lessonID, // lesson ID
+		req.Message,
+		nil, // files - пока не поддерживаем через этот endpoint
+	)
+	if err != nil {
+		log.Printf("[ERROR] Failed to create lesson broadcast for lesson %s: %v\n", lessonID, err)
+		h.handleTeacherBroadcastError(w, err)
+		return
+	}
+
+	log.Printf("[INFO] Lesson broadcast %s created and sending started for lesson %s\n", broadcast.ID, lessonID)
+
+	// Возвращаем успешный ответ с информацией о запущенной рассылке
+	response.Created(w, map[string]interface{}{
+		"broadcast_id": broadcast.ID,
+		"message":      "Broadcast started successfully via Telegram",
+		"status":       broadcast.Status,
+	})
+}
+
+// handleTeacherBroadcastError обрабатывает ошибки рассылки преподавателя
+func (h *TeacherHandler) handleTeacherBroadcastError(w http.ResponseWriter, err error) {
+	// Проверяем ошибки lesson broadcast service
+	if errors.Is(err, service.ErrInvalidMessage) {
+		response.BadRequest(w, response.ErrCodeValidationFailed, "Broadcast message must be between 1 and 4096 characters")
+		return
+	}
+	if errors.Is(err, service.ErrTooManyFiles) {
+		response.BadRequest(w, response.ErrCodeValidationFailed, "Too many files (maximum 10)")
+		return
+	}
+
+	// Проверяем специфичные ошибки models (валидация)
+	if errors.Is(err, models.ErrInvalidBroadcastMessage) {
+		response.BadRequest(w, response.ErrCodeValidationFailed, "Broadcast message is required")
+		return
+	}
+	if errors.Is(err, models.ErrBroadcastMessageTooLong) {
+		response.BadRequest(w, response.ErrCodeValidationFailed, "Broadcast message must not exceed 4096 characters")
+		return
+	}
+
+	// Проверяем repository ошибки
+	if errors.Is(err, repository.ErrLessonNotFound) {
+		response.NotFound(w, "Lesson not found")
+		return
+	}
+	if errors.Is(err, repository.ErrUnauthorized) {
+		response.Forbidden(w, "You are not authorized to broadcast for this lesson")
+		return
+	}
+	if errors.Is(err, repository.ErrUserNotFound) {
+		response.BadRequest(w, response.ErrCodeValidationFailed, "User not found")
+		return
+	}
+
+	// Неизвестная ошибка
+	log.Printf("[ERROR] Unhandled teacher broadcast error: %v\n", err)
+	response.InternalError(w, "An error occurred processing your request")
+}
+
+// ptrTeacherBookingStatus вспомогательная функция для создания указателя на BookingStatus
+func ptrTeacherBookingStatus(status models.BookingStatus) *models.BookingStatus {
+	return &status
+}
+
+// GetTeacherSchedule обрабатывает GET /api/v1/teacher/schedule
+// Возвращает расписание преподавателя в формате календаря с дополнительной информацией
+func (h *TeacherHandler) GetTeacherSchedule(w http.ResponseWriter, r *http.Request) {
+	user, ok := middleware.GetUserFromContext(r.Context())
+	if !ok {
+		response.Unauthorized(w, "Authentication required")
+		return
+	}
+
+	// Проверяем что пользователь не удален/деактивирован
+	if user.IsDeleted() {
+		response.Unauthorized(w, "User account is deleted or deactivated")
+		return
+	}
+
+	// Проверяем что пользователь - преподаватель, методист или админ
+	if !user.IsTeacher() && !user.IsAdmin() && !user.IsMethodologist() {
+		response.Forbidden(w, "Only teachers, methodologists and admins can access teacher schedule")
+		return
+	}
+
+	// Парсим query параметры
+	startDateStr := r.URL.Query().Get("start_date")
+	endDateStr := r.URL.Query().Get("end_date")
+
+	var startDate, endDate time.Time
+	var err error
+
+	// Если start_date не указан - начало текущей недели (понедельник)
+	if startDateStr == "" {
+		now := time.Now()
+		// Получаем день недели (0 = Sunday, 1 = Monday)
+		weekday := now.Weekday()
+		// Количество дней до понедельника
+		daysToMonday := int(weekday) - 1
+		if weekday == time.Sunday {
+			daysToMonday = 6 // Воскресенье - идем на 6 дней назад
+		}
+		startDate = time.Date(now.Year(), now.Month(), now.Day()-daysToMonday, 0, 0, 0, 0, now.Location())
+	} else {
+		// Валидируем формат даты строго: YYYY-MM-DD и проверяем диапазон 2020-2030
+		startDate, err = h.timeValidator.ValidateDateString(startDateStr)
+		if err != nil {
+			if errors.Is(err, validator.ErrInvalidDateFormat) {
+				response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid start_date format (use YYYY-MM-DD)")
+			} else if errors.Is(err, validator.ErrDateOutOfRange) {
+				response.BadRequest(w, response.ErrCodeInvalidInput, "start_date must be between 2020 and 2030")
+			} else {
+				response.BadRequest(w, response.ErrCodeInvalidInput, err.Error())
+			}
+			return
+		}
+	}
+
+	// Если end_date не указан - start_date + 7 дней
+	if endDateStr == "" {
+		endDate = startDate.AddDate(0, 0, 7)
+	} else {
+		// Валидируем формат даты строго: YYYY-MM-DD и проверяем диапазон 2020-2030
+		endDate, err = h.timeValidator.ValidateDateString(endDateStr)
+		if err != nil {
+			if errors.Is(err, validator.ErrInvalidDateFormat) {
+				response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid end_date format (use YYYY-MM-DD)")
+			} else if errors.Is(err, validator.ErrDateOutOfRange) {
+				response.BadRequest(w, response.ErrCodeInvalidInput, "end_date must be between 2020 and 2030")
+			} else {
+				response.BadRequest(w, response.ErrCodeInvalidInput, err.Error())
+			}
+			return
+		}
+	}
+
+	// Валидируем диапазон дат: end_date должен быть >= start_date и диапазон не более 365 дней
+	if err := h.timeValidator.ValidateDateRange(startDate, endDate, 365); err != nil {
+		if errors.Is(err, validator.ErrInvalidTimeRange) {
+			response.BadRequest(w, response.ErrCodeInvalidInput, "end_date must be after or equal to start_date")
+		} else {
+			response.BadRequest(w, response.ErrCodeInvalidInput, "Date range cannot exceed 365 days")
+		}
+		return
+	}
+
+	// Добавляем 1 день, чтобы включить конечную дату целиком
+	// (аналогично credits.go:177 и swaps.go:158)
+	endDate = endDate.Add(24 * time.Hour)
+
+	// Определяем teacherID - для учителя это его ID, для админа можно фильтровать
+	var lessons []*models.TeacherScheduleLesson
+
+	if user.IsAdmin() {
+		// Админ может запросить расписание любого учителя через query param
+		teacherIDParam := r.URL.Query().Get("teacher_id")
+		if teacherIDParam != "" {
+			teacherID, err := uuid.Parse(teacherIDParam)
+			if err != nil {
+				response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid teacher_id format")
+				return
+			}
+			// Получаем расписание конкретного учителя
+			lessons, err = h.lessonRepo.GetTeacherSchedule(r.Context(), teacherID, startDate, endDate)
+			if err != nil {
+				log.Printf("[ERROR] Failed to get teacher schedule for teacher %s: %v\n", teacherID, err)
+				response.InternalError(w, "Failed to retrieve teacher schedule")
+				return
+			}
+		} else {
+			// Админ без teacher_id получает расписание ВСЕХ учителей
+			lessons, err = h.lessonRepo.GetAllTeachersSchedule(r.Context(), startDate, endDate)
+			if err != nil {
+				log.Printf("[ERROR] Failed to get all teachers schedule: %v\n", err)
+				response.InternalError(w, "Failed to retrieve schedule")
+				return
+			}
+		}
+	} else {
+		// Учитель видит только свои занятия
+		lessons, err = h.lessonRepo.GetTeacherSchedule(r.Context(), user.ID, startDate, endDate)
+		if err != nil {
+			log.Printf("[ERROR] Failed to get teacher schedule for teacher %s: %v\n", user.ID, err)
+			response.InternalError(w, "Failed to retrieve teacher schedule")
+			return
+		}
+	}
+
+	// Преобразуем в response format с is_past полем
+	lessonResponses := make([]map[string]interface{}, len(lessons))
+	for i, lesson := range lessons {
+		lessonResponses[i] = lesson.ToResponse()
+	}
+
+	response.OK(w, map[string]interface{}{
+		"lessons": lessonResponses,
+		"count":   len(lessonResponses),
+	})
+}

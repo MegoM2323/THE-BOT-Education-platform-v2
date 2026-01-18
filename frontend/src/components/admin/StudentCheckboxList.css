@@ -1,0 +1,267 @@
+.student-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+.student-checkbox-list-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.student-checkbox-list-header h4 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.student-search-input {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.student-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.student-count-info {
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
+  font-weight: 500;
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.student-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  background-color: var(--white);
+}
+
+.student-list-empty {
+  padding: var(--spacing-6);
+  text-align: center;
+  color: var(--gray-600);
+  font-size: var(--font-size-sm);
+}
+
+.student-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--gray-200);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.student-item:last-child {
+  border-bottom: none;
+}
+
+.student-item:hover {
+  background-color: var(--gray-50);
+}
+
+.student-item.enrolled {
+  background-color: var(--primary-light);
+  border-left: 4px solid var(--primary);
+}
+
+.student-item.enrolled:hover {
+  background-color: rgba(99, 102, 241, 0.15);
+}
+
+.student-item.low-credits {
+  border-left: 4px solid var(--warning);
+}
+
+.student-item.enrolled.low-credits {
+  border-left: 4px solid var(--error);
+}
+
+.student-item input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+
+.student-item.disabled {
+  opacity: 0.6;
+  background-color: var(--gray-50);
+  cursor: not-allowed;
+}
+
+.student-item.disabled:hover {
+  background-color: var(--gray-50);
+}
+
+.student-item.disabled input[type="checkbox"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Заблокированное состояние всего компонента (для прошедших занятий) */
+.student-checkbox-list.disabled {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.student-checkbox-list.disabled .student-search-input {
+  background-color: var(--gray-100);
+  cursor: not-allowed;
+}
+
+.student-checkbox-list.disabled .student-item {
+  cursor: not-allowed;
+}
+
+.student-checkbox-list.disabled .student-item:hover {
+  background-color: inherit;
+}
+
+.student-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0; /* Для корректной работы text-overflow */
+}
+
+.student-name {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--gray-900);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.student-email {
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.student-credits-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+.student-credits {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius);
+  white-space: nowrap;
+}
+
+.student-credits.credits-warning {
+  color: var(--error);
+  background-color: var(--error-light);
+}
+
+.credits-warning-icon {
+  font-size: var(--font-size-base);
+  cursor: help;
+}
+
+/* Scrollbar styling */
+.student-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.student-list::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: var(--border-radius);
+}
+
+.student-list::-webkit-scrollbar-thumb {
+  background: var(--gray-400);
+  border-radius: var(--border-radius);
+}
+
+.student-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-500);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .student-checkbox-list {
+    gap: var(--spacing-2);
+  }
+
+  .student-list {
+    max-height: 300px;
+  }
+
+  .student-item {
+    padding: var(--spacing-2);
+    gap: var(--spacing-2);
+  }
+
+  .student-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .student-email {
+    font-size: var(--font-size-xs);
+  }
+
+  .student-credits {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-05) var(--spacing-1);
+  }
+
+  .credits-warning-icon {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .student-checkbox-list-header h4 {
+    font-size: var(--font-size-base);
+  }
+
+  .student-count-info {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+
+  .student-list {
+    max-height: 250px;
+  }
+
+  .student-item {
+    flex-wrap: wrap;
+    padding: var(--spacing-2);
+  }
+
+  .student-credits-container {
+    width: 100%;
+    justify-content: flex-end;
+    padding-left: calc(18px + var(--spacing-3)); /* Выравнивание с чекбоксом */
+  }
+}

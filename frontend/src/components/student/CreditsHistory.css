@@ -1,0 +1,315 @@
+.credits-history {
+  width: 100%;
+  /* max-width and margin removed - titles should align with other dashboards */
+}
+
+.credits-history-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.credits-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.credits-history-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.credits-balance-display {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  background: var(--primary-light);
+  border-radius: var(--border-radius);
+}
+
+.balance-label {
+  font-size: var(--font-size-xs);
+  color: var(--gray-700);
+  font-weight: 500;
+}
+
+.balance-value {
+  font-size: var(--font-size-sm);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.credits-history-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-4);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.filter-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.filter-select {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  color: var(--gray-900);
+  background: var(--white);
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.credits-history-empty {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--gray-500);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.credits-history-empty p {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.credits-history-error {
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+  color: #991b1b;
+  margin-bottom: var(--spacing-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.error-retry-btn {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.error-retry-btn:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.error-retry-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.filter-loading-indicator {
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+  margin-left: auto;
+}
+
+.credits-history-table-wrapper {
+  overflow-x: auto;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.credits-history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.credits-history-table thead {
+  background: var(--gray-50);
+}
+
+.credits-history-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.credits-history-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.credits-history-table tbody tr:nth-child(even) {
+  background-color: var(--gray-50);
+}
+
+.credits-history-table tbody tr:hover {
+  background-color: var(--gray-100);
+  transition: background-color var(--transition-fast);
+}
+
+.transaction-date {
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+.transaction-time {
+  font-size: var(--font-size-sm);
+  color: var(--gray-500);
+  margin-top: var(--spacing-1);
+}
+
+.transaction-type {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.type-booking {
+  background: var(--error-light);
+  color: var(--error);
+}
+
+.type-cancellation,
+.type-refund {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.type-admin_add,
+.type-add {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.type-admin_deduct,
+.type-deduct {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.type-refund {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.transaction-amount {
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+}
+
+.transaction-amount.positive {
+  color: var(--success);
+}
+
+.transaction-amount.negative {
+  color: var(--error);
+}
+
+.transaction-description {
+  color: var(--gray-600);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 768px) {
+  .credits-history {
+    width: 100%;
+    max-width: 100%;
+    /* padding removed - using .dashboard-main padding */
+  }
+
+  .credits-history-header {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .credits-balance-display {
+    width: 100%;
+  }
+
+  .credits-history-filters {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .credits-history-table-wrapper {
+    width: 100%;
+  }
+
+  .credits-history-table {
+    font-size: var(--font-size-sm);
+    width: 100%;
+  }
+
+  .credits-history-table th,
+  .credits-history-table td {
+    padding: var(--spacing-2);
+  }
+
+  .credits-history-table thead {
+    display: none;
+  }
+
+  .credits-history-table tbody {
+    width: 100%;
+    display: block;
+  }
+
+  .credits-history-table tr {
+    display: block;
+    margin-bottom: var(--spacing-4);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    width: 100%;
+  }
+
+  .credits-history-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-3);
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .credits-history-table td:last-child {
+    border-bottom: none;
+  }
+
+  .credits-history-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--gray-700);
+  }
+}

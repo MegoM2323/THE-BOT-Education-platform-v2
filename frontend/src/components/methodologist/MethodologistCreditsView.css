@@ -1,0 +1,191 @@
+.methodologist-credits-view {
+  width: 100%;
+}
+
+.methodologist-credits-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.methodologist-credits-header {
+  margin-bottom: var(--spacing-6);
+}
+
+.methodologist-credits-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.methodologist-credits-table-wrapper {
+  overflow-x: auto;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.methodologist-credits-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.methodologist-credits-table thead {
+  background: var(--gray-100);
+}
+
+.methodologist-credits-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+}
+
+.methodologist-credits-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.methodologist-credits-table th.sortable .sort-indicator {
+  margin-left: 0.5rem;
+}
+
+.methodologist-credits-table th.sortable:hover {
+  background-color: var(--gray-200);
+  transition: background-color var(--transition-fast);
+}
+
+.methodologist-credits-table th.sortable.active {
+  color: var(--primary);
+}
+
+.sort-indicator {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 1rem;
+}
+
+.methodologist-credits-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.methodologist-credits-table tbody tr:nth-child(even) td {
+  background-color: var(--gray-50);
+}
+
+.methodologist-credits-table tbody tr:hover td {
+  background-color: var(--gray-100);
+  transition: background-color var(--transition-fast);
+}
+
+.empty-message {
+  text-align: center;
+  padding: 2rem 1.5rem !important;
+  color: var(--gray-500);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+}
+
+.balance-badge {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.actions-cell {
+  text-align: center;
+}
+
+.history-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: var(--spacing-2);
+  border-radius: var(--border-radius);
+  color: var(--primary);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-action-btn:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  color: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+.history-action-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .methodologist-credits-view {
+    padding: var(--spacing-4);
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .methodologist-credits-header {
+    width: 100%;
+  }
+
+  .methodologist-credits-table-wrapper {
+    width: 100%;
+  }
+
+  .methodologist-credits-table {
+    width: 100%;
+  }
+
+  .methodologist-credits-table thead {
+    display: none;
+  }
+
+  .methodologist-credits-table tbody {
+    width: 100%;
+    display: block;
+  }
+
+  .methodologist-credits-table tr {
+    display: block;
+    margin-bottom: var(--spacing-4);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    width: 100%;
+    background-color: var(--white);
+  }
+
+  .methodologist-credits-table tr:nth-child(even) {
+    background-color: var(--gray-50);
+  }
+
+  .methodologist-credits-table tr:hover {
+    background-color: var(--gray-100);
+  }
+
+  .methodologist-credits-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-3);
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .methodologist-credits-table td:last-child {
+    border-bottom: none;
+  }
+
+  .actions-cell {
+    text-align: right;
+  }
+}

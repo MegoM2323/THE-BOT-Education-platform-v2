@@ -1,0 +1,81 @@
+.affected-lessons-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--gray-300);
+}
+
+.preview-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.preview-empty {
+  color: var(--gray-600);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--spacing-3);
+  margin: 0;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  background: var(--white);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.preview-table thead {
+  background: var(--gray-100);
+}
+
+.preview-table th {
+  padding: var(--spacing-2) var(--spacing-3);
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: var(--font-size-xs);
+}
+
+.preview-table td {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-top: 1px solid var(--gray-200);
+  color: var(--gray-900);
+}
+
+.preview-table tbody tr:hover {
+  background: var(--gray-50);
+}
+
+.preview-more {
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+  font-style: italic;
+  text-align: center;
+  margin: var(--spacing-2) 0 0 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .preview-table {
+    font-size: var(--font-size-xs);
+  }
+
+  .preview-table th,
+  .preview-table td {
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+
+  .preview-title {
+    font-size: var(--font-size-sm);
+  }
+}

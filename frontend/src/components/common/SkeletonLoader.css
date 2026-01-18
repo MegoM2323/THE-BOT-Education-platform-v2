@@ -1,0 +1,231 @@
+/* Skeleton Loader Styles */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base, #e0e0e0) 25%,
+    var(--skeleton-highlight, #f0f0f0) 50%,
+    var(--skeleton-base, #e0e0e0) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Skeleton Variants */
+.skeleton-text {
+  height: 16px;
+  width: 100%;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 60%;
+  margin-bottom: 12px;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  padding: 16px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: var(--bg-white, white);
+}
+
+.skeleton-card-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+}
+
+.skeleton-calendar-cell {
+  height: 60px;
+  margin-bottom: 8px;
+}
+
+/* Skeleton Table */
+.skeleton-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.skeleton-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skeleton-table th,
+.skeleton-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.skeleton-table th {
+  background: var(--bg-gray-light, #f5f5f5);
+}
+
+/* Skeleton Calendar */
+.skeleton-calendar {
+  padding: 16px;
+  background: var(--bg-white, white);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e0e0e0);
+}
+
+.skeleton-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.skeleton-calendar-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.skeleton-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.skeleton-calendar-day {
+  min-height: 150px;
+  padding: 8px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 4px;
+}
+
+.skeleton-calendar-cells {
+  margin-top: 8px;
+}
+
+/* Skeleton List */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Skeleton Dashboard */
+.skeleton-dashboard {
+  padding: 24px;
+}
+
+.skeleton-dashboard-header {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.skeleton-dashboard-content {
+  margin-top: 24px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .skeleton {
+    --skeleton-base: #2a2a2a;
+    --skeleton-highlight: #3a3a3a;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--skeleton-base, #e0e0e0);
+  }
+}
+
+/* Loading state wrapper */
+.loading-state {
+  position: relative;
+  min-height: 200px;
+}
+
+.loading-state.full-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Loading overlay (for blocking interactions) */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: all;
+  cursor: wait;
+}
+
+.loading-overlay.transparent {
+  background: transparent;
+}
+
+/* Slow connection notice */
+.slow-connection-notice {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--color-warning-bg, #fff3cd);
+  color: var(--color-warning-text, #856404);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-warning-border, #ffeeba);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+  animation: slide-in-right 0.3s ease-out;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slow-connection-notice .icon {
+  font-size: 20px;
+}
+
+.slow-connection-notice .message {
+  font-size: 14px;
+  font-weight: 500;
+}

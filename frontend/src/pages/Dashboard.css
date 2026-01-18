@@ -1,0 +1,298 @@
+.dashboard {
+  display: flex;
+  min-height: calc(100vh - var(--header-height));
+  background-color: var(--bg-secondary);
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.templates-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  width: 100%;
+}
+
+.dashboard-menu-toggle {
+  display: none;
+  position: fixed;
+  top: calc(var(--header-height) + var(--spacing-md));
+  left: var(--spacing-md);
+  z-index: calc(var(--z-modal) + 1);
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+.dashboard-menu-toggle:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard-menu-toggle:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-header-mobile {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  z-index: var(--z-sticky);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-md);
+}
+
+.dashboard-header-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: fixed;
+  top: calc(var(--header-height) + var(--spacing-md));
+  right: var(--spacing-lg);
+  z-index: calc(var(--z-sticky) - 1);
+  width: auto;
+  padding: 0;
+}
+
+.dashboard-sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  flex-shrink: 0;
+}
+
+.dashboard-credits {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  color: var(--text-inverse);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.credits-label {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  margin-bottom: var(--spacing-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.credits-value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.dashboard-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.dashboard-link {
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.dashboard-link:hover {
+  background-color: var(--bg-hover);
+  color: var(--color-primary);
+  transform: translateX(4px);
+}
+
+.dashboard-link.active {
+  background-color: var(--color-primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  transition: margin-left var(--transition-base);
+  position: relative;
+}
+
+/*
+  Унификация вертикального отступа первого заголовка страницы.
+  На страницах, где header сделан flex-контейнером с кнопками и align-items:center,
+  заголовок (h2) центрируется по высоте кнопок и визуально "падает" ниже.
+  Align-self работает только внутри flex/grid и не влияет на обычную разметку.
+*/
+.dashboard-main [class$="-header"] > h2[class*="title"] {
+  align-self: flex-start;
+}
+
+/* Desktop: добавляем margin равный ширине sidebar */
+@media (min-width: 769px) {
+  .dashboard-main {
+    margin-left: var(--sidebar-width);
+  }
+
+  /* Когда sidebar свернут */
+  .dashboard-main.sidebar-collapsed {
+    margin-left: var(--sidebar-width-collapsed);
+  }
+}
+
+.dashboard-content {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
+}
+
+.dashboard-content:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    position: relative;
+    margin: 0;
+    padding: 0;
+  }
+
+  .dashboard-menu-toggle {
+    display: block;
+  }
+
+  .dashboard-header-mobile {
+    display: flex;
+  }
+
+  .dashboard-header-desktop {
+    display: none;
+  }
+
+  .dashboard-main {
+    flex: 0 0 auto !important;
+    margin-top: var(--header-height);
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    padding: var(--spacing-md);
+    padding-top: calc(var(--touch-target-min) + var(--spacing-md));
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboard-main * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .dashboard-main.sidebar-collapsed {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .dashboard-content {
+    width: 100%;
+    max-width: 100%;
+    padding: var(--spacing-md);
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .dashboard-sidebar {
+    display: none !important;
+  }
+}
+
+/* Дополнительные стили для очень маленьких экранов */
+@media (max-width: 480px) {
+  .dashboard {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .dashboard-main {
+    flex: 0 0 auto !important;
+    padding: var(--spacing-sm);
+    padding-top: calc(var(--touch-target-min) + var(--spacing-sm));
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .dashboard-main.sidebar-collapsed {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .dashboard-content {
+    padding: var(--spacing-sm);
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+
+/* Print styles */
+@media print {
+  .dashboard-menu-toggle,
+  .dashboard-sidebar {
+    display: none;
+  }
+
+  .dashboard-main {
+    margin-left: 0;
+    padding: 0;
+  }
+
+  .dashboard-main.sidebar-collapsed {
+    margin-left: 0;
+  }
+}

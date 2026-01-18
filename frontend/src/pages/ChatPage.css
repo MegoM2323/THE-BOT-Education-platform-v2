@@ -1,0 +1,110 @@
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Занимаем всё доступное пространство внутри dashboard */
+  background-color: #ffffff;
+}
+
+.chat-page-container {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Chat list (left side) */
+.chat-page-list {
+  width: 350px;
+  flex-shrink: 0;
+  border-right: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+/* Chat window (right side) */
+.chat-page-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #fafafa;
+  overflow: hidden;
+}
+
+/* Mobile back button (скрыт на desktop) */
+.chat-page-mobile-back {
+  display: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .chat-page {
+    height: calc(100vh - 56px); /* Меньшая высота Header на mobile */
+  }
+
+  .chat-page-container {
+    position: relative;
+  }
+
+  /* На mobile список и окно чата занимают весь экран */
+  .chat-page-list {
+    width: 100%;
+    border-right: none;
+    transition: transform 0.3s ease;
+  }
+
+  /* Скрыть список когда выбран чат */
+  .chat-page-list-hidden {
+    transform: translateX(-100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 0;
+  }
+
+  .chat-page-window {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1;
+  }
+
+  /* Показать окно чата когда выбрана комната */
+  .chat-page-window-visible {
+    transform: translateX(0);
+  }
+
+  /* Показать кнопку "Назад" на mobile */
+  .chat-page-mobile-back {
+    display: block;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .chat-back-button {
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a73e8;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .chat-back-button:hover {
+    background-color: #e8f0fe;
+  }
+}
+
+/* Small mobile screens */
+@media (max-width: 480px) {
+  .chat-page {
+    height: calc(100vh - 48px);
+  }
+}

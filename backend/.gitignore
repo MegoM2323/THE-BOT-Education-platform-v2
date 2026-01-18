@@ -1,0 +1,59 @@
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Go compiled binaries (no extension)
+tutoring-backend
+tutoring-api
+main
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Backup files
+**/*.bak
+**/*.backup
+*.bak
+*.backup
+
+# Python cache (from pytest)
+.pytest_cache/
+__pycache__/
+**/__pycache__/
+
+# Test artifacts
+test_login_flow.py
+
+# Outdated environment templates
+.env.cache.example
+.env.cluster.example

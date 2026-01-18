@@ -1,0 +1,226 @@
+.lesson-management {
+  width: 100%;
+  /* max-width and margin removed - titles should align with other dashboards */
+}
+
+.lesson-management-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.lesson-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.lesson-management-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.lesson-management-table-wrapper {
+  overflow-x: auto;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.lesson-management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lesson-management-table thead {
+  background: var(--gray-50);
+}
+
+.lesson-management-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.lesson-management-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.lesson-management-table tbody tr:nth-child(even) {
+  background-color: var(--gray-50);
+}
+
+.lesson-management-table tbody tr:hover {
+  background-color: var(--gray-100);
+  transition: background-color var(--transition-fast);
+}
+
+.empty-message {
+  text-align: center;
+  padding: 2rem 1.5rem !important;
+  color: var(--gray-500);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+}
+
+.lesson-datetime {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.lesson-time {
+  font-size: var(--font-size-sm);
+  color: var(--gray-500);
+}
+
+.capacity-indicator {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.capacity-indicator.full {
+  background: var(--error-light);
+  color: var(--error);
+}
+
+.lesson-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.lesson-actions button {
+  min-width: auto;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.lesson-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.form-select {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  color: var(--gray-900);
+  background: var(--white);
+  cursor: pointer;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.form-textarea {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--gray-900);
+  resize: vertical;
+  background-color: #ffffff;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.lesson-form-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-4);
+}
+
+@media (max-width: 768px) {
+  .lesson-management {
+    padding: var(--spacing-4);
+  }
+
+  .lesson-management-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lesson-management-table thead {
+    display: none;
+  }
+
+  .lesson-management-table tr {
+    display: block;
+    margin-bottom: var(--spacing-4);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+  }
+
+  .lesson-management-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-3);
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .lesson-management-table td:last-child {
+    border-bottom: none;
+  }
+
+  .lesson-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .lesson-actions button {
+    width: auto;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .lesson-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .lesson-form-actions button {
+    width: 100%;
+  }
+}

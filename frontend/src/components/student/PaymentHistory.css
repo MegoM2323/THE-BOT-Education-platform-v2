@@ -1,0 +1,136 @@
+.payment-history {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+  margin-top: var(--spacing-xl);
+}
+
+.payment-history-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.payment-history-loading,
+.payment-history-error,
+.payment-history-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.payment-history-error {
+  color: var(--color-danger);
+}
+
+.payment-history-empty {
+  color: var(--text-secondary);
+}
+
+.payment-history-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.payment-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-primary);
+}
+
+.payment-history-table thead {
+  background: var(--bg-secondary);
+}
+
+.payment-history-table th {
+  padding: var(--spacing-md);
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.payment-history-table td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.payment-history-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+.payment-history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.payment-date {
+  font-weight: var(--font-weight-medium);
+}
+
+.payment-time {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-xs);
+}
+
+.payment-amount {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.payment-credits {
+  font-weight: var(--font-weight-medium);
+}
+
+.payment-status {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.payment-status.status-pending {
+  background: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.payment-status.status-succeeded {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.payment-status.status-cancelled,
+.payment-status.status-failed {
+  background: var(--color-danger-light);
+  color: var(--color-danger-dark);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .payment-history {
+    padding: var(--spacing-md);
+  }
+
+  .payment-history-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .payment-history-table th,
+  .payment-history-table td {
+    padding: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .payment-history-table th:nth-child(2),
+  .payment-history-table td:nth-child(2) {
+    display: none; /* Скрываем колонку суммы на мобильных */
+  }
+}

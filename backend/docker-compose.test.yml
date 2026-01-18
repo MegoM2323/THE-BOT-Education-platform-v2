@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: tutoring-platform-test-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tutoring_test
+      # Увеличиваем лимит соединений для тестов
+      POSTGRES_INIT_ARGS: "-c max_connections=200 -c shared_buffers=256MB"
+    ports:
+      - "5433:5432"
+    volumes:
+      - test-postgres-data:/var/lib/postgresql/data
+      - ./internal/database/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+volumes:
+  test-postgres-data:
+    driver: local
+
+networks:
+  test-network:
+    driver: bridge

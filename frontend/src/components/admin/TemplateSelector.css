@@ -1,0 +1,129 @@
+.template-selector {
+  background: var(--white);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.template-selector-loading {
+  padding: var(--spacing-4);
+  text-align: center;
+  color: var(--gray-600);
+}
+
+.template-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.template-selector-label {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.template-selector-content {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.template-selector-dropdown {
+  flex: 1;
+  min-width: 250px;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  background: var(--white);
+  color: var(--gray-900);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.template-selector-dropdown:hover {
+  border-color: var(--primary);
+}
+
+.template-selector-dropdown:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.template-selector-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.template-info {
+  margin-top: var(--spacing-3);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--gray-200);
+}
+
+.template-info-item {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+
+.template-info-label {
+  font-weight: 500;
+  color: var(--gray-700);
+  min-width: 100px;
+}
+
+.template-info-value {
+  color: var(--gray-900);
+}
+
+.template-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.template-create-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .template-selector-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+
+  .template-selector-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .template-selector-dropdown {
+    min-width: 100%;
+  }
+
+  .template-selector-actions {
+    width: 100%;
+  }
+
+  .template-selector-actions .btn {
+    flex: 1;
+  }
+
+  .template-info-item {
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .template-info-label {
+    min-width: auto;
+  }
+}

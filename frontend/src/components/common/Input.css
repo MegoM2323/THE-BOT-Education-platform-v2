@@ -1,0 +1,231 @@
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.input-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  transition: color var(--transition-fast);
+}
+
+.input-required {
+  color: var(--color-error);
+  margin-left: 0.25rem;
+}
+
+.input-field {
+  width: 100%;
+  height: var(--input-height);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: var(--input-border-width) solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-base);
+  outline: none;
+  position: relative;
+  z-index: 1; /* Гарантирует кликабельность input */
+}
+
+.input-field::placeholder {
+  color: var(--text-tertiary);
+  transition: color var(--transition-fast);
+}
+
+.input-field:hover:not(:disabled) {
+  border-color: var(--color-gray-400);
+  background-color: var(--bg-secondary);
+}
+
+.input-field:hover::placeholder {
+  color: var(--text-secondary);
+}
+
+.input-focused,
+.input-field:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--input-focus-ring);
+  background-color: var(--bg-primary);
+}
+
+.input-error {
+  border-color: var(--color-error);
+}
+
+.input-error:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-disabled,
+.input-field:disabled {
+  background-color: var(--bg-tertiary);
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: var(--border-color-light);
+}
+
+.input-error-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  margin-top: -0.125rem;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  animation: slideIn var(--transition-fast);
+}
+
+.input-success {
+  border-color: var(--color-success);
+}
+
+.input-success:focus {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.input-success-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  margin-top: -0.125rem;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  animation: slideIn var(--transition-fast);
+}
+
+.input-helper-text {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: -0.125rem;
+}
+
+/* Input with icon */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+  transition: color var(--transition-fast);
+}
+
+.input-icon-left {
+  left: var(--spacing-md);
+}
+
+.input-icon-right {
+  right: var(--spacing-md);
+}
+
+.input-field.has-icon-left {
+  padding-left: calc(var(--spacing-md) * 2.5);
+}
+
+.input-field.has-icon-right {
+  padding-right: calc(var(--spacing-md) * 2.5);
+}
+
+.input-field:focus ~ .input-icon {
+  color: var(--color-primary);
+}
+
+/* Textarea */
+textarea.input-field {
+  min-height: 120px;
+  resize: vertical;
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+}
+
+/* Input sizes */
+.input-field-sm {
+  height: 2.25rem;
+  padding: 0.375rem 0.625rem;
+  font-size: var(--font-size-sm);
+}
+
+.input-field-lg {
+  height: 3.25rem;
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-lg);
+}
+
+/* Date/Time/Number specific styles */
+.input-field-date,
+.input-field-time,
+.input-field-datetime-local {
+  /* Обеспечить правильное отображение date/time пикеров */
+  min-width: 0;
+  cursor: pointer;
+}
+
+.input-field-date::-webkit-calendar-picker-indicator,
+.input-field-time::-webkit-calendar-picker-indicator,
+.input-field-datetime-local::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.input-field-date:hover::-webkit-calendar-picker-indicator,
+.input-field-time:hover::-webkit-calendar-picker-indicator,
+.input-field-datetime-local:hover::-webkit-calendar-picker-indicator {
+  opacity: 1;
+}
+
+.input-field-number {
+  /* Стили для number input */
+  font-variant-numeric: tabular-nums;
+}
+
+.input-field-number::-webkit-inner-spin-button,
+.input-field-number::-webkit-outer-spin-button {
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.input-field-number:hover::-webkit-inner-spin-button,
+.input-field-number:hover::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+/* Убедимся что все типы inputs одинаково стилизованы */
+input[type="date"].input-field,
+input[type="time"].input-field,
+input[type="datetime-local"].input-field,
+input[type="number"].input-field {
+  /* Наследуем все базовые стили от .input-field */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+/* Firefox number input */
+input[type="number"].input-field {
+  -moz-appearance: textfield;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .input-field {
+    font-size: var(--font-size-base);
+  }
+
+  /* Увеличить размер date/time picker на мобильных устройствах */
+  .input-field-date,
+  .input-field-time,
+  .input-field-datetime-local {
+    min-height: var(--input-height);
+  }
+}

@@ -1,0 +1,636 @@
+/* ============================================
+   ANIMATION KEYFRAMES
+   ============================================ */
+
+/* Animation for card removal - opacity and transform (no layout shift) */
+@keyframes fadeOutSlide {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1) translateZ(0);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(-20px) scale(0.97) translateZ(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-40px) scale(0.95) translateZ(0);
+  }
+}
+
+/* Animation for card height collapse (runs after fadeOut) */
+@keyframes collapseHeight {
+  0% {
+    margin-bottom: var(--spacing-4);
+    padding-top: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-width: 1px;
+  }
+  99% {
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+  100% {
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+    display: none;
+  }
+}
+
+/* Animation for card appearance with smooth entry */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Pulse animation for loading state */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Booking animation - smooth scale up */
+@keyframes bookingPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ============================================
+   LESSON CARD COMPONENT STYLES
+   ============================================ */
+
+.lesson-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color-light);
+  /* Allow inline border-left to override for dynamic colors */
+  border-left: 4px solid var(--border-color-light);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 200ms ease-out,
+    border-color 200ms ease-out,
+    transform 200ms ease-out,
+    background 200ms ease-out,
+    opacity 300ms ease-out,
+    filter 300ms ease-out;
+  will-change: box-shadow, border-color, transform, opacity, filter;
+  position: relative;
+  overflow: hidden;
+  /* GPU Acceleration - for smooth animations */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Animation classes for card lifecycle */
+.lesson-card-removing {
+  animation:
+    fadeOutSlide 200ms ease-out forwards,
+    collapseHeight 200ms ease-out 200ms forwards;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.lesson-card-entering {
+  animation: fadeInScale 300ms ease-out forwards;
+}
+
+/* Applied when card is in operation (loading/booking) */
+.lesson-card-operating {
+  /* T021: Removed pulse animation */
+}
+
+/* Applied specifically during booking */
+.lesson-card-booking {
+  /* T021: Removed bookingPulse animation */
+}
+
+.lesson-card:hover {
+  /* T021: Hover effect - only opacity change from 0.25 to 0.35 */
+}
+
+.lesson-card-booked {
+  /* background и border задаются inline в компоненте для динамического цвета занятия */
+}
+
+.lesson-card-booked::after {
+  content: 'Вы записаны';
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: linear-gradient(135deg, var(--color-info) 0%, var(--color-info-dark) 100%);
+  color: var(--text-inverse);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-sm);
+  letter-spacing: 0.3px;
+}
+
+.lesson-card-booked:hover {
+  /* T021: Hover effect - only opacity change */
+}
+
+.lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color-light);
+  transition:
+    opacity 300ms ease-out,
+    transform 300ms ease-out;
+  will-change: transform, opacity;
+}
+
+.lesson-subject {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+  transition: color 300ms ease-out;
+}
+
+.lesson-subject-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  color: var(--text-inverse);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.lesson-status {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background-color 300ms ease-out,
+    border-color 300ms ease-out,
+    color 300ms ease-out;
+  will-change: background-color, border-color;
+}
+
+.lesson-status.available {
+  background: linear-gradient(135deg, var(--color-success-bg) 0%, rgba(52, 211, 153, 0.2) 100%);
+  color: var(--color-success-dark);
+  border: 1px solid var(--color-success-light);
+}
+
+.lesson-status.full {
+  background: linear-gradient(135deg, var(--color-error-bg) 0%, rgba(248, 113, 113, 0.2) 100%);
+  color: var(--color-error-dark);
+  border: 1px solid var(--color-error-light);
+}
+
+.lesson-status.booked {
+  background: linear-gradient(135deg, var(--color-info-bg) 0%, rgba(96, 165, 250, 0.2) 100%);
+  color: var(--color-info-dark);
+  border: 1px solid var(--color-info-light);
+}
+
+.lesson-status.completed {
+  background: linear-gradient(135deg, var(--color-gray-200) 0%, var(--color-gray-100) 100%);
+  color: var(--color-gray-700);
+  border: 1px solid var(--color-gray-300);
+}
+
+.lesson-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  transition: opacity 300ms ease-out;
+  will-change: opacity;
+}
+
+.lesson-detail {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
+  transition:
+    opacity 300ms ease-out,
+    transform 300ms ease-out;
+}
+
+.lesson-detail-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  transition: color 300ms ease-out;
+}
+
+.detail-label {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  min-width: 100px;
+  transition: color 300ms ease-out;
+}
+
+.detail-value {
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  flex: 1;
+  transition: color 300ms ease-out;
+}
+
+.detail-value-highlight {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.lesson-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+  transition: opacity 300ms ease-out;
+}
+
+.lesson-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  transition:
+    background-color 300ms ease-out,
+    color 300ms ease-out;
+}
+
+.lesson-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color-light);
+  transition:
+    opacity 300ms ease-out,
+    transform 300ms ease-out;
+  will-change: opacity, transform;
+}
+
+/* Cancel button styling */
+.lesson-actions .btn-danger {
+  transition:
+    box-shadow 300ms ease-out,
+    transform 300ms ease-out,
+    background-color 300ms ease-out,
+    border-color 300ms ease-out;
+  font-weight: var(--font-weight-medium);
+  will-change: box-shadow, transform;
+}
+
+.lesson-actions .btn-danger:not(:disabled):hover {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.lesson-actions button {
+  transition:
+    box-shadow 300ms ease-out,
+    transform 300ms ease-out,
+    background-color 300ms ease-out,
+    border-color 300ms ease-out,
+    opacity 300ms ease-out;
+  will-change: opacity, background-color, border-color, cursor;
+}
+
+.lesson-actions button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transition:
+    box-shadow 300ms ease-out,
+    transform 300ms ease-out,
+    background-color 300ms ease-out,
+    border-color 300ms ease-out,
+    opacity 300ms ease-out;
+}
+
+.lesson-actions .btn-danger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background-color: var(--color-gray-300);
+  border-color: var(--color-gray-300);
+  color: var(--color-gray-600);
+  transition:
+    box-shadow 300ms ease-out,
+    transform 300ms ease-out,
+    background-color 300ms ease-out,
+    border-color 300ms ease-out;
+}
+
+.lesson-teacher {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+  margin-top: var(--spacing-sm);
+  transition:
+    background-color 300ms ease-out,
+    box-shadow 300ms ease-out;
+  will-change: background-color, box-shadow;
+}
+
+.lesson-teacher-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-full);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-inverse);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  transition: all 300ms ease-out;
+  flex-shrink: 0;
+}
+
+.lesson-teacher-info {
+  flex: 1;
+  transition: all 300ms ease-out;
+}
+
+.lesson-teacher-name {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  transition: color 300ms ease-out;
+}
+
+.lesson-teacher-title {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  transition: color 300ms ease-out;
+}
+
+/* Clickable card state - for list view modal trigger */
+.lesson-card-clickable {
+  cursor: pointer;
+}
+
+.lesson-card-clickable:hover {
+  /* T021: Hover effect removed */
+}
+
+.lesson-card-clickable:active {
+  /* T021: Active effect removed */
+}
+
+/* ============================================
+   COMPACT LESSON CARD STYLES
+   ============================================ */
+
+.lesson-card-compact {
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: 0;
+}
+
+.lesson-card-compact.lesson-card-booked::after {
+  display: none;
+}
+
+.lesson-header-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.lesson-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lesson-subject-compact {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lesson-datetime-compact {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.lesson-teacher-compact {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lesson-right-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.lesson-spots {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  white-space: nowrap;
+}
+
+.lesson-spots.available {
+  color: var(--color-success-dark);
+  background: var(--color-success-bg);
+}
+
+.lesson-spots.full {
+  color: var(--color-error-dark);
+  background: var(--color-error-bg);
+}
+
+.lesson-credits-cost {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: #059669; /* green-600 */
+  margin-left: var(--spacing-xs);
+  white-space: nowrap;
+}
+
+.lesson-book-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  min-width: 80px;
+}
+
+.lesson-card-compact.lesson-card-booked {
+  /* background задаётся inline в компоненте для динамического цвета занятия */
+}
+
+.lesson-card-compact.lesson-card-booked .lesson-subject-compact::after {
+  content: ' (записан)';
+  font-weight: var(--font-weight-normal);
+  color: var(--color-info);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 480px) {
+  .lesson-header-compact {
+    flex-wrap: wrap;
+  }
+
+  .lesson-main-info {
+    width: 100%;
+  }
+
+  .lesson-right-section {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: var(--spacing-xs);
+  }
+}
+
+/* Filtered lesson state - единый серый шаблон для всех личных кабинетов */
+.lesson-card-filtered {
+  opacity: 0.6 !important; /* Единая прозрачность для всех отфильтрованных */
+  /* Убираем CSS фильтры - используем конкретные серые цвета */
+  transition: opacity 300ms ease-out, background-color 300ms ease-out, border-color 300ms ease-out;
+  pointer-events: auto; /* Keep clickable but disabled via button */
+  /* Единый шаблон серых цветов */
+  background-color: #F3F4F6 !important; /* Фон карточки - светлый серый */
+  border-left-color: #9CA3AF !important; /* Полоска - средний серый */
+  border-color: #9CA3AF !important; /* Обводка - средний серый */
+  color: #6B7280 !important; /* Текст контейнера - единый серый */
+}
+
+/* Все текстовые элементы в отфильтрованных карточках должны быть одинакового серого цвета */
+.lesson-card-filtered .lesson-subject,
+.lesson-card-filtered .lesson-subject-compact,
+.lesson-card-filtered .lesson-datetime-compact,
+.lesson-card-filtered .lesson-teacher-compact,
+.lesson-card-filtered .lesson-teacher-name,
+.lesson-card-filtered .lesson-teacher-title,
+.lesson-card-filtered .detail-label,
+.lesson-card-filtered .detail-value,
+.lesson-card-filtered .lesson-meta-item,
+.lesson-card-filtered .lesson-spots,
+.lesson-card-filtered .lesson-credits-cost,
+.lesson-card-filtered .lesson-header,
+.lesson-card-filtered .lesson-details,
+.lesson-card-filtered .lesson-actions {
+  color: #6B7280 !important; /* Единый серый цвет для всего текста */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .lesson-card {
+    padding: var(--spacing-md);
+  }
+
+  .lesson-card-booked::after {
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-xs);
+  }
+
+  .lesson-actions {
+    flex-direction: column;
+  }
+
+  .lesson-actions button {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+  }
+
+  .detail-label {
+    min-width: 80px;
+    font-size: var(--font-size-xs);
+  }
+
+  .detail-value {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .lesson-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lesson-detail {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .detail-label {
+    min-width: auto;
+  }
+}

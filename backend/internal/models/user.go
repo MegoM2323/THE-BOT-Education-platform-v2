@@ -1,0 +1,262 @@
+package models
+
+import (
+	"database/sql"
+	"encoding/json"
+	"time"
+
+	"tutoring-platform/pkg/sanitize"
+
+	"github.com/google/uuid"
+)
+
+// UserRole представляет роль пользователя в системе
+type UserRole string
+
+const (
+	RoleStudent       UserRole = "student"
+	RoleTeacher       UserRole = "teacher"
+	RoleMethodologist UserRole = "methodologist"
+	RoleAdmin         UserRole = "admin"
+)
+
+// User представляет учетную запись пользователя в системе
+type User struct {
+	ID               uuid.UUID      `db:"id" json:"id"`
+	Email            string         `db:"email" json:"email"`
+	PasswordHash     string         `db:"password_hash" json:"-"` // Никогда не показывать хеш пароля в JSON
+	FullName         string         `db:"full_name" json:"full_name"`
+	Role             UserRole       `db:"role" json:"role"`
+	PaymentEnabled   bool           `db:"payment_enabled" json:"payment_enabled"`
+	TelegramUsername sql.NullString `db:"telegram_username" json:"telegram_username,omitempty"` // Telegram username
+	TelegramLinked   bool           `db:"-" json:"telegram_linked,omitempty"`                   // Вычисляемое поле, не хранится в БД
+	CreatedAt        time.Time      `db:"created_at" json:"created_at"`
+	UpdatedAt        time.Time      `db:"updated_at" json:"updated_at"`
+	DeletedAt        sql.NullTime   `db:"deleted_at" json:"deleted_at,omitempty"`
+}
+
+// CreateUserRequest представляет запрос на создание нового пользователя
+type CreateUserRequest struct {
+	Email    string   `json:"email"`
+	Password string   `json:"password"`
+	FullName string   `json:"full_name"`
+	Role     UserRole `json:"role"`
+}
+
+// UpdateUserRequest представляет запрос на обновление пользователя
+type UpdateUserRequest struct {
+	Email            *string   `json:"email,omitempty"`
+	FullName         *string   `json:"full_name,omitempty"`
+	Role             *UserRole `json:"role,omitempty"`
+	PaymentEnabled   *bool     `json:"payment_enabled,omitempty"`
+	TelegramUsername *string   `json:"telegram_username,omitempty"`
+	Password         *string   `json:"password,omitempty"` // Новый пароль (для админа)
+}
+
+// ChangePasswordRequest представляет запрос на смену пароля
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
+}
+
+// RegisterRequest представляет запрос на регистрацию нового пользователя
+type RegisterRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	FullName string `json:"full_name"`
+}
+
+// RegisterViaTelegramRequest представляет запрос на регистрацию через Telegram
+type RegisterViaTelegramRequest struct {
+	TelegramUsername string `json:"telegram_username"`
+}
+
+// MarshalJSON customizes JSON marshaling for User to handle sql.NullString and sql.NullTime fields
+func (u *User) MarshalJSON() ([]byte, error) {
+	// Create a map to build the JSON response
+	data := map[string]interface{}{
+		"id":              u.ID,
+		"email":           u.Email,
+		"full_name":       u.FullName,
+		"role":            u.Role,
+		"payment_enabled": u.PaymentEnabled,
+		"created_at":      u.CreatedAt,
+		"updated_at":      u.UpdatedAt,
+		"telegram_linked": u.TelegramLinked,
+	}
+
+	// Handle TelegramUsername - convert sql.NullString to string or null
+	if u.TelegramUsername.Valid && u.TelegramUsername.String != "" {
+		data["telegram_username"] = u.TelegramUsername.String
+	}
+
+	// Handle DeletedAt - convert sql.NullTime to ISO8601 string or omit if null
+	if u.DeletedAt.Valid {
+		data["deleted_at"] = u.DeletedAt.Time.Format("2006-01-02T15:04:05Z07:00")
+	}
+
+	return json.Marshal(data)
+}
+
+// IsDeleted проверяет, удален ли пользователь (мягкое удаление)
+func (u *User) IsDeleted() bool {
+	return u.DeletedAt.Valid
+}
+
+// IsStudent проверяет, является ли пользователь студентом
+func (u *User) IsStudent() bool {
+	return u.Role == RoleStudent
+}
+
+// IsTeacher проверяет, является ли пользователь преподавателем
+func (u *User) IsTeacher() bool {
+	return u.Role == RoleTeacher
+}
+
+// IsAdmin проверяет, является ли пользователь администратором
+func (u *User) IsAdmin() bool {
+	return u.Role == RoleAdmin
+}
+
+// IsMethodologist проверяет, является ли пользователь методистом
+func (u *User) IsMethodologist() bool {
+	return u.Role == RoleMethodologist
+}
+
+// CanBeAssignedAsTeacher проверяет, может ли пользователь быть назначен преподавателем занятия
+// Допустимые роли: teacher, admin, methodologist
+func (u *User) CanBeAssignedAsTeacher() bool {
+	return u.IsTeacher() || u.IsAdmin() || u.IsMethodologist()
+}
+
+// Validate выполняет валидацию CreateUserRequest
+func (r *CreateUserRequest) Validate() error {
+	// Санитизация входных данных
+	r.Email = sanitize.Email(r.Email)
+	r.FullName = sanitize.Name(r.FullName)
+
+	// Валидация email
+	if r.Email == "" {
+		return ErrInvalidEmail
+	}
+	// Простая проверка формата email
+	if !isValidEmail(r.Email) {
+		return ErrInvalidEmail
+	}
+
+	// Валидация пароля
+	if r.Password == "" {
+		return ErrPasswordTooShort
+	}
+	if len(r.Password) < 8 {
+		return ErrPasswordTooShort
+	}
+
+	// Валидация имени
+	if r.FullName == "" {
+		return ErrInvalidFullName
+	}
+	if len(r.FullName) < 2 {
+		return ErrInvalidFullName
+	}
+
+	// Валидация роли
+	if r.Role != RoleStudent && r.Role != RoleTeacher && r.Role != RoleAdmin && r.Role != RoleMethodologist {
+		return ErrInvalidRole
+	}
+
+	return nil
+}
+
+// isValidEmail выполняет базовую валидацию email адреса
+func isValidEmail(email string) bool {
+	if len(email) < 3 || len(email) > 254 {
+		return false
+	}
+
+	// Проверяем наличие @ и точки
+	atIndex := -1
+	lastDotIndex := -1
+
+	for i, char := range email {
+		if char == '@' {
+			if atIndex != -1 {
+				return false // Несколько @
+			}
+			atIndex = i
+		}
+		if char == '.' {
+			lastDotIndex = i
+		}
+	}
+
+	// Должна быть ровно одна @
+	if atIndex == -1 {
+		return false
+	}
+
+	// Проверяем структуру: user@domain.ext
+	if atIndex == 0 || atIndex == len(email)-1 {
+		return false // @ не может быть в начале или конце
+	}
+
+	if lastDotIndex == -1 || lastDotIndex <= atIndex {
+		return false // Должна быть точка после @
+	}
+
+	if lastDotIndex == len(email)-1 {
+		return false // Точка не может быть в конце
+	}
+
+	return true
+}
+
+// Sanitize очищает входные данные UpdateUserRequest
+func (r *UpdateUserRequest) Sanitize() {
+	if r.Email != nil {
+		email := sanitize.Email(*r.Email)
+		r.Email = &email
+	}
+	if r.FullName != nil {
+		fullName := sanitize.Name(*r.FullName)
+		r.FullName = &fullName
+	}
+	if r.TelegramUsername != nil {
+		*r.TelegramUsername = sanitize.TelegramUsername(*r.TelegramUsername)
+	}
+}
+
+// ValidateTelegramUsername проверяет корректность имени пользователя Telegram
+// Telegram username: 5-32 символа, начинается с буквы, содержит буквы, цифры, подчёркивание
+func isValidTelegramUsername(username string) bool {
+	if len(username) < 5 || len(username) > 32 {
+		return false
+	}
+
+	// Telegram username должен начинаться с буквы
+	if len(username) > 0 && !((username[0] >= 'a' && username[0] <= 'z') ||
+		(username[0] >= 'A' && username[0] <= 'Z')) {
+		return false
+	}
+
+	// Telegram username может содержать только буквы, цифры и подчеркивание
+	for _, char := range username {
+		if !((char >= 'a' && char <= 'z') ||
+			(char >= 'A' && char <= 'Z') ||
+			(char >= '0' && char <= '9') ||
+			char == '_') {
+			return false
+		}
+	}
+
+	return true
+}
+
+// StudentPaymentStatus представляет статус платежей студента для админа
+type StudentPaymentStatus struct {
+	ID             uuid.UUID `json:"id"`
+	FullName       string    `json:"full_name"`
+	Email          string    `json:"email"`
+	PaymentEnabled bool      `json:"payment_enabled"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}

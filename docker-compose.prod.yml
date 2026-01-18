@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tutoring-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-tutoring_platform}
+      POSTGRES_USER: ${DB_USER:-tutoring}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tutoring} -d ${DB_NAME:-tutoring_platform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tutoring-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tutoring-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-tutoring_platform}
+      DB_USER: ${DB_USER:-tutoring}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL_MODE: prefer
+      SERVER_PORT: 8080
+      ENV: ${ENV:-production}
+      PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-https://diploma-m.ru}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SESSION_MAX_AGE: ${SESSION_MAX_AGE:-86400}
+      SESSION_SAME_SITE: ${SESSION_SAME_SITE:-Lax}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      ADMIN_TELEGRAM_ID: ${ADMIN_TELEGRAM_ID:-}
+      TELEGRAM_PROXY: ${TELEGRAM_PROXY:-}
+      YOOKASSA_SHOP_ID: ${YOOKASSA_SHOP_ID:-}
+      YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY:-}
+    volumes:
+      - backend_uploads:/app/uploads
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - tutoring-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tutoring-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt/live/${CERTBOT_DOMAIN:-diploma-m.ru}:/etc/letsencrypt/live/${CERTBOT_DOMAIN:-diploma-m.ru}:ro
+      - /etc/letsencrypt/archive/${CERTBOT_DOMAIN:-diploma-m.ru}:/etc/letsencrypt/archive/${CERTBOT_DOMAIN:-diploma-m.ru}:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health-nginx"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - tutoring-network
+
+networks:
+  tutoring-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  backend_uploads:

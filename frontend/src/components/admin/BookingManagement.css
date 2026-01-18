@@ -1,0 +1,212 @@
+.booking-management {
+  width: 100%;
+  /* max-width and margin removed - titles should align with other dashboards */
+}
+
+.booking-management-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.booking-management-header {
+  margin-bottom: var(--spacing-6);
+}
+
+.booking-management-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.booking-management-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-4);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.filter-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.filter-select {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  color: var(--gray-900);
+  background: var(--white);
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.booking-management-table-wrapper {
+  overflow-x: auto;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.booking-management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.booking-management-table thead {
+  background: var(--gray-50);
+}
+
+.booking-management-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.booking-management-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.booking-management-table tbody tr:nth-child(even) {
+  background-color: var(--gray-50);
+}
+
+.booking-management-table tbody tr:hover {
+  background-color: var(--gray-100);
+  transition: background-color var(--transition-fast);
+}
+
+.empty-message {
+  text-align: center;
+  padding: 2rem 1.5rem !important;
+  color: var(--gray-500);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+}
+
+.booking-lesson-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.booking-teacher {
+  font-size: var(--font-size-sm);
+  color: var(--gray-500);
+}
+
+.booking-datetime {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.booking-time {
+  font-size: var(--font-size-sm);
+  color: var(--gray-500);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.status-active {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.status-cancelled {
+  background: var(--error-light);
+  color: var(--error);
+}
+
+.status-completed {
+  background: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.booking-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.booking-actions button {
+  min-width: auto;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 768px) {
+  .booking-management {
+    padding: var(--spacing-4);
+  }
+
+  .booking-management-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .booking-management-table thead {
+    display: none;
+  }
+
+  .booking-management-table tr {
+    display: block;
+    margin-bottom: var(--spacing-4);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+  }
+
+  .booking-management-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-3);
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .booking-management-table td:last-child {
+    border-bottom: none;
+  }
+
+  .booking-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .booking-actions button {
+    width: auto;
+    flex: 1;
+    min-width: 100px;
+  }
+}

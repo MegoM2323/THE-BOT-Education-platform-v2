@@ -1,0 +1,1118 @@
+/* Landing Page Styles */
+
+:root {
+  --primary-color: #004231;
+  --secondary-color: #6b7280;
+  --accent-green: #2dc774;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --light-bg: #f9fafb;
+  --white: #ffffff;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  --spacing-1: 0.25rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+strong {
+  font-weight: 600;
+}
+
+html {
+  zoom: 100%;
+}
+
+html,
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* Header */
+.landing-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: var(--spacing-md) 0;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--text-primary);
+}
+
+.login-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: var(--primary-color);
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--spacing-3xl) 0;
+}
+
+.hero-waves {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.5;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: var(--spacing-2xl);
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 2.1125rem;
+  font-weight: 700;
+  color: #004231;
+  margin-bottom: var(--spacing-xl);
+  border: none;
+  box-shadow: none;
+  display: block;
+}
+
+/* Убираем полоски между h2 и p во всех секциях */
+.section-title + * p,
+.section-title + p,
+h2.section-title + p,
+h2 + p {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
+h2.section-title:has(+ p),
+h2.section-title:has(+ * p),
+h2:has(+ p) {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.section-title-center {
+  font-size: 2.1125rem;
+  font-weight: 700;
+  color: #004231;
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+  display: block;
+}
+
+/* About Section */
+
+.about-container {
+  display: block;
+}
+
+.about-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-right {
+  display: block;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+  align-items: flex-start;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.about-text h2 {
+  margin-bottom: var(--spacing-xl);
+  border-bottom: none;
+  color: #004231;
+  display: block;
+}
+
+.about-text p {
+  margin-top: 0;
+  border-top: none;
+}
+
+.about-description {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xl);
+}
+
+.about-achievements {
+  list-style-type: disc;
+  padding-left: var(--spacing-xl);
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.about-achievements li {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.about-achievements li:last-child {
+  margin-bottom: 0;
+}
+
+.about-image {
+  display: flex;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.about-image img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1024px) {
+  .about-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2xl);
+    align-items: flex-start;
+  }
+
+  .about-left {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .about-right {
+    display: block;
+    padding-top: 3.2rem;
+  }
+
+  .about-image {
+    margin: 0;
+    margin-bottom: 0;
+  }
+}
+
+/* Demo Lessons (карточки занятий) */
+.demo-lessons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.demo-lesson-card {
+  padding: var(--spacing-md);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.demo-lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.demo-lesson-subject {
+  font-weight: 600;
+  color: #004231;
+  font-size: 1.25rem;
+  display: block;
+}
+
+.demo-lesson-spots {
+  font-size: 0.75rem;
+  color: var(--success-color);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.demo-lesson-teacher {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.demo-lesson-blocks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.demo-lesson-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+.demo-block-value {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+.demo-block-label {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+/* Consult Block */
+.consult-block {
+  padding: 0 0 var(--spacing-xl) 0;
+  margin-bottom: 0;
+}
+
+/* About Section - отступ после последнего блока для следующей секции */
+.about-section {
+  padding: var(--spacing-3xl) 0 var(--spacing-2xl) 0;
+}
+
+.about-section .section-title {
+  margin-bottom: var(--spacing-xl);
+  border-bottom: none;
+  padding-bottom: 0;
+  color: #004231;
+}
+
+.consult-text {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.consult-text strong {
+  color: #004231;
+}
+
+/* Lesson Types Section */
+.lesson-types-section {
+  padding: 0 0 var(--spacing-2xl) 0;
+}
+
+.lesson-types-section .section-title {
+  margin-bottom: var(--spacing-xl);
+  border-bottom: none;
+  padding-bottom: 0;
+  color: #004231;
+}
+
+.lesson-types-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.lesson-types-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.lesson-types-text > .lesson-type:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.lesson-type h3 {
+  font-size: 1.425rem;
+  font-weight: 600;
+  color: #004231;
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  padding-top: 0;
+  display: block;
+}
+
+.lesson-type p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.lesson-types-image {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.lesson-types-image img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-top: 0;
+  padding-top: 0;
+  display: block;
+}
+
+.image-caption {
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-sm);
+  font-style: italic;
+}
+
+/* Examples Section (конспекты) */
+.examples-section {
+  padding: 0 0 var(--spacing-lg) 0;
+}
+
+.examples-intro {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.homework-examples-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+
+.homework-example-tile {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.homework-example-tile:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  border-color: var(--border-color);
+}
+
+.homework-example-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+}
+
+.homework-example-subject {
+  font-size: 1.425rem;
+  font-weight: 600;
+  color: #004231;
+  display: block;
+}
+
+.homework-example-date {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.homework-example-teacher {
+  display: flex;
+  gap: var(--spacing-xs);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.teacher-label {
+  font-weight: 500;
+}
+
+.teacher-name {
+  color: var(--text-primary);
+}
+
+.homework-example-content {
+  flex: 1;
+}
+
+.homework-example-text {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.homework-example-files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding-top: var(--spacing-md);
+}
+
+.files-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.file-link-demo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--primary-color);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.file-link-demo:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+.file-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.examples-footer {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Swap System Section (записи на занятия) */
+.swap-system-section {
+  padding: 0 0 var(--spacing-2xl) 0;
+}
+
+.swap-system-section .section-title {
+  margin-bottom: var(--spacing-xl);
+  border-bottom: none;
+  padding-bottom: 0;
+  color: #004231;
+}
+
+.swap-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.swap-description {
+  flex: 1;
+}
+
+.swap-system-section .section-title + .swap-content .description-text {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
+.description-text {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+.calendar-demo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 1024px) {
+  .calendar-demo {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-demo {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-demo {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Синхронизировано с компонентом Calendar.jsx (админский календарь) */
+.calendar-lesson {
+  position: relative;
+  padding: var(--spacing-sm);
+  border-radius: 4px;
+  border-left: 4px solid;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-height: 70px;
+  width: 100%;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.3s ease,
+    filter 0.3s ease;
+}
+
+.calendar-lesson:hover {
+  box-shadow: inset 0 0 0 9999px rgba(0, 0, 0, 0.03);
+}
+
+/* Порядок в структуре: subject → time → teacher → spots */
+.calendar-lesson-subject {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-1);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  line-height: 1.3;
+  transition:
+    color 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.calendar-lesson-teacher {
+  font-size: 10px;
+  font-weight: 400;
+  color: #6b7280;
+  margin-bottom: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition:
+    color 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.calendar-lesson-blocks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.calendar-lesson-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 2px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+.calendar-block-value {
+  font-weight: 600;
+  font-size: 10px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.calendar-block-label {
+  font-size: 8px;
+  color: var(--text-secondary);
+  line-height: 1.1;
+}
+
+/* How It Works Section */
+.how-it-works-section {
+  padding: 0 0 var(--spacing-md) 0;
+}
+
+.how-it-works-section .section-title-center {
+  font-size: 1.425rem;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Contact Section */
+.contact-section {
+  padding: var(--spacing-md) 0 var(--spacing-lg) 0;
+}
+
+.contact-section label {
+  text-transform: none !important;
+}
+
+
+.contact-form-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  background: var(--white);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.contact-form label {
+  text-transform: none !important;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  text-transform: none !important;
+}
+
+.form-input {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  font-family: inherit;
+  outline: none;
+}
+
+.form-input:focus,
+.form-input:focus-visible {
+  outline: none !important;
+  border-color: #004231 !important;
+  box-shadow: 0 0 0 3px rgba(0, 66, 49, 0.1) !important;
+}
+
+.form-input.error {
+  border-color: var(--border-color);
+}
+
+.form-input:disabled {
+  background-color: var(--light-bg);
+  cursor: not-allowed;
+}
+
+.error-message {
+  display: none;
+  font-size: 0.75rem;
+  color: var(--error-color);
+  margin-top: var(--spacing-sm);
+}
+
+.submit-button {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--white);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #003220;
+  transform: translateY(-2px);
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success Message */
+.contact-form-success {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  background: var(--white);
+  border: 2px solid var(--success-color);
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.success-icon {
+  font-size: 3rem;
+  color: var(--success-color);
+  margin-bottom: var(--spacing-md);
+  display: block;
+}
+
+.success-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.success-message {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .lesson-types-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .swap-content {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .section-title,
+  .section-title-center {
+    font-size: 1.5rem;
+  }
+
+
+  .homework-examples-grid,
+  .about-content,
+  .lesson-types-content {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-section {
+    padding: 2rem 0;
+  }
+
+  .contact-form {
+    padding: var(--spacing-md);
+  }
+
+  .contact-form-success {
+    padding: var(--spacing-xl);
+  }
+}
+
+@media (max-width: 900px) {
+  .demo-lessons {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  .section-title,
+  .section-title-center {
+    font-size: 1.25rem;
+  }
+
+  .contact-section {
+    padding: 1.5rem 0;
+  }
+
+  .contact-form {
+    padding: 1rem;
+    gap: var(--spacing-sm);
+  }
+
+  .form-input {
+    font-size: 16px;
+  }
+}
+
+/* Recent Lessons Section */
+.recent-lessons-section {
+  padding: var(--spacing-3xl) 0;
+  background: var(--light-bg);
+}
+
+.recent-lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-2xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.lesson-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: var(--spacing-2xl);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.lesson-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.lesson-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.lesson-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.lesson-date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.lesson-teacher {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-lg) 0;
+  font-weight: 500;
+}
+
+.lesson-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.lesson-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  text-transform: none;
+}
+
+.task-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.task-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 var(--spacing-sm);
+  background: var(--light-bg);
+  color: var(--primary-color);
+  text-decoration: none;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.task-link:hover {
+  background: var(--primary-color);
+  color: var(--white);
+}
+
+.attached-files {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.attached-files-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.file-item {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  padding: var(--spacing-sm) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.file-item-clickable {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.file-item-clickable:hover {
+  color: #004231;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .recent-lessons-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .lesson-card {
+    padding: var(--spacing-lg);
+  }
+
+  .lesson-card-title {
+    font-size: 1.125rem;
+  }
+
+  .lesson-section-title {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .recent-lessons-section {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .lesson-card {
+    padding: var(--spacing-md);
+  }
+
+  .task-link {
+    min-width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
+  }
+}

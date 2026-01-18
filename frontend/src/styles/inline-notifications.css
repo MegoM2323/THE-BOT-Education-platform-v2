@@ -1,0 +1,25 @@
+/* Общие стили для inline уведомлений на платформе
+ * Используют ту же анимацию что и основные Notification компоненты
+ */
+
+/* Анимация появления - идентична Notification.css */
+@keyframes inlineFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Базовый класс для inline error сообщений */
+.inline-notification {
+  animation: inlineFadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Миксин для применения в существующих компонентах */
+.inline-notification-animate {
+  animation: inlineFadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}

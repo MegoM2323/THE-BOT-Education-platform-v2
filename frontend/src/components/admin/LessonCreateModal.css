@@ -1,0 +1,192 @@
+/* Lesson Create Modal - унифицированный стиль с LessonEditModal */
+
+.lesson-create-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.lesson-create-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.lesson-create-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+  padding-bottom: var(--spacing-2);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+/* Form styles */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-select,
+.form-input {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  color: var(--gray-900);
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-input {
+  width: 100%;
+  cursor: text;
+}
+
+/* Native date/time picker styles */
+.form-input[type="date"],
+.form-input[type="time"],
+.form-input[type="number"] {
+  cursor: default;
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+  appearance: auto;
+}
+
+.form-input[type="date"]::-webkit-calendar-picker-indicator,
+.form-input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: none;
+}
+
+.form-select:hover:not(:disabled),
+.form-input:hover:not(:disabled) {
+  border-color: var(--primary);
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select:disabled,
+.form-input:disabled {
+  background: var(--gray-200);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-select.error,
+.form-input.error {
+  border-color: var(--error);
+}
+
+.form-select.error:focus,
+.form-input.error:focus {
+  box-shadow: 0 0 0 3px var(--error-light);
+}
+
+.form-error {
+  font-size: var(--font-size-xs);
+  color: var(--error);
+  margin-top: var(--spacing-1);
+}
+
+.form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--gray-600);
+  margin-top: var(--spacing-1);
+  display: block;
+}
+
+/* Info box */
+.lesson-create-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--border-radius);
+}
+
+.lesson-create-info-box .info-icon {
+  flex-shrink: 0;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lesson-create-info-box p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
+  line-height: 1.5;
+}
+
+/* Footer */
+.lesson-create-footer {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+
+  .lesson-create-content {
+    max-height: 80vh;
+  }
+
+  .lesson-create-footer {
+    flex-direction: column-reverse;
+  }
+
+  .lesson-create-footer button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .lesson-create-info-box {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .lesson-create-info-box .info-icon {
+    align-self: center;
+  }
+}

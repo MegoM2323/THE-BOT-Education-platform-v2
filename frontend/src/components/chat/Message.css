@@ -1,0 +1,209 @@
+.message {
+  display: flex;
+  margin-bottom: 12px;
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-own {
+  justify-content: flex-end;
+}
+
+.message-other {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.message-own .message-bubble {
+  background-color: #007bff;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-other .message-bubble {
+  background-color: #f1f3f4;
+  color: #202124;
+  border-bottom-left-radius: 4px;
+}
+
+.message-sender-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5f6368;
+  margin-bottom: 4px;
+}
+
+.message-text {
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.message-attachments {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.message-own .attachment-item {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.attachment-item:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.message-own .attachment-item:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.attachment-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.attachment-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.attachment-filename {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-own .attachment-filename {
+  color: white;
+}
+
+.attachment-size {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.attachment-download-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.attachment-download-btn:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.message-own .attachment-download-btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.attachment-download-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.message-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.message-time {
+  white-space: nowrap;
+}
+
+.message-status {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #f57c00;
+}
+
+.message-own .status-pending {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffe082;
+}
+
+.status-delivered {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #2e7d32;
+}
+
+.message-own .status-delivered {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #a5d6a7;
+}
+
+.status-blocked {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #c62828;
+}
+
+.message-own .status-blocked {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ef9a9a;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .message-bubble {
+    max-width: 85%;
+  }
+
+  .message-text {
+    font-size: 14px;
+  }
+
+  .attachment-filename {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,293 @@
+.notifications-container {
+  position: fixed;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: var(--z-tooltip);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 420px;
+  pointer-events: none;
+}
+
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+  border-left: 4px solid;
+  /* Exact same animation as react-toastify */
+  animation: bounceInRight 0.5s both;
+  min-width: 320px;
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+/* Animated gradient background for different types */
+.notification::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.03;
+  z-index: 0;
+  background: linear-gradient(135deg, currentColor 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.notification > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Success variant - accent green, NO ::after */
+.notification-success {
+  border-left-color: #004231;
+  color: var(--color-success);
+}
+
+/* Error variant - accent red, NO ::after */
+.notification-error {
+  border-left-color: #660000;
+  color: var(--color-error);
+}
+
+/* Warning variant - with shimmer */
+.notification-warning {
+  border-left-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+.notification-warning::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-warning-light) 0%, var(--color-warning-dark) 100%);
+  animation: shimmer 2s infinite;
+}
+
+/* Info variant - with shimmer */
+.notification-info {
+  border-left-color: var(--color-info);
+  color: var(--color-info);
+}
+
+.notification-info::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-info-light) 0%, var(--color-info-dark) 100%);
+  animation: shimmer 2s infinite;
+}
+
+.notification-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.notification-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.notification-message {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+.notification-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.notification-close:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.notification-close:active {
+  transform: scale(0.95);
+}
+
+.notification-close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Exit animation - exact same as react-toastify */
+.notification-exit {
+  animation: bounceOutRight 0.5s both forwards;
+}
+
+/* Collapse animation - second phase after bounceOut (like react-toastify) */
+.notification-collapsing {
+  overflow: hidden;
+  transition: height 300ms ease-out, padding 300ms ease-out, margin 300ms ease-out;
+  opacity: 0;
+}
+
+/* Progress bar for auto-dismiss */
+.notification-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.3;
+  animation: progress linear;
+  transform-origin: left;
+}
+
+/*
+ * ANIMATIONS - Exact copy from react-toastify
+ * These are the same keyframes used by ToastContainer on landing
+ */
+
+@keyframes bounceInRight {
+  from,
+  60%,
+  75%,
+  90%,
+  to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  from {
+    opacity: 0;
+    transform: translate3d(3000px, 0, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(-25px, 0, 0);
+  }
+  75% {
+    transform: translate3d(10px, 0, 0);
+  }
+  90% {
+    transform: translate3d(-5px, 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes bounceOutRight {
+  20% {
+    opacity: 1;
+    transform: translate3d(-20px, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(2000px, 0, 0);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Hover effect */
+.notification:hover {
+  box-shadow: var(--shadow-2xl);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .notifications-container {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    top: calc(var(--header-height) + var(--spacing-md));
+    max-width: none;
+  }
+
+  .notification {
+    min-width: auto;
+    padding: var(--spacing-md);
+  }
+
+  .notification-title {
+    font-size: var(--font-size-xs);
+  }
+
+  .notification-message {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification {
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  .notification-exit {
+    animation: fadeOut 0.2s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+}

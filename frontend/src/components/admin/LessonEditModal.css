@@ -1,0 +1,814 @@
+/* Modal Title with Badges */
+.lesson-edit-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.homework-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12px;
+}
+
+/* Предупреждение о редактировании прошлого занятия */
+.lesson-edit-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background-color: #FEF3C7;
+  border: 2px solid #F97316;
+  color: #92400E;
+}
+
+.lesson-edit-warning .warning-icon {
+  flex-shrink: 0;
+  color: #F97316;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lesson-edit-warning .warning-text {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+/* Tab Navigation */
+.lesson-edit-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.lesson-edit-tab {
+  position: relative;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #718096;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.lesson-edit-tab:hover {
+  color: #3b82f6;
+  background-color: #f7fafc;
+}
+
+.lesson-edit-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  font-weight: 600;
+}
+
+.lesson-edit-tab .tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 10px;
+  min-width: 18px;
+}
+
+.lesson-edit-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.lesson-edit-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.lesson-edit-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+/* Убираем полоску между h3 и следующим div */
+.lesson-edit-section h3 + div,
+.lesson-edit-section h3 + .homework-section {
+  border-top: none;
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+  padding-bottom: var(--spacing-2);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+/* Информация о занятии */
+.lesson-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.info-item-full-width {
+  grid-column: 1 / -1; /* Full width across all columns */
+}
+
+.info-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-3);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--gray-200);
+}
+
+.info-item label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: var(--font-size-base);
+  color: var(--gray-900);
+  padding: var(--spacing-2);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.capacity-full {
+  color: var(--error) !important;
+  background: var(--error-light) !important;
+  font-weight: 600;
+}
+
+.capacity-available {
+  color: var(--success) !important;
+  background: var(--success-light) !important;
+  font-weight: 600;
+}
+
+/* Контролы редактирования */
+.info-item-display {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.info-item-display .info-value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.info-item-edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.form-select,
+.form-input {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  color: var(--gray-900);
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-input {
+  width: 100%;
+  cursor: text;
+}
+
+/* Ensure native date/time pickers are displayed */
+.form-input[type="date"],
+.form-input[type="time"],
+.form-input[type="number"] {
+  cursor: default;
+  /* Remove any appearance overrides */
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+  appearance: auto;
+}
+
+/* Specific styling for date input */
+.form-input[type="date"]::-webkit-calendar-picker-indicator,
+.form-input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: none; /* Ensure the picker icon is visible */
+}
+
+.form-select:hover:not(:disabled),
+.form-input:hover:not(:disabled) {
+  border-color: var(--primary);
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select:disabled,
+.form-input:disabled {
+  background: var(--gray-200);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.edit-controls {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.edit-controls button {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Список студентов */
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.student-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-3);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--primary);
+  transition: all 0.2s ease;
+}
+
+.student-item:hover {
+  background: var(--gray-100);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  flex: 1;
+}
+
+.student-name {
+  font-weight: 600;
+  color: var(--gray-900);
+  font-size: var(--font-size-base);
+}
+
+.student-email {
+  color: var(--gray-600);
+  font-size: var(--font-size-sm);
+}
+
+.btn-remove-student {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--error-light);
+  color: var(--error);
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: var(--spacing-3);
+}
+
+.btn-remove-student:hover:not(:disabled) {
+  background: var(--error);
+  color: var(--white);
+  transform: scale(1.1);
+}
+
+.btn-remove-student:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Пусто */
+.lesson-edit-empty {
+  padding: var(--spacing-4);
+  text-align: center;
+  color: var(--gray-600);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+  border: 1px dashed var(--gray-300);
+}
+
+.lesson-edit-empty p {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+/* Форма добавления студента */
+.add-student-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--gray-600);
+  margin-top: var(--spacing-1);
+  display: block;
+}
+
+.form-hint-disabled {
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+/* Визуальное выделение заблокированного поля */
+.form-input.disabled-field:disabled {
+  background: var(--gray-100);
+  border-color: var(--gray-300);
+  color: var(--gray-600);
+  cursor: not-allowed;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--gray-900);
+  font-size: var(--font-size-base);
+}
+
+.student-select {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  color: var(--gray-900);
+  background: var(--white);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.student-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.student-select:disabled {
+  background: var(--gray-200);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.student-credits-info {
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  border-radius: 4px;
+  color: var(--primary);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+}
+
+/* Footer */
+.lesson-edit-footer {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  gap: var(--spacing-3);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lesson-edit-footer-left {
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap */
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.lesson-edit-footer-right {
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap */
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+/* Autosave indicator */
+.autosave-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.autosave-indicator.saving {
+  color: var(--primary);
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.autosave-indicator.success {
+  color: var(--success);
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.autosave-indicator.error {
+  color: var(--error);
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  cursor: help;
+}
+
+/* Ensure all footer buttons have consistent styling */
+.lesson-edit-footer button {
+  white-space: normal;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.bulk-edit-button {
+  background: var(--primary);
+  color: var(--white);
+  border: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: normal; /* Allow text wrapping for long Russian text */
+  line-height: 1.4;
+  padding: 10px 16px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.bulk-edit-button:hover:not(:disabled) {
+  background: var(--primary-dark);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.bulk-edit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--gray-400);
+}
+
+.bulk-edit-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Адаптивный дизайн */
+
+/* Tablet and below: buttons wrap as needed */
+@media (max-width: 1023px) {
+  .lesson-edit-footer {
+    gap: var(--spacing-2);
+  }
+
+  .lesson-edit-footer-left,
+  .lesson-edit-footer-right {
+    gap: var(--spacing-2);
+  }
+}
+
+/* Mobile: vertical stacking */
+@media (max-width: 768px) {
+  .lesson-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-edit-content {
+    max-height: 80vh;
+  }
+
+  /* Tabs responsive */
+  .lesson-edit-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lesson-edit-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .homework-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .student-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+
+  .btn-remove-student {
+    align-self: flex-end;
+    margin-left: 0;
+  }
+
+  .lesson-edit-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lesson-edit-footer-left {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .lesson-edit-footer-left button {
+    width: 100%;
+  }
+
+  .lesson-edit-footer-right {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .lesson-edit-footer-right button {
+    width: 100%;
+  }
+
+  .info-item-display {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+
+  .info-item-display .info-value {
+    width: 100%;
+  }
+
+  .info-item-display button {
+    width: 100%;
+  }
+
+  .info-item-edit {
+    width: 100%;
+  }
+
+  .edit-controls {
+    width: 100%;
+  }
+
+  .edit-controls button {
+    flex: 1;
+  }
+}
+
+/* Small mobile: ensure no text overflow */
+@media (max-width: 480px) {
+  .bulk-edit-button {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+}
+
+/* Анимации */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.student-item {
+  animation: slideIn 0.3s ease;
+}
+
+/* Состояние удаления студента */
+.student-item-removing {
+  opacity: 0.5;
+  background: var(--error-light);
+  border-left-color: var(--error);
+}
+
+.student-removing-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  margin-left: var(--spacing-3);
+}
+
+/* Color preview in info display */
+.color-preview-small {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid #d1d5db;
+}
+
+.color-preview-small .info-value {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Broadcast Modal Styles */
+.broadcast-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.broadcast-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.broadcast-lesson-info,
+.broadcast-recipients,
+.broadcast-message-input {
+  padding: var(--spacing-3);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.broadcast-lesson-info h4,
+.broadcast-recipients h4,
+.broadcast-message-input label {
+  margin: 0 0 var(--spacing-2) 0;
+  color: var(--gray-900);
+  font-weight: 600;
+  font-size: var(--font-size-base);
+}
+
+.broadcast-info-item {
+  margin: var(--spacing-1) 0;
+  color: var(--gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.broadcast-info-item strong {
+  color: var(--gray-900);
+}
+
+.broadcast-students-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-2);
+  background: var(--white);
+}
+
+.broadcast-students-list li {
+  padding: var(--spacing-1) 0;
+  color: var(--gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.broadcast-message-input label {
+  display: block;
+  margin-bottom: var(--spacing-2);
+}
+
+.broadcast-message-input textarea {
+  width: 100%;
+  padding: var(--spacing-2);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  resize: vertical;
+  min-height: 120px;
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.broadcast-message-input textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.broadcast-message-input textarea:disabled {
+  background: var(--gray-200);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.broadcast-char-counter {
+  text-align: right;
+  font-size: var(--font-size-xs);
+  color: var(--gray-600);
+  margin-top: var(--spacing-1);
+}
+
+/* Radio Button Styles */
+.radio-group {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.radio-label input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+/* Responsive broadcast modal */
+@media (max-width: 768px) {
+  .broadcast-modal-content {
+    max-height: 80vh;
+  }
+
+  .broadcast-students-list {
+    max-height: 120px;
+  }
+
+  .broadcast-modal-footer {
+    flex-direction: column;
+  }
+
+  .broadcast-modal-footer button {
+    width: 100%;
+  }
+}
+

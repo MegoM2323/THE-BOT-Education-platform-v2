@@ -1,0 +1,291 @@
+.student-calendar-grid {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background-color: #e5e5e5;
+  border-bottom: 2px solid #ddd;
+}
+
+.day-header {
+  background-color: #f8f9fa;
+  padding: 16px 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-body {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background-color: #e5e5e5;
+  min-height: 400px;
+}
+
+.day-column {
+  background-color: white;
+  padding: 12px 8px;
+  min-height: 400px;
+  min-width: 0; /* Предотвращает растягивание столбца от содержимого */
+  overflow-y: auto;
+  /* Hide scrollbars while keeping scroll functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.day-column::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.empty-day {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #999;
+  font-size: 14px;
+}
+
+.lesson-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  position: relative;
+}
+
+.lesson-card:hover {
+  /* hover animations removed */
+}
+
+.lesson-card.available {
+  /* Цвет берётся из inline style (lesson.color) */
+}
+
+.lesson-card.booked {
+  /* Цвет берётся из inline style (lesson.color) */
+}
+
+.lesson-card.full {
+  /* Цвет берётся из inline style (lesson.color) */
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.lesson-card.past {
+  /* Цвет берётся из inline style (lesson.color) */
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+.lesson-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.lesson-teacher {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.lesson-subject {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  /* 2-строчное обрезание с многоточием */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  max-height: 2.8em;
+}
+
+.lesson-capacity {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.lesson-status {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* .booked-badge removed - replaced by border styling */
+
+.full-badge {
+  background-color: #999;
+  color: white;
+}
+
+.past-badge {
+  background-color: #ccc;
+  color: #666;
+}
+
+/* Filtered lesson state - единый серый шаблон для всех личных кабинетов */
+.lesson-card.filtered,
+.lesson-card.filtered.past,
+.lesson-card.filtered.full,
+.lesson-card.filtered.available,
+.lesson-card.filtered.booked {
+  opacity: 0.6 !important; /* Единая прозрачность для всех отфильтрованных */
+  pointer-events: none;
+  cursor: not-allowed;
+  /* Единый шаблон серых цветов */
+  background-color: #F3F4F6 !important; /* Фон карточки - светлый серый */
+  border-left-color: #9CA3AF !important; /* Полоска - средний серый */
+  border-color: #9CA3AF !important; /* Обводка - средний серый */
+  color: #6B7280 !important; /* Текст контейнера - единый серый */
+}
+
+.lesson-card.filtered .lesson-time,
+.lesson-card.filtered .lesson-teacher,
+.lesson-card.filtered .lesson-subject,
+.lesson-card.filtered .lesson-capacity,
+.lesson-card.filtered .badge {
+  color: #6B7280 !important; /* Единый серый цвет для всего текста */
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .calendar-header,
+  .calendar-body {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .calendar-body {
+    min-height: 350px;
+  }
+
+  .day-column {
+    min-height: 350px;
+  }
+
+  .day-column:nth-child(n + 5) {
+    display: none;
+  }
+
+  .day-header:nth-child(n + 5) {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-header,
+  .calendar-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-body {
+    min-height: 300px;
+  }
+
+  .day-column {
+    min-height: 300px;
+  }
+
+  .day-column:nth-child(n + 3) {
+    display: none;
+  }
+
+  .day-header:nth-child(n + 3) {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .calendar-body {
+    min-height: 250px;
+  }
+
+  .day-column {
+    min-height: 250px;
+    padding: 10px 6px;
+  }
+
+  .lesson-card {
+    padding: 10px;
+    margin-bottom: 6px;
+  }
+
+  .lesson-time {
+    font-size: 12px;
+  }
+
+  .lesson-teacher,
+  .lesson-subject {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-header,
+  .calendar-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .day-column,
+  .day-header {
+    display: block !important;
+  }
+
+  .calendar-body {
+    min-height: 200px;
+  }
+
+  .day-column {
+    min-height: 200px;
+    padding: 8px;
+  }
+
+  .lesson-card {
+    padding: 10px;
+  }
+}
+
+/* Responsive grid layout */
+.calendar-grid.calendar-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.calendar-grid.calendar-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.calendar-grid.calendar-grid-7 {
+  grid-template-columns: repeat(7, 1fr);
+}
+

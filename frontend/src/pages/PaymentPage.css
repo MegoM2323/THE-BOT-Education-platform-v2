@@ -1,0 +1,45 @@
+.payment-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.payment-page-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.payment-page-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.payment-page-description {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.payment-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .payment-page {
+    padding: var(--spacing-md);
+  }
+
+  .payment-page-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .payment-page-description {
+    font-size: var(--font-size-base);
+  }
+}
