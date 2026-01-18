@@ -209,8 +209,8 @@ func (r *CreditRepository) GetTransactionHistory(ctx context.Context, filter *mo
 			u.email as user_email, u.full_name as user_name,
 			COALESCE(p.email, '') as performed_by_email
 		FROM credit_transactions ct
-		JOIN users u ON ct.user_id = u.id
-		LEFT JOIN users p ON ct.performed_by = p.id
+		JOIN users u ON ct.user_id = u.id AND u.deleted_at IS NULL
+		LEFT JOIN users p ON ct.performed_by = p.id AND p.deleted_at IS NULL
 		WHERE 1=1
 	`
 

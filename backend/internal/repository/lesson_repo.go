@@ -395,6 +395,10 @@ func (r *LessonRepository) IncrementStudents(ctx context.Context, tx pgx.Tx, les
 }
 
 // DecrementStudents уменьшает счетчик current_students в рамках транзакции
+// SAFETY GUARANTEE: This operation is guaranteed to never produce negative values.
+// The WHERE clause includes 'current_students > 0' which prevents decrementing
+// when counter is already at zero. If decrement would produce < 0, the UPDATE
+// affects 0 rows and returns ErrLessonNotFound, preventing data corruption.
 func (r *LessonRepository) DecrementStudents(ctx context.Context, tx pgx.Tx, lessonID uuid.UUID) error {
 	query := `
 		UPDATE lessons

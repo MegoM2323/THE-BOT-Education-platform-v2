@@ -536,10 +536,10 @@ type ChatParticipant struct {
 
 // ChatRoomWithDetails представляет комнату чата с расширенной информацией для админов
 type ChatRoomWithDetails struct {
-	ID            uuid.UUID        `db:"id" json:"id"`
+	ID            uuid.UUID         `db:"id" json:"id"`
 	Participants  []ChatParticipant `json:"participants"`
-	MessagesCount int              `db:"messages_count" json:"messages_count"`
-	LastMessageAt *time.Time       `db:"last_message_at" json:"last_message_at,omitempty"`
+	MessagesCount int               `db:"messages_count" json:"messages_count"`
+	LastMessageAt *time.Time        `db:"last_message_at" json:"last_message_at,omitempty"`
 }
 
 // ListAllRooms возвращает все чаты с информацией о участниках для админ-панели

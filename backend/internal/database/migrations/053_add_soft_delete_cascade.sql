@@ -1,10 +1,15 @@
--- 053_add_soft_delete_cascade.sql
--- Добавляет триггеры для каскадного soft delete всех связанных сущностей
--- Обеспечивает data consistency при удалении lessons и users
-
--- Версия: 1.0
--- Дата: 2026-01-18
--- Назначение: Soft Delete Cascade Triggers для Phase 3
+-- ================================================
+-- Migration 053: Soft Delete Cascade Triggers
+-- ================================================
+--
+-- Transaction Safety: All cascading updates run
+-- within the same transaction as the original DELETE.
+-- PostgreSQL MVCC ensures consistency.
+--
+-- Lock Order: users → lessons → bookings (safe, no circular dependencies)
+--
+-- Isolation: SERIALIZABLE isolation level recommended for bulk operations
+-- ================================================
 
 -- =============================================================================
 -- TRIGGER 1: Cascade soft delete lessons when lesson is deleted
@@ -68,14 +73,16 @@ BEGIN
   -- Проверяем что это soft delete (deleted_at был NULL и стал NOT NULL)
   IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
 
-    -- Soft-delete все lessons этого teacher
+    -- Soft-delete все lessons этого teacher (только если это действительно teacher)
     -- Это запустит триггер trigger_cascade_delete_lesson_bookings
     -- что приведет к отмене всех bookings
     UPDATE lessons
     SET
       deleted_at = NOW(),
       updated_at = NOW()
-    WHERE teacher_id = NEW.id AND deleted_at IS NULL;
+    WHERE teacher_id = NEW.id
+      AND deleted_at IS NULL
+      AND EXISTS(SELECT 1 FROM users WHERE id = NEW.id AND role = 'teacher');
 
   END IF;
 
@@ -90,42 +97,6 @@ AFTER UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION cascade_delete_teacher_lessons();
 
--- =============================================================================
--- TRIGGER 3: Soft delete student bookings when student is deleted
--- =============================================================================
--- Назначение: Когда student (user) удаляется, все его bookings отменяются
---             (устанавливается status='cancelled')
---
--- Логика:
--- - Trigger fires AFTER UPDATE on users table (для students)
--- - Если deleted_at меняется с NULL на NOT NULL
--- - Отменяет все active bookings для этого студента
--- - Не требует возврата кредитов (т.к. account все равно удален)
--- =============================================================================
-
-CREATE OR REPLACE FUNCTION cascade_delete_student_bookings()
-RETURNS TRIGGER AS $$
-BEGIN
-  -- Проверяем что это soft delete студента (deleted_at был NULL и стал NOT NULL)
-  IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
-
-    -- Отменяем все active bookings этого студента
-    UPDATE bookings
-    SET
-      status = 'cancelled',
-      cancelled_at = NOW(),
-      updated_at = NOW()
-    WHERE student_id = NEW.id AND status = 'active';
-
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Примечание: Используем существующий триггер cascade_delete_teacher_lessons
--- и добавляем условие для students. В реальности можем объединить обе функции
--- или создать отдельный триггер. Текущая реализация использует функцию выше.
 
 -- =============================================================================
 -- КОММЕНТАРИИ И ПРИМЕЧАНИЯ
@@ -140,11 +111,6 @@ COMMENT ON FUNCTION cascade_delete_teacher_lessons() IS
 'Каскадно soft-delete все lessons учителя когда teacher помечается как deleted.
 Запускается при soft delete user с ролью teacher.
 Автоматически триггерит cascade_delete_lesson_bookings для всех lessons.';
-
-COMMENT ON FUNCTION cascade_delete_student_bookings() IS
-'Отменяет все active bookings студента когда student помечается как deleted.
-Запускается при soft delete user с ролью student.
-Обеспечивает чистоту данных в таблице bookings.';
 
 -- =============================================================================
 -- ТЕСТИРОВАНИЕ ТРИГГЕРОВ
@@ -168,5 +134,4 @@ COMMENT ON FUNCTION cascade_delete_student_bookings() IS
 -- DROP TRIGGER IF EXISTS trigger_cascade_delete_teacher_lessons ON users;
 -- DROP FUNCTION IF EXISTS cascade_delete_lesson_bookings();
 -- DROP FUNCTION IF EXISTS cascade_delete_teacher_lessons();
--- DROP FUNCTION IF EXISTS cascade_delete_student_bookings();
 

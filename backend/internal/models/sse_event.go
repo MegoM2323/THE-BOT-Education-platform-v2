@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	SSEEventNewMessage      = "new_message"
-	SSEEventMessageDeleted  = "message_deleted"
+	SSEEventNewMessage     = "new_message"
+	SSEEventMessageDeleted = "message_deleted"
 )
 
 type SSEEvent struct {
