@@ -12,11 +12,29 @@ import apiClient from "./client.js";
  */
 export const getOrCreateRoom = async (participantId) => {
   try {
-    return await apiClient.post("/chat/rooms", {
+    console.log("[chat.js] getOrCreateRoom called:", {
+      participantId,
+      participantIdType: typeof participantId,
+      participantIdLength: participantId?.length,
+    });
+
+    if (!participantId) {
+      console.error("[chat.js] ERROR: participantId is empty or undefined!");
+      throw new Error("participant_id is required");
+    }
+
+    const response = await apiClient.post("/chat/rooms", {
       participant_id: participantId,
     });
+
+    console.log("[chat.js] getOrCreateRoom response:", response);
+    return response;
   } catch (error) {
-    console.error("Error creating/getting chat room:", error);
+    console.error("[chat.js] getOrCreateRoom error:", {
+      message: error.message,
+      status: error.status,
+      data: error.data,
+    });
     throw error;
   }
 };
