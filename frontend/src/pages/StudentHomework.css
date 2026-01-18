@@ -43,7 +43,7 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to { }
 }
 
 .homework-error {
@@ -64,7 +64,6 @@
 
 .retry-button:hover {
   background-color: var(--color-primary-dark);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
@@ -117,7 +116,6 @@
 
 .homework-tile:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
   border-color: var(--border-color);
 }
 
@@ -228,7 +226,6 @@
 
 .file-link:hover {
   background-color: var(--bg-hover);
-  transform: translateX(4px);
 }
 
 .file-icon {

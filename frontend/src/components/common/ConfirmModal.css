@@ -124,11 +124,9 @@
 .confirm-modal-close:hover {
   background-color: var(--bg-hover);
   color: var(--text-primary);
-  transform: rotate(90deg);
 }
 
 .confirm-modal-close:active {
-  transform: rotate(90deg) scale(0.9);
 }
 
 .confirm-modal-close:focus-visible {
@@ -148,11 +146,9 @@
 
 @keyframes scaleIn {
   from {
-    transform: scale(0.9);
     opacity: 0;
   }
   to {
-    transform: scale(1);
     opacity: 1;
   }
 }
@@ -168,11 +164,9 @@
 
 @keyframes scaleOut {
   from {
-    transform: scale(1);
     opacity: 1;
   }
   to {
-    transform: scale(0.9);
     opacity: 0;
   }
 }
@@ -234,10 +228,8 @@
   }
 
   .confirm-modal-close:hover {
-    transform: none;
   }
 
   .confirm-modal-close:active {
-    transform: scale(0.95);
   }
 }

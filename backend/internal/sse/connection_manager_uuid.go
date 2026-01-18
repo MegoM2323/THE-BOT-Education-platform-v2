@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"log"
 	"sync"
 
 	"github.com/google/uuid"
@@ -65,11 +66,12 @@ func (cm *ConnectionManagerUUID) SendToUser(userID uuid.UUID, event EventUUID) b
 	}
 
 	sent := false
-	for _, ch := range channels {
+	for i, ch := range channels {
 		select {
 		case ch <- event:
 			sent = true
 		default:
+			log.Printf("[WARNING] Message dropped for user %s (channel %d) - buffer full\n", userID.String(), i)
 		}
 	}
 
@@ -117,11 +119,12 @@ func (cm *ConnectionManagerUUID) Broadcast(event EventUUID) {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
 
-	for _, channels := range cm.connections {
-		for _, ch := range channels {
+	for userID, channels := range cm.connections {
+		for i, ch := range channels {
 			select {
 			case ch <- event:
 			default:
+				log.Printf("[WARNING] Broadcast message dropped for user %s (channel %d) - buffer full\n", userID.String(), i)
 			}
 		}
 	}

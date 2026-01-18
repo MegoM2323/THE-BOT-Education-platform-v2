@@ -24,7 +24,6 @@
 }
 
 .credits-counter:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
 }
 
@@ -141,7 +140,6 @@
 
 .credits-counter-inline:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
 .credits-counter-inline-icon {
@@ -170,22 +168,18 @@
 @keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: scale(0.8);
   }
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
 @keyframes pulse {
   0%, 100% {
     opacity: 0.15;
-    transform: scale(1);
   }
   50% {
     opacity: 0.25;
-    transform: scale(1.1);
   }
 }
 
@@ -249,11 +243,6 @@
 .error-retry-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
-}
-
-.error-retry-btn:active {
-  transform: translateY(0);
 }
 
 /* Inline error button */
@@ -289,11 +278,9 @@
 
   .credits-counter:hover,
   .credits-counter-inline:hover {
-    transform: none;
   }
 
   .error-retry-btn:hover,
   .error-retry-btn:active {
-    transform: none;
   }
 }

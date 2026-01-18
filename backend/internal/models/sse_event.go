@@ -23,10 +23,12 @@ type NewMessagePayload struct {
 }
 
 type SSEMessagePayload struct {
-	ID        uuid.UUID `json:"id"`
-	SenderID  uuid.UUID `json:"sender_id"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
+	ChatID      uuid.UUID `json:"chat_id"`
+	ID          uuid.UUID `json:"id"`
+	SenderID    uuid.UUID `json:"sender_id"`
+	MessageText string    `json:"message_text"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type MessageDeletedPayload struct {
@@ -40,10 +42,12 @@ func NewMessageEvent(chatID uuid.UUID, message *ChatMessageWithSender) SSEEvent 
 		Data: NewMessagePayload{
 			ChatID: chatID,
 			Message: SSEMessagePayload{
-				ID:        message.ID,
-				SenderID:  message.SenderID,
-				Content:   message.MessageText,
-				CreatedAt: message.CreatedAt,
+				ChatID:      chatID,
+				ID:          message.ID,
+				SenderID:    message.SenderID,
+				MessageText: message.MessageText,
+				Status:      "delivered",
+				CreatedAt:   message.CreatedAt,
 			},
 		},
 	}
@@ -55,10 +59,12 @@ func NewMessageEventFromMessage(chatID uuid.UUID, message *Message) SSEEvent {
 		Data: NewMessagePayload{
 			ChatID: chatID,
 			Message: SSEMessagePayload{
-				ID:        message.ID,
-				SenderID:  message.SenderID,
-				Content:   message.MessageText,
-				CreatedAt: message.CreatedAt,
+				ChatID:      chatID,
+				ID:          message.ID,
+				SenderID:    message.SenderID,
+				MessageText: message.MessageText,
+				Status:      "delivered",
+				CreatedAt:   message.CreatedAt,
 			},
 		},
 	}

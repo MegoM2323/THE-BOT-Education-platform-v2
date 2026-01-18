@@ -26,11 +26,9 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -47,15 +45,6 @@
   margin-bottom: 20px;
   display: block;
   animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
 }
 
 .student-error-title {
@@ -155,12 +144,7 @@
 }
 
 .student-error-button:hover {
-  transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
-.student-error-button:active {
-  transform: translateY(0);
 }
 
 .student-error-button-primary {

@@ -324,7 +324,6 @@
 .btn-remove-student:hover:not(:disabled) {
   background: var(--error);
   color: var(--white);
-  transform: scale(1.1);
 }
 
 .btn-remove-student:disabled {
@@ -628,11 +627,9 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

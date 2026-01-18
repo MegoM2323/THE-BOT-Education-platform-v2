@@ -9,6 +9,7 @@ import TemplateManagement from "../components/admin/TemplateManagement.jsx";
 import TemplateList from "../components/admin/TemplateList.jsx";
 import Spinner from "../components/common/Spinner.jsx";
 import MethodologistCreditsView from "../components/methodologist/MethodologistCreditsView.jsx";
+import ChatPage from "./ChatPage.jsx";
 import { useAuth } from "../hooks/useAuth.js";
 import { ROLES } from "../utils/constants.js";
 import "./Dashboard.css";
@@ -155,6 +156,26 @@ export const MethodologistDashboard = () => {
       ),
       testId: "nav-credits",
     },
+    {
+      path: "/dashboard/methodologist/chat",
+      label: "Чат",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+          />
+        </svg>
+      ),
+      testId: "nav-methodologist-chat",
+    },
   ];
 
   if (loading || isAuthorizing) {
@@ -246,6 +267,22 @@ export const MethodologistDashboard = () => {
               element={
                 <ErrorBoundary>
                   <MethodologistCreditsView />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="chat"
+              element={
+                <ErrorBoundary>
+                  <ChatPage />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="chat/:roomId"
+              element={
+                <ErrorBoundary>
+                  <ChatPage />
                 </ErrorBoundary>
               }
             />

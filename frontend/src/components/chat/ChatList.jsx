@@ -119,7 +119,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
 
       updatedRoom.last_message = {
         id: message.id,
-        message: message.content,
+        message: message.message_text,
         created_at: message.created_at,
         sender_id: message.sender_id,
       };
@@ -173,7 +173,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
                 ...newRooms[idx],
                 last_message: {
                   id: latestMsg.id,
-                  message: latestMsg.message_text || latestMsg.message,
+                  message: latestMsg.message_text,
                   created_at: latestMsg.created_at,
                   sender_id: latestMsg.sender_id,
                 },

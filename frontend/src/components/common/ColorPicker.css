@@ -33,11 +33,6 @@
 
 .color-preview:hover:not(:disabled) {
   border-color: #9ca3af;
-  transform: scale(1.05);
-}
-
-.color-preview:active:not(:disabled) {
-  transform: scale(0.98);
 }
 
 .color-preview:disabled {
@@ -119,11 +114,9 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -157,13 +150,8 @@
 }
 
 .color-palette-item:hover {
-  transform: scale(1.1);
   border-color: #9ca3af;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.color-palette-item:active {
-  transform: scale(0.95);
 }
 
 .color-palette-item.active {

@@ -13,7 +13,7 @@ import apiClient from "./client.js";
 export const getOrCreateRoom = async (participantId) => {
   try {
     return await apiClient.post("/chat/rooms", {
-      participant_id: participantId,
+      other_user_id: participantId,
     });
   } catch (error) {
     console.error("Error creating/getting chat room:", error);

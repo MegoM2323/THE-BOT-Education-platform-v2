@@ -148,6 +148,11 @@ func (s *ChatService) GetRoomByID(ctx context.Context, roomID, userID uuid.UUID)
 	return room, nil
 }
 
+// GetUserByID получает информацию о пользователе по ID
+func (s *ChatService) GetUserByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	return s.userRepo.GetByID(ctx, userID)
+}
+
 // ==================== Message Methods ====================
 
 // SendMessage отправляет сообщение в комнату с асинхронной модерацией

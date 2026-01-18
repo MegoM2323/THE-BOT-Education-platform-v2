@@ -70,7 +70,6 @@
   }
 
   .swap-divider {
-    transform: rotate(90deg);
     margin: var(--spacing-4) 0;
   }
 }

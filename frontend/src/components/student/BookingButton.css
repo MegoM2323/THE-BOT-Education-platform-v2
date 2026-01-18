@@ -42,7 +42,6 @@
   position: absolute;
   bottom: calc(100% + var(--spacing-sm));
   left: 50%;
-  transform: translateX(-50%);
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--color-error-dark);
   color: var(--text-inverse);
@@ -59,7 +58,6 @@
   position: absolute;
   top: 100%;
   left: 50%;
-  transform: translateX(-50%);
   border: 6px solid transparent;
   border-top-color: var(--color-error-dark);
 }
@@ -113,29 +111,23 @@
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translate(-50%, -10px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
   }
 }
 
 @keyframes shake {
   0%, 100% {
-    transform: translateX(0);
   }
   25% {
-    transform: translateX(-5px);
   }
   75% {
-    transform: translateX(5px);
   }
 }
 
 @keyframes spin {
   to {
-    transform: rotate(360deg);
   }
 }
 
@@ -143,7 +135,6 @@
 @media (max-width: 768px) {
   .booking-button-tooltip {
     position: static;
-    transform: none;
     margin-top: var(--spacing-xs);
     display: block;
     opacity: 1;

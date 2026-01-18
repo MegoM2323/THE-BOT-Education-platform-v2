@@ -183,7 +183,6 @@
 }
 
 .toggle-switch.enabled .toggle-slider {
-  transform: translateX(24px);
 }
 
 .status-label {
@@ -297,6 +296,5 @@
   }
 
   .toggle-switch.enabled .toggle-slider {
-    transform: translateX(20px);
   }
 }

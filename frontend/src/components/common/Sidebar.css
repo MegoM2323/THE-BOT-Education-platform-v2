@@ -305,7 +305,6 @@
 @media (max-width: 768px) {
   .sidebar {
     top: 0;
-    transform: translateX(-100%);
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     width: var(--sidebar-width) !important;
     z-index: 1040;
@@ -317,7 +316,6 @@
   }
 
   .sidebar-open {
-    transform: translateX(0);
   }
 
   /* Grid вариант на mobile - вертикальный список */
@@ -407,7 +405,6 @@
 /* Tablet and up */
 @media (min-width: 769px) {
   .sidebar {
-    transform: none !important;
   }
 
   .sidebar-close {

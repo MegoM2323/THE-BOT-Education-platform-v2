@@ -99,6 +99,22 @@ func (h *ChatHandler) GetOrCreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	otherUserID := room.GetOtherParticipant(session.UserID)
+	participant, err := h.chatService.GetUserByID(ctx, otherUserID)
+	if err != nil {
+		log.Error().Err(err).
+			Str("user_id", session.UserID.String()).
+			Str("other_user_id", otherUserID.String()).
+			Str("method", "GetOrCreateRoom:GetUserByID").
+			Msg("Failed to get participant data")
+		response.BadRequest(w, response.ErrCodeInternalError, "Unable to retrieve participant information")
+		return
+	}
+
+	room.ParticipantID = participant.ID
+	room.ParticipantName = participant.FullName
+	room.ParticipantRole = string(participant.Role)
+
 	response.Success(w, http.StatusOK, room)
 }
 

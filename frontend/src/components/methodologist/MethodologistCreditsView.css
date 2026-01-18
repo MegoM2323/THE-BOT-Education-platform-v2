@@ -122,11 +122,9 @@
 .history-action-btn:hover {
   background-color: rgba(0, 123, 255, 0.1);
   color: var(--primary-dark);
-  transform: scale(1.1);
 }
 
 .history-action-btn:active {
-  transform: scale(0.95);
 }
 
 @media (max-width: 768px) {

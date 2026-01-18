@@ -6,15 +6,12 @@
 @keyframes fadeOutSlide {
   0% {
     opacity: 1;
-    transform: translateX(0) scale(1) translateZ(0);
   }
   50% {
     opacity: 0.5;
-    transform: translateX(-20px) scale(0.97) translateZ(0);
   }
   100% {
     opacity: 0;
-    transform: translateX(-40px) scale(0.95) translateZ(0);
   }
 }
 
@@ -45,11 +42,9 @@
 @keyframes fadeInScale {
   0% {
     opacity: 0;
-    transform: translateX(20px) scale(0.95);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
   }
 }
 
@@ -69,14 +64,11 @@
 /* Booking animation - smooth scale up */
 @keyframes bookingPulse {
   0% {
-    transform: scale(1);
     opacity: 0.8;
   }
   50% {
-    transform: scale(1.02);
   }
   100% {
-    transform: scale(1);
     opacity: 1;
   }
 }
@@ -107,15 +99,13 @@
   transition:
     box-shadow 200ms ease-out,
     border-color 200ms ease-out,
-    transform 200ms ease-out,
     background 200ms ease-out,
     opacity 300ms ease-out,
     filter 300ms ease-out;
-  will-change: box-shadow, border-color, transform, opacity, filter;
+  will-change: box-shadow, border-color, opacity, filter;
   position: relative;
   overflow: hidden;
   /* GPU Acceleration - for smooth animations */
-  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
@@ -177,9 +167,8 @@
   padding-bottom: var(--spacing-md);
   border-bottom: 1px solid var(--border-color-light);
   transition:
-    opacity 300ms ease-out,
-    transform 300ms ease-out;
-  will-change: transform, opacity;
+    opacity 300ms ease-out;
+  will-change: opacity;
 }
 
 .lesson-subject {
@@ -259,8 +248,7 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-xs) 0;
   transition:
-    opacity 300ms ease-out,
-    transform 300ms ease-out;
+    opacity 300ms ease-out;
 }
 
 .lesson-detail-icon {
@@ -323,20 +311,18 @@
   padding-top: var(--spacing-md);
   border-top: 1px solid var(--border-color-light);
   transition:
-    opacity 300ms ease-out,
-    transform 300ms ease-out;
-  will-change: opacity, transform;
+    opacity 300ms ease-out;
+  will-change: opacity;
 }
 
 /* Cancel button styling */
 .lesson-actions .btn-danger {
   transition:
     box-shadow 300ms ease-out,
-    transform 300ms ease-out,
     background-color 300ms ease-out,
     border-color 300ms ease-out;
   font-weight: var(--font-weight-medium);
-  will-change: box-shadow, transform;
+  will-change: box-shadow;
 }
 
 .lesson-actions .btn-danger:not(:disabled):hover {
@@ -346,7 +332,6 @@
 .lesson-actions button {
   transition:
     box-shadow 300ms ease-out,
-    transform 300ms ease-out,
     background-color 300ms ease-out,
     border-color 300ms ease-out,
     opacity 300ms ease-out;
@@ -358,7 +343,6 @@
   cursor: not-allowed;
   transition:
     box-shadow 300ms ease-out,
-    transform 300ms ease-out,
     background-color 300ms ease-out,
     border-color 300ms ease-out,
     opacity 300ms ease-out;
@@ -372,7 +356,6 @@
   color: var(--color-gray-600);
   transition:
     box-shadow 300ms ease-out,
-    transform 300ms ease-out,
     background-color 300ms ease-out,
     border-color 300ms ease-out;
 }

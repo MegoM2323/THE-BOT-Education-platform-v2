@@ -54,7 +54,7 @@
 }
 
 .partial-data-toggle svg {
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
   display: block;
 }
 
@@ -104,7 +104,6 @@
 
 .partial-data-retry-btn:hover:not(:disabled) {
   background-color: #f57c00;
-  transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -125,7 +124,6 @@
 
 @keyframes spin {
   to {
-    transform: rotate(360deg);
   }
 }
 

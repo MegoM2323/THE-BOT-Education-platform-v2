@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"log"
 	"sync"
 )
 
@@ -79,11 +80,12 @@ func (cm *ConnectionManager) SendToUser(userID int, event Event) bool {
 	}
 
 	sent := false
-	for _, ch := range channels {
+	for i, ch := range channels {
 		select {
 		case ch <- event:
 			sent = true
 		default:
+			log.Printf("[WARNING] Message dropped for user %d (channel %d) - buffer full\n", userID, i)
 		}
 	}
 
@@ -138,11 +140,12 @@ func (cm *ConnectionManager) Broadcast(event Event) {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
 
-	for _, channels := range cm.connections {
-		for _, ch := range channels {
+	for userID, channels := range cm.connections {
+		for i, ch := range channels {
 			select {
 			case ch <- event:
 			default:
+				log.Printf("[WARNING] Broadcast message dropped for user %d (channel %d) - buffer full\n", userID, i)
 			}
 		}
 	}

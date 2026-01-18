@@ -114,7 +114,6 @@
 .input-icon {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
   color: var(--text-tertiary);
   pointer-events: none;
   transition: color var(--transition-fast);

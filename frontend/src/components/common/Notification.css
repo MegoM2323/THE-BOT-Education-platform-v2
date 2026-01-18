@@ -147,11 +147,6 @@
 .notification-close:hover {
   background-color: var(--bg-hover);
   color: var(--text-primary);
-  transform: scale(1.1);
-}
-
-.notification-close:active {
-  transform: scale(0.95);
 }
 
 .notification-close:focus-visible {
@@ -198,31 +193,24 @@
   }
   from {
     opacity: 0;
-    transform: translate3d(3000px, 0, 0);
   }
   60% {
     opacity: 1;
-    transform: translate3d(-25px, 0, 0);
   }
   75% {
-    transform: translate3d(10px, 0, 0);
   }
   90% {
-    transform: translate3d(-5px, 0, 0);
   }
   to {
-    transform: none;
   }
 }
 
 @keyframes bounceOutRight {
   20% {
     opacity: 1;
-    transform: translate3d(-20px, 0, 0);
   }
   to {
     opacity: 0;
-    transform: translate3d(2000px, 0, 0);
   }
 }
 
@@ -232,15 +220,6 @@
   }
   50% {
     opacity: 0.6;
-  }
-}
-
-@keyframes progress {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
   }
 }
 

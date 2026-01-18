@@ -130,7 +130,6 @@
 .homework-upload-zone.dragging {
   border-color: #3b82f6;
   background-color: #dbeafe;
-  transform: scale(1.02);
 }
 
 .upload-icon {
@@ -261,11 +260,9 @@
 @keyframes inlineFadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

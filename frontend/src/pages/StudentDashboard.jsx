@@ -11,10 +11,10 @@ import Spinner from "../components/common/Spinner.jsx";
 import { useCredits } from "../hooks/useCredits.js";
 import { useAuth } from "../hooks/useAuth.js";
 import { ROLES } from "../utils/constants.js";
-// HIDDEN: Payment and Chat sections temporarily disabled
+import ChatPage from "./ChatPage.jsx";
+// HIDDEN: Payment sections temporarily disabled
 // import PaymentPage from './PaymentPage.js';
 // import PaymentSuccessPage from './PaymentSuccessPage.js';
-// import ChatPage from './ChatPage.js';
 import "./Dashboard.css";
 
 export const StudentDashboard = () => {
@@ -138,13 +138,26 @@ export const StudentDashboard = () => {
       ),
       testId: "nav-homework",
     },
-    // HIDDEN: Chat section temporarily disabled
-    // {
-    //   path: '/dashboard/student/chat',
-    //   label: 'Чат',
-    //   icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>,
-    //   testId: 'nav-chat'
-    // },
+    {
+      path: "/dashboard/student/chat",
+      label: "Чат",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+          />
+        </svg>
+      ),
+      testId: "nav-chat",
+    },
     // HIDDEN: Payment section temporarily disabled
     // {
     //   path: '/dashboard/student/payment',
@@ -228,9 +241,22 @@ export const StudentDashboard = () => {
                 </StudentErrorBoundary>
               }
             />
-            {/* HIDDEN: Chat routes temporarily disabled */}
-            {/* <Route path="chat" element={<StudentErrorBoundary><ChatPage /></StudentErrorBoundary>} /> */}
-            {/* <Route path="chat/:roomId" element={<StudentErrorBoundary><ChatPage /></StudentErrorBoundary>} /> */}
+            <Route
+              path="chat"
+              element={
+                <StudentErrorBoundary>
+                  <ChatPage />
+                </StudentErrorBoundary>
+              }
+            />
+            <Route
+              path="chat/:roomId"
+              element={
+                <StudentErrorBoundary>
+                  <ChatPage />
+                </StudentErrorBoundary>
+              }
+            />
             {/* HIDDEN: Payment routes temporarily disabled */}
             {/* <Route path="payment" element={<StudentErrorBoundary><PaymentPage /></StudentErrorBoundary>} /> */}
             {/* <Route path="payment-success" element={<StudentErrorBoundary><PaymentSuccessPage /></StudentErrorBoundary>} /> */}

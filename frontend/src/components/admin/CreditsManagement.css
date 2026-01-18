@@ -111,10 +111,6 @@
   border-color: var(--gray-400);
 }
 
-.credits-action-btn:active {
-  transform: scale(0.95);
-}
-
 .credits-action-btn-add {
   color: var(--primary);
 }

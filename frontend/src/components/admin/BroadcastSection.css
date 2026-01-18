@@ -97,11 +97,7 @@
   cursor: pointer;
   padding: 0 8px;
   line-height: 1;
-  transition: transform 0.2s;
-}
-
-.broadcast-file-remove:hover {
-  transform: scale(1.2);
+  transition: all 0.2s;
 }
 
 .broadcast-file-remove:disabled {
@@ -152,7 +148,6 @@
 .broadcast-item:hover {
   background-color: #edf2f7;
   border-color: #cbd5e0;
-  transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 

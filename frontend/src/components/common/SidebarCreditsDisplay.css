@@ -79,10 +79,6 @@
   background-color: var(--color-primary-light, rgba(59, 130, 246, 0.05));
 }
 
-.sidebar-credits-refresh:active:not(:disabled) {
-  transform: scale(0.95);
-}
-
 .sidebar-credits-refresh:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -99,10 +95,8 @@
 
 @keyframes spin {
   from {
-    transform: rotate(0deg);
   }
   to {
-    transform: rotate(360deg);
   }
 }
 
