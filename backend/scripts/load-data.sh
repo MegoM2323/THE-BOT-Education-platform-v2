@@ -53,17 +53,17 @@ done
 # Настройки БД
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
-DB_NAME="${DB_NAME:-tutoring_platform}"
+DB_NAME="${DB_NAME:-thebot_db}"
 DB_USER="${DB_USER:-postgres}"
 DB_PASSWORD="${DB_PASSWORD:-postgres}"
 
 export PGPASSWORD="$DB_PASSWORD"
 
 # CRITICAL SAFETY CHECK 1: Verify we're not loading into test database
-if [[ "$DB_NAME" == "tutoring_platform_test" ]]; then
+if [[ "$DB_NAME" == "thebot_db_test" ]] || [[ "$DB_NAME" == "test_db" ]]; then
     echo -e "${RED}ERROR: load-data.sh should NOT be run against test database!${NC}"
     echo "This script loads sample data into the DEVELOPMENT database."
-    echo "To use development database, set: DB_NAME=tutoring_platform"
+    echo "To use development database, set: DB_NAME=thebot_db"
     echo ""
     echo "Current DB_NAME: $DB_NAME"
     exit 1
@@ -179,9 +179,9 @@ INSERT INTO users (id, email, password_hash, full_name, role) VALUES
 
 -- Преподаватели
 INSERT INTO users (id, email, password_hash, full_name, role) VALUES
-('10000000-0000-0000-0000-000000000001', 'ivan.petrov@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Иван Петров', 'teacher'),
-('10000000-0000-0000-0000-000000000002', 'maria.sidorova@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Мария Сидорова', 'teacher'),
-('10000000-0000-0000-0000-000000000003', 'alexey.kozlov@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Алексей Козлов', 'teacher');
+('10000000-0000-0000-0000-000000000001', 'ivan.petrov@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Иван Петров', 'methodologist'),
+('10000000-0000-0000-0000-000000000002', 'maria.sidorova@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Мария Сидорова', 'methodologist'),
+('10000000-0000-0000-0000-000000000003', 'alexey.kozlov@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Алексей Козлов', 'methodologist');
 
 -- Ученики (с payment_enabled)
 INSERT INTO users (id, email, password_hash, full_name, role, payment_enabled) VALUES
@@ -902,23 +902,7 @@ ON CONFLICT (id) DO NOTHING;
 
 # 8. Создание чат-комнат
 echo -e "${GREEN}[8/8] Создание чат-комнат...${NC}"
-run_sql "
--- Чат-комнаты между преподавателями и студентами
-INSERT INTO chat_rooms (id, teacher_id, student_id, last_message_at, created_at, updated_at) VALUES
-    ('60000000-6000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', NOW() - INTERVAL '1 hour', NOW() - INTERVAL '7 days', NOW()),
-    ('60000000-6000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000002', NOW() - INTERVAL '2 days', NOW() - INTERVAL '5 days', NOW()),
-    ('60000000-6000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001', NOW() - INTERVAL '3 hours', NOW() - INTERVAL '6 days', NOW()),
-    ('60000000-6000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000004', NOW() - INTERVAL '1 day', NOW() - INTERVAL '4 days', NOW())
-ON CONFLICT (id) DO NOTHING;
-
--- Сообщения в чатах (status: pending_moderation, delivered, blocked)
-INSERT INTO messages (id, room_id, sender_id, message_text, status, created_at) VALUES
-    ('70000000-7000-0000-0000-000000000001', '60000000-6000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'Добрый день! Можно уточнить по домашнему заданию?', 'delivered', NOW() - INTERVAL '2 hours'),
-    ('70000000-7000-0000-0000-000000000002', '60000000-6000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'Здравствуйте! Конечно, задавайте вопрос.', 'delivered', NOW() - INTERVAL '1 hour' - INTERVAL '30 minutes'),
-    ('70000000-7000-0000-0000-000000000003', '60000000-6000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'В задаче 5 непонятно как применить формулу. Можете объяснить?', 'delivered', NOW() - INTERVAL '1 hour'),
-    ('70000000-7000-0000-0000-000000000004', '60000000-6000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000001', 'Мария Александровна, спасибо за занятие! Очень понравилось объяснение.', 'delivered', NOW() - INTERVAL '3 hours')
-ON CONFLICT (id) DO NOTHING;
-"
+# Чат-комнаты создаются автоматически при создании занятий (миграция 049)
 
 echo ""
 echo -e "${GREEN}=== Загрузка завершена! ===${NC}"

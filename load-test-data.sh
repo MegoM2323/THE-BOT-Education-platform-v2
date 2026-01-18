@@ -58,7 +58,7 @@ fi
 
 DB_HOST=${DB_HOST:-localhost}
 DB_PORT=${DB_PORT:-5432}
-DB_NAME=${DB_NAME:-tutoring_platform}
+DB_NAME=${DB_NAME:-thebot_db}
 DB_USER=${DB_USER:-postgres}
 DB_PASSWORD=${DB_PASSWORD:-postgres}
 
@@ -158,32 +158,31 @@ if [ $? -eq 0 ]; then
     echo ""
 
     echo -e "${BLUE}${BOLD}АДМИНИСТРАТОР:${NC}"
-    echo "  Email: admin@tutoring.com"
-    echo "  Имя:   Администратор Системы"
+    echo "  Email: admin@thebot.com"
+    echo "  Имя:   Администратор системы"
     echo ""
 
-    echo -e "${BLUE}${BOLD}ПРЕПОДАВАТЕЛИ:${NC}"
-    echo "  1. ivan.petrov@tutoring.com    - Иван Петров"
-    echo "  2. maria.sidorova@tutoring.com - Мария Сидорова"
-    echo "  3. alexey.kozlov@tutoring.com  - Алексей Козлов"
+    echo -e "${BLUE}${BOLD}МЕТОДИСТЫ (Наставники):${NC}"
+    echo "  1. methodologist1@thebot.com - Елена Петрова"
+    echo "  2. methodologist2@thebot.com - Иван Сидоров"
+    echo "  3. methodologist3@thebot.com - Мария Волкова"
     echo ""
 
-    echo -e "${BLUE}${BOLD}УЧЕНИКИ:${NC}"
-    echo "  1. anna.ivanova@student.com    - Анна Иванова (10 кредитов)"
-    echo "  2. dmitry.smirnov@student.com  - Дмитрий Смирнов (8 кредитов)"
-    echo "  3. elena.volkova@student.com   - Елена Волкова (12 кредитов)"
-    echo "  4. pavel.morozov@student.com   - Павел Морозов (5 кредитов)"
-    echo "  5. olga.novikova@student.com   - Ольга Новикова (3 кредита)"
+    echo -e "${BLUE}${BOLD}СТУДЕНТЫ:${NC}"
+    echo "  1. student1@thebot.com       - Алексей Иванов"
+    echo "  2. student2@thebot.com       - Анна Смирнова"
+    echo "  3. student3@thebot.com       - Дмитрий Козлов"
+    echo "  4. student4@thebot.com       - Елена Морозова"
+    echo "  5. student5@thebot.com       - Павел Новиков"
     echo ""
 
     echo -e "${GREEN}${BOLD}СОЗДАНО:${NC}"
     echo "  • 1 администратор"
-    echo "  • 3 преподавателя"
-    echo "  • 5 учеников"
-    echo "  • 107 занятий (прошлые и будущие, с ДЗ и без)"
-    echo "  • Бронирования и история транзакций"
-    echo "  • 7 шаблонов расписания"
-    echo "  • Чаты и рассылки"
+    echo "  • 3 методиста (наставника)"
+    echo "  • 5 студентов"
+    echo "  • Занятия и расписания"
+    echo "  • История платежей и бронирований"
+    echo "  • Чаты и коммуникация"
     echo ""
 
     print_info "Теперь вы можете войти на http://localhost:3000"

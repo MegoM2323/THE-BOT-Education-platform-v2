@@ -176,6 +176,20 @@ body {
   animation: fadeInUp 0.8s ease-out;
 }
 
+.hero-logo {
+  font-size: 4.5rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--spacing-2xl);
+  text-transform: uppercase;
+  animation: fadeInUp 1s ease-out;
+  text-shadow: 0 2px 8px rgba(0, 66, 49, 0.15);
+}
+
 .hero-title {
   font-size: 3rem;
   font-weight: var(--font-weight-bold);
@@ -824,6 +838,10 @@ body {
 
 /* Tablet: 768px and below */
 @media (max-width: 1024px) {
+  .hero-logo {
+    font-size: 4rem;
+  }
+
   .hero-title {
     font-size: 2.5rem;
   }
@@ -866,6 +884,11 @@ body {
   .hero-section {
     padding: var(--spacing-2xl) 0;
     margin-top: 80px;
+  }
+
+  .hero-logo {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-lg);
   }
 
   .hero-title {
@@ -964,6 +987,11 @@ body {
     padding: var(--spacing-xl) 0;
     margin-top: 60px;
     min-height: 400px;
+  }
+
+  .hero-logo {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
   }
 
   .hero-title {

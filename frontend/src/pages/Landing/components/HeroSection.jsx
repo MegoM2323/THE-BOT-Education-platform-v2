@@ -17,6 +17,7 @@ const HeroSection = () => {
           aria-hidden="true"
         />
         <div className="hero-content">
+          <div className="hero-logo">THE BOT</div>
           <h1 className="hero-title">ТВОЙ КРАТЧАЙШИЙ ПУТЬ К УСПЕХУ</h1>
         </div>
       </section>
