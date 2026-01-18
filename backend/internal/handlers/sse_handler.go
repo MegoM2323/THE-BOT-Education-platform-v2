@@ -127,13 +127,14 @@ func (h *SSEHandler) writeHeartbeat(w http.ResponseWriter, flusher http.Flusher)
 	return nil
 }
 
-func (h *SSEHandler) GetChatParticipants(roomID uuid.UUID) ([]uuid.UUID, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+func (h *SSEHandler) GetChatParticipants(ctx context.Context, userID, roomID uuid.UUID) ([]uuid.UUID, error) {
 	room, err := h.chatRepo.GetRoomByID(ctx, roomID)
 	if err != nil {
 		return nil, err
+	}
+
+	if !room.IsParticipant(userID) {
+		return nil, fmt.Errorf("unauthorized: user %s is not a participant of room %s", userID, roomID)
 	}
 
 	return []uuid.UUID{room.TeacherID, room.StudentID}, nil
