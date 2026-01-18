@@ -9,8 +9,8 @@ const faviconPlugin = {
     order: 'pre',
     handler(html) {
       // Заменяем все старые ссылки на favicon на новые
-      html = html.replace(/<link[^>]*rel="icon"[^>]*href="\/diploma-favicon\.[^"]*"[^>]*>/g, '');
-      html = html.replace(/<link[^>]*rel="apple-touch-icon"[^>]*href="\/diploma-favicon\.[^"]*"[^>]*>/g, '');
+      html = html.replace(/<link[^>]*rel="icon"[^>]*href="\/thebot-favicon\.[^"]*"[^>]*>/g, '');
+      html = html.replace(/<link[^>]*rel="apple-touch-icon"[^>]*href="\/thebot-favicon\.[^"]*"[^>]*>/g, '');
 
       // Добавляем правильный favicon в head
       html = html.replace(

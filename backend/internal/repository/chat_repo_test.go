@@ -122,7 +122,7 @@ func TestListRoomsByTeacher_WithParticipantInfo(t *testing.T) {
 	ctx := context.Background()
 
 	// Create test users
-	teacher := createChatTestUser(t, pool, models.RoleTeacher, "teacher@test.com", "Иван Преподаватель")
+	teacher := createChatTestUser(t, pool, models.RoleMethodologist, "teacher@test.com", "Иван Преподаватель")
 	student1 := createChatTestUser(t, pool, models.RoleStudent, "student1@test.com", "Петр Студент")
 	student2 := createChatTestUser(t, pool, models.RoleStudent, "student2@test.com", "Мария Студентова")
 
@@ -181,7 +181,7 @@ func TestListRoomsByTeacher_Empty(t *testing.T) {
 	ctx := context.Background()
 
 	// Create teacher with no rooms
-	teacher := createChatTestUser(t, pool, models.RoleTeacher, "teacher@test.com", "Иван Преподаватель")
+	teacher := createChatTestUser(t, pool, models.RoleMethodologist, "teacher@test.com", "Иван Преподаватель")
 
 	// Create repository
 	db := createSqlxFromPool(t, pool)
@@ -208,7 +208,7 @@ func TestListRoomsByTeacher_OrderByLastMessage(t *testing.T) {
 	ctx := context.Background()
 
 	// Create test users
-	teacher := createChatTestUser(t, pool, models.RoleTeacher, "teacher@test.com", "Иван Преподаватель")
+	teacher := createChatTestUser(t, pool, models.RoleMethodologist, "teacher@test.com", "Иван Преподаватель")
 	student1 := createChatTestUser(t, pool, models.RoleStudent, "student1@test.com", "Петр Студент")
 	student2 := createChatTestUser(t, pool, models.RoleStudent, "student2@test.com", "Мария Студентова")
 
@@ -260,8 +260,8 @@ func TestListRoomsByStudent_WithParticipantInfo(t *testing.T) {
 	ctx := context.Background()
 
 	// Create test users
-	teacher1 := createChatTestUser(t, pool, models.RoleTeacher, "teacher1@test.com", "Иван Преподаватель")
-	teacher2 := createChatTestUser(t, pool, models.RoleTeacher, "teacher2@test.com", "Сергей Учитель")
+	teacher1 := createChatTestUser(t, pool, models.RoleMethodologist, "teacher1@test.com", "Иван Преподаватель")
+	teacher2 := createChatTestUser(t, pool, models.RoleMethodologist, "teacher2@test.com", "Сергей Учитель")
 	student := createChatTestUser(t, pool, models.RoleStudent, "student@test.com", "Петр Студент")
 
 	// Create chat rooms
@@ -284,7 +284,7 @@ func TestListRoomsByStudent_WithParticipantInfo(t *testing.T) {
 		if room.ID == room1.ID {
 			assert.Equal(t, teacher1.ID, room.ParticipantID, "Should see teacher1 as participant")
 			assert.Equal(t, teacher1.FullName, room.ParticipantName, "Should have teacher1 name")
-			assert.Equal(t, string(models.RoleTeacher), room.ParticipantRole, "Should have teacher role")
+			assert.Equal(t, string(models.RoleMethodologist), room.ParticipantRole, "Should have teacher role")
 			found = true
 			break
 		}
@@ -297,7 +297,7 @@ func TestListRoomsByStudent_WithParticipantInfo(t *testing.T) {
 		if room.ID == room2.ID {
 			assert.Equal(t, teacher2.ID, room.ParticipantID, "Should see teacher2 as participant")
 			assert.Equal(t, teacher2.FullName, room.ParticipantName, "Should have teacher2 name")
-			assert.Equal(t, string(models.RoleTeacher), room.ParticipantRole, "Should have teacher role")
+			assert.Equal(t, string(models.RoleMethodologist), room.ParticipantRole, "Should have teacher role")
 			found = true
 			break
 		}
@@ -346,7 +346,7 @@ func TestListRoomsByStudent_OnlyOwnRooms(t *testing.T) {
 	ctx := context.Background()
 
 	// Create test users
-	teacher := createChatTestUser(t, pool, models.RoleTeacher, "teacher@test.com", "Иван Преподаватель")
+	teacher := createChatTestUser(t, pool, models.RoleMethodologist, "teacher@test.com", "Иван Преподаватель")
 	student1 := createChatTestUser(t, pool, models.RoleStudent, "student1@test.com", "Петр Студент")
 	student2 := createChatTestUser(t, pool, models.RoleStudent, "student2@test.com", "Мария Студентова")
 
@@ -383,7 +383,7 @@ func TestChatRepository_JoinQueryCorrectness(t *testing.T) {
 	ctx := context.Background()
 
 	// Create test users
-	teacher := createChatTestUser(t, pool, models.RoleTeacher, "teacher@test.com", "Иван Преподаватель")
+	teacher := createChatTestUser(t, pool, models.RoleMethodologist, "teacher@test.com", "Иван Преподаватель")
 	student := createChatTestUser(t, pool, models.RoleStudent, "student@test.com", "Петр Студент")
 
 	// Create room
@@ -428,7 +428,7 @@ func TestChatRepository_MultipleRoomsWithSameTeacher(t *testing.T) {
 	ctx := context.Background()
 
 	// Create test users
-	teacher := createChatTestUser(t, pool, models.RoleTeacher, "teacher@test.com", "Иван Преподаватель")
+	teacher := createChatTestUser(t, pool, models.RoleMethodologist, "teacher@test.com", "Иван Преподаватель")
 	students := make([]*models.User, 3)
 	for i := 0; i < 3; i++ {
 		students[i] = createChatTestUser(t, pool, models.RoleStudent, "student"+string(rune('1'+i))+"@test.com", "Студент "+string(rune('A'+i)))

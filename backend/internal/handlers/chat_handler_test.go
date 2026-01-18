@@ -13,6 +13,7 @@ import (
 
 	"tutoring-platform/internal/middleware"
 	"tutoring-platform/internal/models"
+	"tutoring-platform/internal/repository"
 	"tutoring-platform/internal/service"
 
 	"github.com/google/uuid"
@@ -120,6 +121,19 @@ func (m *MockChatRepository) GetAttachmentByID(ctx context.Context, attachmentID
 	return args.Get(0).(*models.FileAttachment), args.Error(1)
 }
 
+func (m *MockChatRepository) ListAllRooms(ctx context.Context) ([]repository.ChatRoomWithDetails, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]repository.ChatRoomWithDetails), args.Error(1)
+}
+
+func (m *MockChatRepository) SoftDeleteMessage(ctx context.Context, msgID uuid.UUID) error {
+	args := m.Called(ctx, msgID)
+	return args.Error(0)
+}
+
 // MockUserRepository for testing
 type MockUserRepository struct {
 	mock.Mock
@@ -212,7 +226,7 @@ func TestChatHandler_GetMyRooms_Success(t *testing.T) {
 			StudentID:       studentID,
 			ParticipantID:   teacherID,
 			ParticipantName: "Иван Преподаватель",
-			ParticipantRole: string(models.RoleTeacher),
+			ParticipantRole: string(models.RoleMethodologist),
 			CreatedAt:       time.Now(),
 			UpdatedAt:       time.Now(),
 		},

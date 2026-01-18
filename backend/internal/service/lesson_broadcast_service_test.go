@@ -279,7 +279,7 @@ func TestCreateLessonBroadcast_Success_Teacher(t *testing.T) {
 
 	teacher := &models.User{
 		ID:   teacherID,
-		Role: models.RoleTeacher,
+		Role: models.RoleMethodologist,
 	}
 
 	broadcast := &models.LessonBroadcast{

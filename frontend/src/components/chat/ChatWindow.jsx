@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { logger } from '../../utils/logger.js';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useNotification } from '../../hooks/useNotification.js';
+import { useSSE } from '../../hooks/useSSE.js';
 import { sendMessage, getMessages } from '../../api/chat.js';
 import Message from './Message.jsx';
 import Spinner from '../common/Spinner.jsx';
@@ -13,6 +14,7 @@ import './ChatWindow.css';
 const ChatWindow = ({ room }) => {
   const { user } = useAuth();
   const { showNotification } = useNotification();
+  const { lastMessage, lastDeletedMessage, isConnected } = useSSE();
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,15 +25,12 @@ const ChatWindow = ({ room }) => {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
-
-  // Polling interval (3 секунды)
-  const POLLING_INTERVAL = 3000;
-  const pollingTimerRef = useRef(null);
+  const processedMessageIdsRef = useRef(new Set());
 
   /**
    * Загрузить сообщения из комнаты
    */
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     if (!room?.id) return;
 
     try {
@@ -43,29 +42,57 @@ const ChatWindow = ({ room }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [room?.id, showNotification]);
 
   /**
-   * Инициализация: загрузить сообщения и запустить polling
+   * Инициализация: загрузить сообщения при смене комнаты
    */
   useEffect(() => {
     if (!room?.id) return;
 
     setLoading(true);
+    processedMessageIdsRef.current.clear();
     loadMessages();
+  }, [room?.id, loadMessages]);
 
-    // Запустить polling для real-time обновлений
-    pollingTimerRef.current = setInterval(() => {
-      loadMessages();
-    }, POLLING_INTERVAL);
+  /**
+   * SSE: Обработка новых сообщений
+   */
+  useEffect(() => {
+    if (!lastMessage || !room?.id) return;
 
-    // Cleanup при размонтировании или смене комнаты
-    return () => {
-      if (pollingTimerRef.current) {
-        clearInterval(pollingTimerRef.current);
-      }
-    };
-  }, [room?.id]);
+    if (lastMessage.chat_id !== room.id) return;
+
+    if (processedMessageIdsRef.current.has(lastMessage.id)) return;
+
+    if (lastMessage.sender_id === user?.id) return;
+
+    processedMessageIdsRef.current.add(lastMessage.id);
+
+    setMessages((prev) => {
+      const exists = prev.some((msg) => msg.id === lastMessage.id);
+      if (exists) return prev;
+
+      return [...prev, lastMessage];
+    });
+
+    logger.debug('[ChatWindow] SSE new message added:', lastMessage.id);
+  }, [lastMessage, room?.id, user?.id]);
+
+  /**
+   * SSE: Обработка удалённых сообщений
+   */
+  useEffect(() => {
+    if (!lastDeletedMessage || !room?.id) return;
+
+    if (lastDeletedMessage.chat_id !== room.id) return;
+
+    setMessages((prev) =>
+      prev.filter((msg) => msg.id !== lastDeletedMessage.message_id)
+    );
+
+    logger.debug('[ChatWindow] SSE message deleted:', lastDeletedMessage.message_id);
+  }, [lastDeletedMessage, room?.id]);
 
   /**
    * Автоскролл к последнему сообщению
@@ -107,7 +134,8 @@ const ChatWindow = ({ room }) => {
       // DEBUG: Логируем что получили
       console.log('[ChatWindow] Сообщение отправлено:', newMessage);
 
-      // Добавить новое сообщение в список
+      processedMessageIdsRef.current.add(newMessage.id);
+
       setMessages((prev) => [...prev, newMessage]);
 
       // Очистить форму

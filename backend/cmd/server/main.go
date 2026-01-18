@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,7 +13,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog/log"
 
 	"tutoring-platform/internal/config"
 	"tutoring-platform/internal/database"
@@ -22,6 +23,7 @@ import (
 	"tutoring-platform/internal/middleware"
 	"tutoring-platform/internal/repository"
 	"tutoring-platform/internal/service"
+	"tutoring-platform/internal/sse"
 	"tutoring-platform/internal/validator"
 	"tutoring-platform/pkg/auth"
 	"tutoring-platform/pkg/logger"
@@ -338,6 +340,26 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	// Initialize chat service (moderation will be handled by the service internally)
 	chatService := service.NewChatService(chatRepo, userRepo, nil)
 
+	// Initialize SSE connection manager for real-time chat updates
+	// ChatParticipantsProvider callback returns participants for a chat room
+	chatParticipantsProvider := func(roomID uuid.UUID) []uuid.UUID {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		room, err := chatRepo.GetRoomByID(ctx, roomID)
+		if err != nil {
+			log.Warn().Err(err).Str("room_id", roomID.String()).Msg("Failed to get chat room participants for SSE")
+			return nil
+		}
+		return []uuid.UUID{room.TeacherID, room.StudentID}
+	}
+	sseManager := sse.NewConnectionManagerUUID(chatParticipantsProvider)
+
+	// Wire up SSE manager to chat service for broadcasting messages
+	chatService.SetSSEManager(sseManager)
+
+	// Initialize SSE handler
+	sseHandler := handlers.NewSSEHandler(sseManager, chatRepo)
+
 	// Initialize homework service
 	homeworkService := service.NewHomeworkService(homeworkRepo, lessonRepo, bookingRepo, userRepo)
 
@@ -413,7 +435,7 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	swapHandler := handlers.NewSwapHandler(swapService)
 	trialRequestHandler := handlers.NewTrialRequestHandler(trialRequestService)
 	templateHandler := handlers.NewTemplateHandler(templateService)
-	teacherHandler := handlers.NewTeacherHandler(lessonService, bookingService, lessonBroadcastService, lessonRepo)
+	methodologistHandler := handlers.NewMethodologistHandler(lessonService, bookingService, lessonBroadcastService, lessonRepo)
 	chatHandler := handlers.NewChatHandler(chatService)
 	homeworkHandler := handlers.NewHomeworkHandler(homeworkService)
 	lessonBroadcastHandler := handlers.NewLessonBroadcastHandler(lessonBroadcastService, uploadDir)
@@ -545,7 +567,7 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 				})
 			})
 
-			// Teacher subject routes
+			// Methodologist subject routes
 			r.Get("/my-subjects", subjectsHandler.GetMySubjects)
 			r.Route("/teachers/{id}/subjects", func(r chi.Router) {
 				r.Get("/", subjectsHandler.GetTeacherSubjects)
@@ -724,15 +746,24 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 				})
 			})
 
-			// Teacher routes (teacher-only endpoints)
-			r.Route("/teacher", func(r chi.Router) {
-				r.Use(middleware.RequireTeacher)
+			// SSE endpoint for real-time chat events (authenticated users)
+			r.Get("/events/chat", sseHandler.HandleChatEvents)
 
-				// Teacher schedule - calendar view with lessons and enrolled students (GET only)
-				r.Get("/schedule", teacherHandler.GetTeacherSchedule)
+			// Admin chat routes
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.RequireAdmin)
+				r.Get("/admin/chats", chatHandler.ListAllChats)
+			})
+
+			// Methodologist routes (methodologist-only endpoints)
+			r.Route("/teacher", func(r chi.Router) {
+				r.Use(middleware.RequireMethodologist)
+
+				// Methodologist schedule - calendar view with lessons and enrolled students (GET only)
+				r.Get("/schedule", methodologistHandler.GetMethodologistSchedule)
 
 				// Lesson broadcasts - send message to all students in a lesson (CSRF protected)
-				r.With(middleware.CSRFMiddleware(csrfStore)).Post("/lessons/{id}/broadcast", teacherHandler.SendLessonBroadcast)
+				r.With(middleware.CSRFMiddleware(csrfStore)).Post("/lessons/{id}/broadcast", methodologistHandler.SendLessonBroadcast)
 			})
 
 		})

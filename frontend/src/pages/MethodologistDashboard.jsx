@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Sidebar from "../components/common/Sidebar.jsx";
 import ErrorBoundary from "../components/common/ErrorBoundary.jsx";
-import Calendar from "../components/admin/Calendar.jsx";
+import MethodologistCalendar from "../components/methodologist/MethodologistCalendar.jsx";
+import MethodologistProfile from "../components/methodologist/MethodologistProfile.jsx";
 import TelegramManagement from "../components/admin/TelegramManagement.jsx";
 import TemplateManagement from "../components/admin/TemplateManagement.jsx";
 import TemplateList from "../components/admin/TemplateList.jsx";
@@ -34,8 +35,6 @@ export const MethodologistDashboard = () => {
     if (user.role !== ROLES.METHODOLOGIST) {
       if (user.role === ROLES.STUDENT) {
         navigate("/dashboard/student", { replace: true });
-      } else if (user.role === ROLES.TEACHER) {
-        navigate("/dashboard/teacher", { replace: true });
       } else if (user.role === ROLES.ADMIN) {
         navigate("/dashboard/admin", { replace: true });
       } else {
@@ -88,6 +87,26 @@ export const MethodologistDashboard = () => {
         </svg>
       ),
       testId: "nav-calendar",
+    },
+    {
+      path: "/dashboard/methodologist/profile",
+      label: "Профиль",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+          />
+        </svg>
+      ),
+      testId: "nav-profile",
     },
     {
       path: "/dashboard/methodologist/templates",
@@ -188,7 +207,15 @@ export const MethodologistDashboard = () => {
               path="calendar"
               element={
                 <ErrorBoundary>
-                  <Calendar />
+                  <MethodologistCalendar />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="profile"
+              element={
+                <ErrorBoundary>
+                  <MethodologistProfile />
                 </ErrorBoundary>
               }
             />

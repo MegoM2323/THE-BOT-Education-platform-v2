@@ -43,11 +43,6 @@ func RequireAdmin(next http.Handler) http.Handler {
 	return RequireRole(models.RoleAdmin)(next)
 }
 
-// RequireTeacher удобный middleware, требующий роль преподавателя
-func RequireTeacher(next http.Handler) http.Handler {
-	return RequireRole(models.RoleTeacher)(next)
-}
-
 // RequireMethodologist удобный middleware, требующий роль методиста
 func RequireMethodologist(next http.Handler) http.Handler {
 	return RequireRole(models.RoleMethodologist)(next)
@@ -58,9 +53,9 @@ func RequireStudent(next http.Handler) http.Handler {
 	return RequireRole(models.RoleStudent)(next)
 }
 
-// RequireTeacherOrAdmin удобный middleware, требующий роль преподавателя или администратора
-func RequireTeacherOrAdmin(next http.Handler) http.Handler {
-	return RequireRole(models.RoleTeacher, models.RoleAdmin)(next)
+// RequireMethodologistOrAdmin удобный middleware, требующий роль методиста или администратора
+func RequireMethodologistOrAdmin(next http.Handler) http.Handler {
+	return RequireRole(models.RoleMethodologist, models.RoleAdmin)(next)
 }
 
 // RequireAdminOrMethodologist удобный middleware, требующий роль администратора или методиста

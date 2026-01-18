@@ -79,7 +79,7 @@ func TestTemplateReplacement_CleanApply(t *testing.T) {
 
 	// Setup: Создаем пользователей
 	admin := createTestUser(t, db, "admin-replace@test.com", "Admin Replace", string(models.RoleAdmin))
-	teacher := createTestUser(t, db, "teacher-replace@test.com", "Teacher Replace", string(models.RoleTeacher))
+	teacher := createTestUser(t, db, "teacher-replace@test.com", "Teacher Replace", string(models.RoleMethodologist))
 	student1 := createTestUser(t, db, "student-replace1@test.com", "Student Replace 1", string(models.RoleStudent))
 	student2 := createTestUser(t, db, "student-replace2@test.com", "Student Replace 2", string(models.RoleStudent))
 
@@ -187,8 +187,8 @@ func TestTemplateReplacement_ReplaceWithExisting(t *testing.T) {
 
 	// Setup: Создаем пользователей
 	admin := createTestUser(t, db, "admin-replace2@test.com", "Admin Replace 2", string(models.RoleAdmin))
-	teacher1 := createTestUser(t, db, "teacher-replace1a@test.com", "Teacher Replace 1A", string(models.RoleTeacher))
-	teacher2 := createTestUser(t, db, "teacher-replace2a@test.com", "Teacher Replace 2A", string(models.RoleTeacher))
+	teacher1 := createTestUser(t, db, "teacher-replace1a@test.com", "Teacher Replace 1A", string(models.RoleMethodologist))
+	teacher2 := createTestUser(t, db, "teacher-replace2a@test.com", "Teacher Replace 2A", string(models.RoleMethodologist))
 	student1 := createTestUser(t, db, "student-replace1a@test.com", "Student Replace 1A", string(models.RoleStudent))
 	student2 := createTestUser(t, db, "student-replace2a@test.com", "Student Replace 2A", string(models.RoleStudent))
 	student3 := createTestUser(t, db, "student-replace3a@test.com", "Student Replace 3A", string(models.RoleStudent))
@@ -336,7 +336,7 @@ func TestTemplateReplacement_InsufficientCreditsAfterReplacement(t *testing.T) {
 
 	// Setup
 	admin := createTestUser(t, db, "admin-insuff@test.com", "Admin Insuff", string(models.RoleAdmin))
-	teacher := createTestUser(t, db, "teacher-insuff@test.com", "Teacher Insuff", string(models.RoleTeacher))
+	teacher := createTestUser(t, db, "teacher-insuff@test.com", "Teacher Insuff", string(models.RoleMethodologist))
 	student1 := createTestUser(t, db, "student-insuff1@test.com", "Student Insuff 1", string(models.RoleStudent))
 
 	// Даем студенту ровно столько, чтобы хватило на первый шаблон
@@ -458,7 +458,7 @@ func TestTemplateReplacement_NetCreditCalculation(t *testing.T) {
 
 	// Setup
 	admin := createTestUser(t, db, "admin-net@test.com", "Admin Net", string(models.RoleAdmin))
-	teacher := createTestUser(t, db, "teacher-net@test.com", "Teacher Net", string(models.RoleTeacher))
+	teacher := createTestUser(t, db, "teacher-net@test.com", "Teacher Net", string(models.RoleMethodologist))
 	student := createTestUser(t, db, "student-net@test.com", "Student Net", string(models.RoleStudent))
 
 	// Даем студенту 20 кредитов
@@ -559,7 +559,7 @@ func TestTemplateReplacement_ApplicationStatusTracking(t *testing.T) {
 
 	// Setup
 	admin := createTestUser(t, db, "admin-status@test.com", "Admin Status", string(models.RoleAdmin))
-	teacher := createTestUser(t, db, "teacher-status@test.com", "Teacher Status", string(models.RoleTeacher))
+	teacher := createTestUser(t, db, "teacher-status@test.com", "Teacher Status", string(models.RoleMethodologist))
 	student := createTestUser(t, db, "student-status@test.com", "Student Status", string(models.RoleStudent))
 
 	addCreditToStudent(t, db, student.ID, 30)

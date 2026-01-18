@@ -22,7 +22,7 @@ func TestMethodologistRoleCheck(t *testing.T) {
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
 		FullName: "Test Teacher",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	student := &models.User{
@@ -48,7 +48,7 @@ func TestMethodologistRoleCheck(t *testing.T) {
 	})
 
 	t.Run("Methodologist_NotTeacher", func(t *testing.T) {
-		assert.False(t, methodologist.IsTeacher(), "Методист не должен быть учителем")
+		assert.False(t, methodologist.IsMethodologist(), "Методист не должен быть учителем")
 	})
 
 	t.Run("Methodologist_NotStudent", func(t *testing.T) {
@@ -85,7 +85,7 @@ func TestMethodologistCanCreateLesson(t *testing.T) {
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
 		FullName: "Test Teacher",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
@@ -119,14 +119,14 @@ func TestMethodologistCanUpdateLesson(t *testing.T) {
 		ID:       uuid.New(),
 		Email:    "teacher1@test.com",
 		FullName: "Test Teacher 1",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	_ = &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher2@test.com",
 		FullName: "Test Teacher 2",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
@@ -169,7 +169,7 @@ func TestMethodologistCanDeleteLesson(t *testing.T) {
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
 		FullName: "Test Teacher",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
@@ -204,7 +204,7 @@ func TestMethodologistCanBulkEdit(t *testing.T) {
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
 		FullName: "Test Teacher",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
@@ -239,7 +239,7 @@ func TestMethodologistCanEditPastLesson(t *testing.T) {
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
 		FullName: "Test Teacher",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
@@ -271,13 +271,13 @@ func TestTeacherHomeworkOnlyPermission(t *testing.T) {
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
 		FullName: "Test Teacher",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	lessonTeacherID := teacher.ID
 
 	// Учитель пытается обновить только homework своего урока
-	isTeacherOwnLesson := teacher.IsTeacher() && lessonTeacherID == teacher.ID
+	isTeacherOwnLesson := teacher.IsMethodologist() && lessonTeacherID == teacher.ID
 	isHomeworkTextOnlyUpdate := true // только homework_text
 
 	// Логика из lessons.go:205

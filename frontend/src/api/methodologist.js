@@ -1,5 +1,5 @@
 /**
- * API эндпоинты для работы преподавателя
+ * API эндпоинты для работы методолога
  */
 
 import apiClient from './client.js';
@@ -13,7 +13,7 @@ import apiClient from './client.js';
  */
 export const sendLessonBroadcast = async (lessonId, message, options = {}) => {
   try {
-    return await apiClient.post(`/teacher/lessons/${lessonId}/broadcast`, { message }, options);
+    return await apiClient.post(`/methodologist/lessons/${lessonId}/broadcast`, { message }, options);
   } catch (error) {
     if (error.name !== 'AbortError') {
       console.error('Error sending lesson broadcast:', error);

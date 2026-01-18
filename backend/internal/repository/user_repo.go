@@ -331,7 +331,7 @@ func (r *UserRepo) Delete(ctx context.Context, id uuid.UUID) error {
 		return fmt.Errorf("failed to get user role: %w", err)
 	}
 
-	if user.Role == models.RoleTeacher {
+	if user.Role == models.RoleMethodologist {
 		var hasActiveLessons bool
 		err := tx.QueryRowContext(ctx,
 			`SELECT EXISTS(SELECT 1 FROM lessons WHERE teacher_id = $1 AND deleted_at IS NULL)`, id).Scan(&hasActiveLessons)

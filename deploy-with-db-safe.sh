@@ -7,12 +7,12 @@
 set -euo pipefail
 
 # Configuration
-REMOTE_HOST="miroslav@213.171.25.168"
-REMOTE_DIR="/opt/tutoring-platform"
+REMOTE_HOST="mg@5.129.249.206"
+REMOTE_DIR="/opt/THE_BOT_platform"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_BEFORE_DEPLOY=true
 DEPLOY_MODE="docker"
-CERTBOT_EMAIL="${CERTBOT_EMAIL:-admin@diploma-m.ru}"
+CERTBOT_EMAIL="${CERTBOT_EMAIL:-admin@the-bot.ru}"
 
 # Colors
 RED='\033[0;31m'
@@ -81,7 +81,7 @@ backup_database() {
     ssh "$REMOTE_HOST" bash -s << 'BACKUP_SCRIPT'
 set -euo pipefail
 
-REMOTE_DIR="/opt/tutoring-platform"
+REMOTE_DIR="/opt/THE_BOT_platform"
 BACKUP_DIR="$REMOTE_DIR/backups"
 
 # Create backup directory
@@ -214,7 +214,7 @@ deploy_docker_safe() {
             -v db_user="tutoring" \
             -v db_password="$DB_PASSWORD" \
             -v session_secret="$SESSION_SECRET" \
-            -v production_domain="https://diploma-m.ru" \
+            -v production_domain="https://the-bot.ru" \
             -v env_mode="production" \
             -v ssl_mode="prefer" '
             /^DB_HOST=/ { print "DB_HOST=" db_host; next }
@@ -238,7 +238,7 @@ deploy_docker_safe() {
     ssh "$REMOTE_HOST" CERTBOT_EMAIL="$CERTBOT_EMAIL" bash -s << 'DOCKER_SCRIPT'
 set -euo pipefail
 
-REMOTE_DIR="/opt/tutoring-platform"
+REMOTE_DIR="/opt/THE_BOT_platform"
 cd "$REMOTE_DIR"
 
 echo "=== Docker Safe Deployment (Database Preservation) ==="
@@ -298,11 +298,11 @@ if ! command -v certbot &> /dev/null; then
 fi
 
 check_certificate_valid() {
-    if [ ! -d "/etc/letsencrypt/live/diploma-m.ru" ]; then
+    if [ ! -d "/etc/letsencrypt/live/the-bot.ru" ]; then
         return 1
     fi
     if command -v certbot &> /dev/null; then
-        certbot certificates 2>/dev/null | grep -q "diploma-m.ru" && return 0
+        certbot certificates 2>/dev/null | grep -q "the-bot.ru" && return 0
         return 1
     fi
     return 0
@@ -319,11 +319,11 @@ if ! check_certificate_valid; then
         --non-interactive \
         --agree-tos \
         --email "${CERTBOT_EMAIL}" \
-        -d diploma-m.ru \
-        -d www.diploma-m.ru \
+        -d the-bot.ru \
+        -d the-bot.ru \
         2>&1 || echo "⚠ Certificate request failed or already exists"
 else
-    echo "Certificate valid at /etc/letsencrypt/live/diploma-m.ru/"
+    echo "Certificate valid at /etc/letsencrypt/live/the-bot.ru/"
 fi
 
 # Setup auto-renewal
@@ -331,8 +331,8 @@ sudo systemctl enable certbot.timer 2>/dev/null || true
 sudo systemctl start certbot.timer 2>/dev/null || true
 
 # Ensure permissions
-sudo setfacl -R -m u:root:rx /etc/letsencrypt/live/diploma-m.ru 2>/dev/null || \
-    sudo chmod -R 755 /etc/letsencrypt/live/diploma-m.ru 2>/dev/null || true
+sudo setfacl -R -m u:root:rx /etc/letsencrypt/live/the-bot.ru 2>/dev/null || \
+    sudo chmod -R 755 /etc/letsencrypt/live/the-bot.ru 2>/dev/null || true
 
 echo ""
 echo "=== Building and starting containers ==="
@@ -388,8 +388,8 @@ done
 echo ""
 echo "=== Deployment Complete ==="
 echo "Platform available at:"
-echo "  https://diploma-m.ru"
-echo "  http://213.171.25.168"
+echo "  https://the-bot.ru"
+echo "  http://5.129.249.206"
 DOCKER_SCRIPT
 
     log_success "Docker deployment completed"
@@ -402,7 +402,7 @@ verify_database() {
     ssh "$REMOTE_HOST" bash -s << 'VERIFY_SCRIPT'
 set -euo pipefail
 
-REMOTE_DIR="/opt/tutoring-platform"
+REMOTE_DIR="/opt/THE_BOT_platform"
 
 echo "Connecting to database..."
 
@@ -459,7 +459,7 @@ main() {
     echo "  ✓ Services verified and healthy"
     echo ""
     echo "Platform available at:"
-    echo "  https://diploma-m.ru"
+    echo "  https://the-bot.ru"
     echo ""
 }
 

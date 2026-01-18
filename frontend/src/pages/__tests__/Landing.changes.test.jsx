@@ -64,7 +64,7 @@ describe('Landing Page - New Changes', () => {
 
       expect(screen.getByText('Кто я?')).toBeInTheDocument();
       expect(screen.getByText(/Записи на занятия/i)).toBeInTheDocument();
-      expect(screen.getByText('diploma')).toBeInTheDocument();
+      expect(screen.getByText('THE BOT')).toBeInTheDocument();
     });
   });
 

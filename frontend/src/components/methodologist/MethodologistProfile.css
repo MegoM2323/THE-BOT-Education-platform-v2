@@ -1,6 +1,5 @@
-.teacher-profile {
+.methodologist-profile {
   width: 100%;
-  /* max-width and margin removed - titles should align with other dashboards */
 }
 
 .profile-header {
@@ -12,7 +11,6 @@
   font-weight: 700;
   color: var(--gray-900);
   margin: 0;
-  /* unified with other dashboard titles */
 }
 
 .profile-content {
@@ -27,11 +25,28 @@
   gap: var(--spacing-md);
 }
 
+.profile-section h3,
+.profile-section .section-title {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  margin-bottom: var(--spacing-md);
+}
+
 .section-title {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin: 0;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+.profile-section h3 + div,
+.profile-section .section-title + div,
+.profile-section h3.section-title + div {
+  border-top: none !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 .profile-info-card {
@@ -43,41 +58,71 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  border-top: none;
 }
 
-.info-row {
+.profile-info-card .info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-sm) 0;
-  border-bottom: 1px solid var(--border-color-light);
+  border-bottom: none !important;
 }
 
-.info-row:last-child {
-  border-bottom: none;
+.profile-info-card .info-row:not(:last-child) {
+  border-bottom: none !important;
+}
+
+.profile-info-card .info-row * {
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
 .info-label {
   font-size: var(--font-size-md);
   color: var(--text-secondary);
   font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
 }
 
 .info-value {
   font-size: var(--font-size-md);
   color: var(--text-primary);
   font-weight: var(--font-weight-semibold);
+  display: flex;
+  align-items: center;
 }
 
-/* Responsive */
+.profile-loading,
+.profile-loading-small {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-lg);
+}
+
+.profile-loading {
+  min-height: 200px;
+}
+
+.profile-loading-small {
+  min-height: 80px;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: var(--font-size-sm);
+}
+
 @media (max-width: 768px) {
-  .teacher-profile {
-    /* padding removed - using .dashboard-main padding */
+  .methodologist-profile {
   }
 
-  .info-row {
+  .profile-info-card .info-row {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-xs);
+    border-bottom: none !important;
   }
 }

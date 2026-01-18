@@ -62,7 +62,7 @@ func TestUpdateLesson_Admin_CanEditPastLesson(t *testing.T) {
 
 	// Создаём админа и преподавателя
 	admin := createTestUser(t, sqlxDB, "admin@test.com", "Admin User", string(models.RoleAdmin))
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
 
 	// Создаём прошлое занятие (2 часа назад)
 	pastTime := time.Now().Add(-2 * time.Hour)
@@ -157,7 +157,7 @@ func TestUpdateLesson_Teacher_CannotEditSubject(t *testing.T) {
 	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
 
 	// Создаём преподавателя
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
 
 	// Создаём будущее занятие (учитель будет пытаться изменить своё занятие)
 	futureTime := time.Now().Add(2 * time.Hour)
@@ -234,7 +234,7 @@ func TestUpdateLesson_Teacher_CanEditHomeworkText(t *testing.T) {
 	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
 
 	// Создаём преподавателя
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
 
 	// Создаём будущее занятие
 	futureTime := time.Now().Add(2 * time.Hour)
@@ -318,8 +318,8 @@ func TestUpdateLesson_Teacher_CannotEditOtherTeacherHomework(t *testing.T) {
 	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
 
 	// Создаём двух преподавателей
-	teacher1 := createTestUser(t, sqlxDB, "teacher1@test.com", "Teacher One", string(models.RoleTeacher))
-	teacher2 := createTestUser(t, sqlxDB, "teacher2@test.com", "Teacher Two", string(models.RoleTeacher))
+	teacher1 := createTestUser(t, sqlxDB, "teacher1@test.com", "Teacher One", string(models.RoleMethodologist))
+	teacher2 := createTestUser(t, sqlxDB, "teacher2@test.com", "Teacher Two", string(models.RoleMethodologist))
 
 	// Создаём занятие teacher1
 	futureTime := time.Now().Add(2 * time.Hour)
@@ -398,7 +398,7 @@ func TestUpdateLesson_Student_CannotEditLesson(t *testing.T) {
 
 	// Создаём студента и преподавателя
 	student := createTestUser(t, sqlxDB, "student@test.com", "Student User", string(models.RoleStudent))
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
 
 	// Создаём будущее занятие
 	futureTime := time.Now().Add(2 * time.Hour)
@@ -476,7 +476,7 @@ func TestUpdateLesson_Admin_EditFutureLesson_NoWarning(t *testing.T) {
 
 	// Создаём админа и преподавателя
 	admin := createTestUser(t, sqlxDB, "admin@test.com", "Admin User", string(models.RoleAdmin))
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
 
 	// Создаём будущее занятие
 	futureTime := time.Now().Add(2 * time.Hour)

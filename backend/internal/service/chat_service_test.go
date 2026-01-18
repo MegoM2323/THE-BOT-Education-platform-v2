@@ -112,6 +112,19 @@ func (m *MockChatRepository) GetAttachmentByID(ctx context.Context, attachmentID
 	return args.Get(0).(*models.FileAttachment), args.Error(1)
 }
 
+func (m *MockChatRepository) ListAllRooms(ctx context.Context) ([]repository.ChatRoomWithDetails, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]repository.ChatRoomWithDetails), args.Error(1)
+}
+
+func (m *MockChatRepository) SoftDeleteMessage(ctx context.Context, msgID uuid.UUID) error {
+	args := m.Called(ctx, msgID)
+	return args.Error(0)
+}
+
 // MockChatUserRepository мок для userRepository (только GetByID метод)
 type MockChatUserRepository struct {
 	mock.Mock
@@ -138,7 +151,7 @@ func TestChatService_GetOrCreateRoom(t *testing.T) {
 
 		teacher := &models.User{
 			ID:   teacherID,
-			Role: models.RoleTeacher,
+			Role: models.RoleMethodologist,
 		}
 
 		student := &models.User{
@@ -183,7 +196,7 @@ func TestChatService_GetOrCreateRoom(t *testing.T) {
 
 		teacher := &models.User{
 			ID:   teacherID,
-			Role: models.RoleTeacher,
+			Role: models.RoleMethodologist,
 		}
 
 		expectedRoom := &models.ChatRoom{
@@ -369,7 +382,7 @@ func TestChatService_GetUserChats(t *testing.T) {
 
 		mockChatRepo.On("ListRoomsByTeacher", mock.Anything, teacherID).Return(expectedRooms, nil)
 
-		rooms, err := service.GetUserChats(context.Background(), teacherID, string(models.RoleTeacher))
+		rooms, err := service.GetUserChats(context.Background(), teacherID, string(models.RoleMethodologist))
 
 		assert.NoError(t, err)
 		assert.NotNil(t, rooms)

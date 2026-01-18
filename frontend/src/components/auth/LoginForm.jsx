@@ -51,9 +51,6 @@ export const LoginForm = () => {
         case ROLES.ADMIN:
           navigate('/dashboard/admin/users');
           break;
-        case ROLES.TEACHER:
-          navigate('/dashboard/teacher/calendar');
-          break;
         case ROLES.STUDENT:
           navigate('/dashboard/student/schedule');
           break;

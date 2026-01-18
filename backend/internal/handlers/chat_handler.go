@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,6 +15,7 @@ import (
 
 	"tutoring-platform/internal/middleware"
 	"tutoring-platform/internal/models"
+	"tutoring-platform/internal/repository"
 	"tutoring-platform/internal/service"
 	"tutoring-platform/pkg/response"
 )
@@ -365,7 +366,47 @@ func (h *ChatHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", attachment.FileName))
+	contentDisposition := mime.FormatMediaType("attachment", map[string]string{
+		"filename": attachment.FileName,
+	})
+	w.Header().Set("Content-Disposition", contentDisposition)
 	w.Header().Set("Content-Type", attachment.MimeType)
 	http.ServeFile(w, r, attachment.FilePath)
+}
+
+// ListAllChats returns all chats for admin panel
+func (h *ChatHandler) ListAllChats(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	session, ok := middleware.GetSessionFromContext(ctx)
+	if !ok || session == nil {
+		response.Unauthorized(w, "Session not found")
+		return
+	}
+
+	if session.UserRole != models.RoleAdmin {
+		log.Warn().
+			Str("user_id", session.UserID.String()).
+			Str("role", string(session.UserRole)).
+			Msg("Non-admin user attempted to access ListAllChats")
+		response.Forbidden(w, "Admin access required")
+		return
+	}
+
+	chats, err := h.chatService.GetAllChats(ctx)
+	if err != nil {
+		log.Error().Err(err).
+			Str("user_id", session.UserID.String()).
+			Str("method", "ListAllChats").
+			Msg("Failed to retrieve all chats")
+		response.BadRequest(w, response.ErrCodeInternalError, "Unable to retrieve chats")
+		return
+	}
+
+	if chats == nil {
+		chats = []repository.ChatRoomWithDetails{}
+	}
+
+	response.Success(w, http.StatusOK, map[string]interface{}{
+		"chats": chats,
+	})
 }

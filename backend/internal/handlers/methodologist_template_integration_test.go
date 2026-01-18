@@ -34,7 +34,7 @@ func TestMethodologistTemplateWorkflow(t *testing.T) {
 
 	// Setup: Create test users
 	methodologist := createTestUser(t, db, "methodologist@test.com", "Methodologist User", string(models.RoleMethodologist))
-	teacher1 := createTestUser(t, db, "teacher1@test.com", "Teacher One", string(models.RoleTeacher))
+	teacher1 := createTestUser(t, db, "teacher1@test.com", "Teacher One", string(models.RoleMethodologist))
 	student1 := createTestUser(t, db, "student1@test.com", "Student One", string(models.RoleStudent))
 
 	// Give student enough credits

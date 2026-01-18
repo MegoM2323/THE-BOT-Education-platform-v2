@@ -45,9 +45,8 @@ func TestUser_IsMethodologist(t *testing.T) {
 func TestUserRole_ValidRoles(t *testing.T) {
 	validRoles := []UserRole{
 		RoleStudent,
-		RoleTeacher,
-		RoleAdmin,
 		RoleMethodologist,
+		RoleAdmin,
 	}
 
 	for _, role := range validRoles {

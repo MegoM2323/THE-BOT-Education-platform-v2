@@ -227,6 +227,38 @@ check_postgres_service() {
     return 1
 }
 
+# Проверка Docker контейнеров PostgreSQL
+check_docker_postgres() {
+    if command -v docker &> /dev/null; then
+        # Проверяем, есть ли запущенные контейнеры PostgreSQL
+        # и маппят ли они порт 5432 на хост
+        if docker ps --format '{{.Names}}:{{.Ports}}' 2>/dev/null | grep -q postgres; then
+            # Проверяем маппинг портов более точно
+            if docker ps --format '{{.Names}}:{{.Ports}}' 2>/dev/null | grep postgres | grep -q ":5432->"; then
+                return 0
+            fi
+        fi
+    fi
+    return 1
+}
+
+# Получение пароля PostgreSQL из Docker контейнера
+get_docker_postgres_password() {
+    if command -v docker &> /dev/null; then
+        # Ищем контейнер PostgreSQL, который слушает на порту 5432
+        local container_name=$(docker ps --format '{{.Names}}:{{.Ports}}' 2>/dev/null | grep postgres | grep ":5432->" | cut -d: -f1 | head -1)
+        if [ -n "$container_name" ]; then
+            # Пытаемся получить пароль из переменных окружения контейнера
+            local password=$(docker inspect "$container_name" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null | grep "^POSTGRES_PASSWORD=" | cut -d= -f2- | head -1)
+            if [ -n "$password" ]; then
+                echo "$password"
+                return 0
+            fi
+        fi
+    fi
+    return 1
+}
+
 # Проверка подключения
 if check_postgres; then
     print_success "PostgreSQL работает и доступен"
@@ -238,8 +270,94 @@ else
     check_postgres > /dev/null 2>&1 || true
     echo ""
 
+    # Проверяем Docker контейнеры
+    if check_docker_postgres; then
+        print_info "Обнаружен запущенный Docker контейнер PostgreSQL на порту 5432"
+        print_info "Используем Docker контейнер вместо системного PostgreSQL"
+        
+        # Пытаемся получить пароль из Docker контейнера
+        DOCKER_POSTGRES_PASSWORD=$(get_docker_postgres_password)
+        if [ -n "$DOCKER_POSTGRES_PASSWORD" ]; then
+            print_info "Пароль PostgreSQL извлечен из Docker контейнера"
+        fi
+        
+        # Дополнительная проверка подключения с учетом Docker
+        sleep 2
+        if check_postgres; then
+            print_success "Подключение к PostgreSQL в Docker успешно"
+        else
+            print_warning "Docker контейнер запущен, но подключение с пользователем '$DB_USER' не удалось"
+            
+            # Пробуем подключиться с различными паролями
+            local connected=false
+            local test_passwords=()
+            
+            # Добавляем пароль из Docker контейнера, если он есть
+            [ -n "$DOCKER_POSTGRES_PASSWORD" ] && test_passwords+=("$DOCKER_POSTGRES_PASSWORD")
+            # Добавляем пароль из переменной окружения
+            [ -n "$DB_PASSWORD" ] && test_passwords+=("$DB_PASSWORD")
+            # Добавляем стандартные пароли для разработки
+            test_passwords+=("postgres" "postgres_dev_password")
+            
+            # Убираем дубликаты
+            test_passwords=($(printf '%s\n' "${test_passwords[@]}" | sort -u))
+            
+            for test_password in "${test_passwords[@]}"; do
+                if PGPASSWORD="$test_password" psql -h "$DB_HOST" -p "$DB_PORT" -U postgres -d postgres -c '\q' 2>/dev/null; then
+                    print_info "Подключение с пользователем 'postgres' успешно (пароль найден в Docker контейнере)"
+                    local connected=true
+                    local admin_password="$test_password"
+                    break
+                fi
+            done
+            
+            if [ "$connected" = true ]; then
+                # Пытаемся создать пользователя, если он не совпадает с postgres
+                if [ "$DB_USER" != "postgres" ]; then
+                    print_info "Попытка создать пользователя '$DB_USER' в Docker контейнере..."
+                    
+                    # Экранирование пароля для SQL
+                    ESCAPED_PASSWORD=$(echo "$DB_PASSWORD" | sed "s/'/''/g")
+                    
+                    # Создание пользователя
+                    CREATE_USER_SQL="DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE usename = '$DB_USER') THEN CREATE USER \"$DB_USER\" WITH PASSWORD '$ESCAPED_PASSWORD'; END IF; END \$\$;"
+                    
+                    if echo "$CREATE_USER_SQL" | PGPASSWORD="$admin_password" psql -h "$DB_HOST" -p "$DB_PORT" -U postgres -d postgres 2>/dev/null; then
+                        print_success "Пользователь '$DB_USER' создан или уже существует"
+                        # Даем права
+                        echo "ALTER USER \"$DB_USER\" CREATEDB;" | PGPASSWORD="$admin_password" psql -h "$DB_HOST" -p "$DB_PORT" -U postgres -d postgres 2>/dev/null || true
+                        
+                        # Повторная проверка подключения
+                        sleep 1
+                        if check_postgres; then
+                            print_success "Подключение к PostgreSQL в Docker успешно восстановлено"
+                        else
+                            print_error "Пользователь создан, но подключение все еще не удается"
+                            print_info "Проверьте пароль для '$DB_USER' в backend/.env"
+                            exit 1
+                        fi
+                    else
+                        print_warning "Не удалось создать пользователя автоматически в Docker контейнере"
+                        print_info "Возможно, нужно изменить DB_USER в backend/.env на 'postgres'"
+                        exit 1
+                    fi
+                else
+                    # Если пользователь postgres, просто обновляем пароль
+                    if [ -n "$DOCKER_POSTGRES_PASSWORD" ] && [ "$DB_PASSWORD" != "$DOCKER_POSTGRES_PASSWORD" ]; then
+                        print_info "Обнаружено несоответствие паролей. Используется пароль из Docker контейнера для подключения."
+                    fi
+                    print_success "Подключение к PostgreSQL в Docker успешно"
+                fi
+            else
+                print_error "Docker контейнер запущен, но подключение не удалось"
+                print_info "Проверьте настройки подключения в backend/.env"
+                print_info "Или проверьте пароль PostgreSQL в Docker контейнере:"
+                print_info "  docker inspect thebot_postgres_dev | grep POSTGRES_PASSWORD"
+                exit 1
+            fi
+        fi
     # Проверяем статус сервиса
-    if check_postgres_service; then
+    elif check_postgres_service; then
         print_info "Сервис PostgreSQL запущен, но подключение не удалось"
         
         # Попытка подключиться с пользователем postgres для проверки (без пароля для локальных подключений)
@@ -294,6 +412,23 @@ else
             exit 1
         fi
     else
+        # Проверяем, не занят ли порт 5432
+        if lsof -i :5432 -sTCP:LISTEN >/dev/null 2>&1; then
+            print_warning "Порт 5432 уже занят"
+            print_info "Возможные причины:"
+            print_info "  - Запущен Docker контейнер PostgreSQL"
+            print_info "  - Запущен другой экземпляр PostgreSQL"
+            print_info "  - Другой сервис использует порт 5432"
+            echo ""
+            print_info "Проверьте запущенные процессы:"
+            print_info "  docker ps | grep postgres"
+            print_info "  sudo lsof -i :5432"
+            echo ""
+            print_error "Не удалось подключиться к PostgreSQL и порт занят"
+            print_info "Остановите существующий процесс или измените DB_PORT в backend/.env"
+            exit 1
+        fi
+
         # Попытка запустить PostgreSQL (зависит от ОС)
         print_info "Попытка запуска PostgreSQL..."
 

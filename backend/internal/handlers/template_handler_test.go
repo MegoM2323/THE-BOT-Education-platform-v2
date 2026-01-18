@@ -53,7 +53,7 @@ func TestTemplateGetTemplatesAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access GetTemplates - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 			userProvided:   true,
 		},
@@ -118,7 +118,7 @@ func TestTemplateCreateTemplateAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access CreateTemplate - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 			userProvided:   true,
 		},
@@ -182,7 +182,7 @@ func TestTemplateGetTemplateAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access GetTemplate - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 			userProvided:   true,
 		},
@@ -232,7 +232,7 @@ func TestTemplateUpdateTemplateAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access UpdateTemplate - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 		},
 	}
@@ -285,7 +285,7 @@ func TestTemplateDeleteTemplateAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access DeleteTemplate - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 		},
 	}
@@ -333,7 +333,7 @@ func TestTemplateApplyTemplateAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access ApplyTemplate - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 		},
 	}
@@ -387,7 +387,7 @@ func TestTemplateRollbackTemplateAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access RollbackTemplate - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 		},
 	}
@@ -441,7 +441,7 @@ func TestTemplateCreateTemplateLessonAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access CreateTemplateLesson - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 		},
 	}
@@ -498,7 +498,7 @@ func TestTemplateUpdateTemplateLessonAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access UpdateTemplateLesson - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 		},
 	}
@@ -553,7 +553,7 @@ func TestTemplateDeleteTemplateLessonAccessControl(t *testing.T) {
 		},
 		{
 			name:           "Teacher cannot access DeleteTemplateLesson - Forbidden",
-			userRole:       models.RoleTeacher,
+			userRole:       models.RoleMethodologist,
 			expectedStatus: http.StatusForbidden,
 		},
 	}

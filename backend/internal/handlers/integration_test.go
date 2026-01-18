@@ -42,8 +42,8 @@ func TestIntegration_TemplateApplicationFlowE2E(t *testing.T) {
 
 	// Setup: Create test users (parameters: email, fullName, role)
 	admin := createTestUser(t, db, "admin@test.com", "Admin User", string(models.RoleAdmin))
-	teacher1 := createTestUser(t, db, "teacher1@test.com", "Teacher One", string(models.RoleTeacher))
-	teacher2 := createTestUser(t, db, "teacher2@test.com", "Teacher Two", string(models.RoleTeacher))
+	teacher1 := createTestUser(t, db, "teacher1@test.com", "Teacher One", string(models.RoleMethodologist))
+	teacher2 := createTestUser(t, db, "teacher2@test.com", "Teacher Two", string(models.RoleMethodologist))
 	student1 := createTestUser(t, db, "student1@test.com", "Student One", string(models.RoleStudent))
 	student2 := createTestUser(t, db, "student2@test.com", "Student Two", string(models.RoleStudent))
 	student3 := createTestUser(t, db, "student3@test.com", "Student Three", string(models.RoleStudent))
@@ -178,7 +178,7 @@ func TestIntegration_RollbackFlowWithCreditRefund(t *testing.T) {
 
 	// Setup: Create users
 	admin := createTestUser(t, db, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher := createTestUser(t, db, "teacher@test.com", "Teacher", string(models.RoleTeacher))
+	teacher := createTestUser(t, db, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
 	student1 := createTestUser(t, db, "student1@test.com", "Student1", string(models.RoleStudent))
 	student2 := createTestUser(t, db, "student2@test.com", "Student2", string(models.RoleStudent))
 
@@ -295,7 +295,7 @@ func TestIntegration_BulkEditMultipleLessons(t *testing.T) {
 	defer cleanupTestDB(t, db)
 
 	// Setup: Create users
-	teacher := createTestUser(t, db, "teacher@test.com", "Teacher", string(models.RoleTeacher))
+	teacher := createTestUser(t, db, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
 	student := createTestUser(t, db, "student@test.com", "Student", string(models.RoleStudent))
 	newStudent := createTestUser(t, db, "newstudent@test.com", "New Student", string(models.RoleStudent))
 
@@ -393,8 +393,8 @@ func TestIntegration_LessonVisibilityByRole(t *testing.T) {
 
 	// Setup: Create users with different roles
 	admin := createTestUser(t, db, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher1 := createTestUser(t, db, "teacher1@test.com", "Teacher1", string(models.RoleTeacher))
-	teacher2 := createTestUser(t, db, "teacher2@test.com", "Teacher2", string(models.RoleTeacher))
+	teacher1 := createTestUser(t, db, "teacher1@test.com", "Teacher1", string(models.RoleMethodologist))
+	teacher2 := createTestUser(t, db, "teacher2@test.com", "Teacher2", string(models.RoleMethodologist))
 	student1 := createTestUser(t, db, "student1@test.com", "Student1", string(models.RoleStudent))
 	student2 := createTestUser(t, db, "student2@test.com", "Student2", string(models.RoleStudent))
 
@@ -499,7 +499,7 @@ func TestIntegration_ConcurrentTemplateApplications(t *testing.T) {
 	// Setup: Create users
 	admin1 := createTestUser(t, db, "admin1@test.com", "Admin1", string(models.RoleAdmin))
 	admin2 := createTestUser(t, db, "admin2@test.com", "Admin2", string(models.RoleAdmin))
-	teacher := createTestUser(t, db, "teacher@test.com", "Teacher", string(models.RoleTeacher))
+	teacher := createTestUser(t, db, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
 	student := createTestUser(t, db, "student@test.com", "Student", string(models.RoleStudent))
 
 	addCreditToStudent(t, db, student.ID, 10)

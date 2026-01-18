@@ -395,7 +395,7 @@ func (h *SubjectsHandler) RemoveSubjectFromTeacher(w http.ResponseWriter, r *htt
 
 // GetMySubjects обрабатывает GET /api/v1/my-subjects
 // @Summary      Get current user's subjects
-// @Description  Get list of subjects for the currently logged-in teacher
+// @Description  Get list of subjects for the currently logged-in methodologist
 // @Tags         subjects
 // @Accept       json
 // @Produce      json
@@ -411,8 +411,8 @@ func (h *SubjectsHandler) GetMySubjects(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if !user.IsTeacher() {
-		response.Forbidden(w, "Teacher access required")
+	if !user.IsMethodologist() {
+		response.Forbidden(w, "Methodologist access required")
 		return
 	}
 

@@ -234,7 +234,7 @@ func TestGetHomeworkByLesson_TeacherCanAccessPastLessonHomework(t *testing.T) {
 	// Мокаем преподавателя
 	teacher := &models.User{
 		ID:   teacherID,
-		Role: models.RoleTeacher,
+		Role: models.RoleMethodologist,
 	}
 	mockUserRepo.On("GetByID", ctx, teacherID).Return(teacher, nil)
 
@@ -500,7 +500,7 @@ func TestGetHomeworkByLesson_TeacherSuccess(t *testing.T) {
 	// Мокаем пользователя (teacher)
 	user := &models.User{
 		ID:   userID,
-		Role: models.RoleTeacher,
+		Role: models.RoleMethodologist,
 	}
 	mockUserRepo.On("GetByID", ctx, userID).Return(user, nil)
 
@@ -854,7 +854,7 @@ func TestDeleteHomework_TeacherCanDeleteAdminFile(t *testing.T) {
 	// Мокаем пользователя (teacher)
 	user := &models.User{
 		ID:   teacherID,
-		Role: models.RoleTeacher,
+		Role: models.RoleMethodologist,
 	}
 	mockUserRepo.On("GetByID", ctx, teacherID).Return(user, nil)
 

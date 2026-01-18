@@ -5,7 +5,7 @@ const HeroSection = () => {
     <>
       <header className="landing-header">
         <div className="container header-container">
-          <div className="logo">diploma</div>
+          <div className="logo">THE BOT</div>
           <Link to="/login" className="login-link">Войти</Link>
         </div>
       </header>
@@ -17,7 +17,7 @@ const HeroSection = () => {
           aria-hidden="true"
         />
         <div className="hero-content">
-          <h1 className="hero-title">ТВОЙ КРАТЧАЙШИЙ ПУТЬ К ДИПЛОМУ</h1>
+          <h1 className="hero-title">ТВОЙ КРАТЧАЙШИЙ ПУТЬ К УСПЕХУ</h1>
         </div>
       </section>
     </>

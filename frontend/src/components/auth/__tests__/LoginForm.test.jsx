@@ -110,77 +110,7 @@ describe('LoginForm - Microtask Redirect Timing Tests', () => {
     });
   });
 
-  describe('Scenario 2: Teacher login redirect', () => {
-    it('should handle teacher login correctly', async () => {
-      const mockUser = {
-        id: '2',
-        email: 'teacher@test.com',
-        role: ROLES.TEACHER,
-      };
-
-      mockLogin.mockResolvedValue(mockUser);
-
-      renderLoginForm();
-
-      const emailField = document.querySelector('input[name="email"]');
-      const passwordField = document.querySelector('input[name="password"]');
-      const submitButton = screen.getByTestId('login-button');
-
-      await userEvent.type(emailField, 'teacher@test.com');
-      await userEvent.type(passwordField, 'TestPass123!');
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockLogin).toHaveBeenCalledWith('teacher@test.com', 'TestPass123!');
-      }, { timeout: 1000 });
-
-      await waitFor(() => {
-        expect(mockNotification.success).toHaveBeenCalled();
-      });
-    });
-
-    it('should call login exactly once for teacher', async () => {
-      const mockUser = { id: '2', role: ROLES.TEACHER };
-      mockLogin.mockResolvedValue(mockUser);
-
-      renderLoginForm();
-
-      const emailField = document.querySelector('input[name="email"]');
-      const passwordField = document.querySelector('input[name="password"]');
-      const submitButton = screen.getByTestId('login-button');
-
-      await userEvent.type(emailField, 'teacher@test.com');
-      await userEvent.type(passwordField, 'password');
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockLogin).toHaveBeenCalled();
-      });
-
-      expect(mockLogin).toHaveBeenCalledTimes(1);
-    });
-
-    it('should show notification on teacher login', async () => {
-      const mockUser = { id: '2', role: ROLES.TEACHER };
-      mockLogin.mockResolvedValue(mockUser);
-
-      renderLoginForm();
-
-      const emailField = document.querySelector('input[name="email"]');
-      const passwordField = document.querySelector('input[name="password"]');
-      const submitButton = screen.getByTestId('login-button');
-
-      await userEvent.type(emailField, 'teacher@test.com');
-      await userEvent.type(passwordField, 'password');
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockNotification.success).toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('Scenario 3: Student login redirect', () => {
+  describe('Scenario 2: Student login redirect', () => {
     it('should handle student login correctly', async () => {
       const mockUser = {
         id: '3',
@@ -252,7 +182,7 @@ describe('LoginForm - Microtask Redirect Timing Tests', () => {
     });
   });
 
-  describe('Scenario 4: Login error handling', () => {
+  describe('Scenario 3: Login error handling', () => {
     it('should not call success notification on invalid credentials', async () => {
       mockLogin.mockRejectedValue(new Error('Invalid credentials'));
 
@@ -366,7 +296,7 @@ describe('LoginForm - Microtask Redirect Timing Tests', () => {
     });
   });
 
-  describe('Scenario 5: Race condition - fast submit', () => {
+  describe('Scenario 4: Race condition - fast submit', () => {
     it('should prevent multiple login calls on rapid clicks', async () => {
       const mockUser = { id: '1', role: ROLES.ADMIN };
       mockLogin.mockResolvedValue(mockUser);

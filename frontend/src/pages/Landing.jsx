@@ -1,10 +1,8 @@
 import HeroSection from './Landing/components/HeroSection';
-import AboutSection from './Landing/components/AboutSection';
-import LessonTypesSection from './Landing/components/LessonTypesSection';
-import ExamplesSection from './Landing/components/ExamplesSection';
-import SwapSystemSection from './Landing/components/SwapSystemSection';
-import HowItWorksSection from './Landing/components/HowItWorksSection';
-import ContactSection from './Landing/components/ContactSection';
+import FeaturesSection from './Landing/components/FeaturesSection';
+import RolesSection from './Landing/components/RolesSection';
+import CallToActionSection from './Landing/components/CallToActionSection';
+import FooterSection from './Landing/components/FooterSection';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Landing/styles/Landing.css';
@@ -13,12 +11,10 @@ export const Landing = () => {
   return (
     <div className="landing-page">
       <HeroSection />
-      <AboutSection />
-      <LessonTypesSection />
-      <ExamplesSection />
-      <SwapSystemSection />
-      <HowItWorksSection />
-      <ContactSection />
+      <FeaturesSection />
+      <RolesSection />
+      <CallToActionSection />
+      <FooterSection />
       <ToastContainer
         position="top-right"
         autoClose={5000}

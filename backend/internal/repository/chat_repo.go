@@ -306,6 +306,30 @@ func (r *ChatRepository) GetPendingMessages(ctx context.Context) ([]*models.Mess
 	return messages, nil
 }
 
+// SoftDeleteMessage мягко удаляет сообщение
+func (r *ChatRepository) SoftDeleteMessage(ctx context.Context, msgID uuid.UUID) error {
+	query := `
+		UPDATE messages
+		SET deleted_at = $1
+		WHERE id = $2 AND deleted_at IS NULL
+	`
+
+	result, err := r.db.ExecContext(ctx, query, time.Now(), msgID)
+	if err != nil {
+		return fmt.Errorf("failed to soft delete message: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rows == 0 {
+		return ErrMessageNotFound
+	}
+
+	return nil
+}
+
 // GetMessageByID получает сообщение по ID
 func (r *ChatRepository) GetMessageByID(ctx context.Context, msgID uuid.UUID) (*models.Message, error) {
 	query := `
@@ -499,4 +523,92 @@ func (r *ChatRepository) MarkAdminNotified(ctx context.Context, messageID uuid.U
 	}
 
 	return nil
+}
+
+// ==================== Admin Methods ====================
+
+// ChatParticipant представляет участника чата
+type ChatParticipant struct {
+	ID       uuid.UUID `db:"id" json:"id"`
+	FullName string    `db:"full_name" json:"full_name"`
+	Role     string    `db:"role" json:"role"`
+}
+
+// ChatRoomWithDetails представляет комнату чата с расширенной информацией для админов
+type ChatRoomWithDetails struct {
+	ID            uuid.UUID        `db:"id" json:"id"`
+	Participants  []ChatParticipant `json:"participants"`
+	MessagesCount int              `db:"messages_count" json:"messages_count"`
+	LastMessageAt *time.Time       `db:"last_message_at" json:"last_message_at,omitempty"`
+}
+
+// ListAllRooms возвращает все чаты с информацией о участниках для админ-панели
+func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetails, error) {
+	query := `
+		SELECT
+			cr.id,
+			cr.teacher_id,
+			cr.student_id,
+			t.full_name AS teacher_name,
+			t.role AS teacher_role,
+			s.full_name AS student_name,
+			s.role AS student_role,
+			COALESCE(mc.messages_count, 0) AS messages_count,
+			cr.last_message_at
+		FROM chat_rooms cr
+		JOIN users t ON t.id = cr.teacher_id
+		JOIN users s ON s.id = cr.student_id
+		LEFT JOIN (
+			SELECT room_id, COUNT(*) AS messages_count
+			FROM messages
+			WHERE deleted_at IS NULL
+			GROUP BY room_id
+		) mc ON mc.room_id = cr.id
+		WHERE cr.deleted_at IS NULL
+		ORDER BY cr.last_message_at DESC NULLS LAST, cr.created_at DESC
+	`
+
+	type roomRow struct {
+		ID            uuid.UUID    `db:"id"`
+		TeacherID     uuid.UUID    `db:"teacher_id"`
+		StudentID     uuid.UUID    `db:"student_id"`
+		TeacherName   string       `db:"teacher_name"`
+		TeacherRole   string       `db:"teacher_role"`
+		StudentName   string       `db:"student_name"`
+		StudentRole   string       `db:"student_role"`
+		MessagesCount int          `db:"messages_count"`
+		LastMessageAt sql.NullTime `db:"last_message_at"`
+	}
+
+	var rows []roomRow
+	err := r.db.SelectContext(ctx, &rows, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list all rooms: %w", err)
+	}
+
+	result := make([]ChatRoomWithDetails, 0, len(rows))
+	for _, row := range rows {
+		room := ChatRoomWithDetails{
+			ID:            row.ID,
+			MessagesCount: row.MessagesCount,
+			Participants: []ChatParticipant{
+				{
+					ID:       row.TeacherID,
+					FullName: row.TeacherName,
+					Role:     row.TeacherRole,
+				},
+				{
+					ID:       row.StudentID,
+					FullName: row.StudentName,
+					Role:     row.StudentRole,
+				},
+			},
+		}
+		if row.LastMessageAt.Valid {
+			room.LastMessageAt = &row.LastMessageAt.Time
+		}
+		result = append(result, room)
+	}
+
+	return result, nil
 }

@@ -165,7 +165,7 @@ func TestPaymentSettings_UpdateStatus_NonAdminDenied(t *testing.T) {
 		ID:       teacherID,
 		Email:    "teacher@example.com",
 		FullName: "Teacher User",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	mockRepo.On("GetByID", ctx, teacherID).Return(teacher, nil)
@@ -196,7 +196,7 @@ func TestPaymentSettings_UpdateStatus_NonStudentTargetDenied(t *testing.T) {
 		ID:       teacherID,
 		Email:    "teacher@example.com",
 		FullName: "Teacher User",
-		Role:     models.RoleTeacher,
+		Role:     models.RoleMethodologist,
 	}
 
 	mockRepo.On("GetByID", ctx, adminID).Return(admin, nil)

@@ -154,26 +154,26 @@ describe('getUsersAll()', () => {
     });
   });
 
-  describe('T6: Filter by role=teacher', () => {
-    it('should pass role filter to API and return teacher users', async () => {
-      const mockTeachers = Array.from({ length: 30 }, (_, i) => ({
+  describe('T6: Filter by role=methodologist', () => {
+    it('should pass role filter to API and return methodologist users', async () => {
+      const mockMethodologists = Array.from({ length: 30 }, (_, i) => ({
         id: i + 1,
-        email: `teacher${i + 1}@test.com`,
-        full_name: `Teacher ${i + 1}`,
-        role: 'teacher',
+        email: `methodologist${i + 1}@test.com`,
+        full_name: `Methodologist ${i + 1}`,
+        role: 'methodologist',
       }));
 
       apiClient.get.mockResolvedValueOnce({
-        users: mockTeachers,
+        users: mockMethodologists,
         meta: { total_pages: 1, page: 1, per_page: 50, total: 30 },
       });
 
-      const result = await usersAPI.getUsersAll({ role: 'teacher' });
+      const result = await usersAPI.getUsersAll({ role: 'methodologist' });
 
       expect(result).toHaveLength(30);
-      expect(result.every(u => u.role === 'teacher')).toBe(true);
+      expect(result.every(u => u.role === 'methodologist')).toBe(true);
       expect(apiClient.get).toHaveBeenCalledWith(
-        expect.stringContaining('role=teacher'),
+        expect.stringContaining('role=methodologist'),
         expect.any(Object)
       );
     });
@@ -325,7 +325,7 @@ describe('getUsersAll()', () => {
           id: 51,
           email: 'user51@test.com',
           full_name: 'User Fifty-One',
-          role: 'teacher',
+          role: 'methodologist',
           created_at: '2024-01-03',
           updated_at: '2024-01-04',
           is_active: false,

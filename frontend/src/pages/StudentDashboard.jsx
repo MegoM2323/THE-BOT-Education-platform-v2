@@ -42,9 +42,7 @@ export const StudentDashboard = () => {
     if (user.role !== ROLES.STUDENT) {
       // Пользователь авторизован, но не является студентом
       // Перенаправляем на соответствующий дашборд
-      if (user.role === ROLES.TEACHER) {
-        navigate("/dashboard/teacher", { replace: true });
-      } else if (user.role === ROLES.ADMIN) {
+      if (user.role === ROLES.ADMIN) {
         navigate("/dashboard/admin", { replace: true });
       } else {
         // Неизвестная роль - на главную

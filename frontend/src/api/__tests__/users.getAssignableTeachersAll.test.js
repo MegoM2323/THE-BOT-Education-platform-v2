@@ -34,7 +34,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         id: 'user-1',
         full_name: 'Alice Johnson',
         email: 'alice@example.com',
-        role: 'teacher',
+        role: 'methodologist',
       };
 
       const sharedUser2 = {
@@ -48,7 +48,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         id: 'user-3',
         full_name: 'Carol White',
         email: 'carol@example.com',
-        role: 'teacher',
+        role: 'methodologist',
       };
 
       const adminOnly = {
@@ -137,7 +137,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         id: 'shared-user',
         full_name: 'Shared Teacher',
         email: 'shared@example.com',
-        role: 'teacher',
+        role: 'methodologist',
       };
 
       // Mock all three calls returning the same user
@@ -175,8 +175,8 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
     it('test_getAssignableTeachersAll_preserves_unique_users', async () => {
       // Test: all users are unique across lists
       const teachers = [
-        { id: 't1', full_name: 'Teacher One', role: 'teacher' },
-        { id: 't2', full_name: 'Teacher Two', role: 'teacher' },
+        { id: 't1', full_name: 'Teacher One', role: 'methodologist' },
+        { id: 't2', full_name: 'Teacher Two', role: 'methodologist' },
       ];
 
       const admins = [
@@ -262,9 +262,9 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
   describe('T002: Sorting and Display', () => {
     it('test_getAssignableTeachersAll_sorted_by_full_name_russian', async () => {
       const users = [
-        { id: '3', full_name: 'Вячеслав Петров', role: 'teacher' },
-        { id: '1', full_name: 'Алексей Иванов', role: 'teacher' },
-        { id: '2', full_name: 'Борис Сидоров', role: 'teacher' },
+        { id: '3', full_name: 'Вячеслав Петров', role: 'methodologist' },
+        { id: '1', full_name: 'Алексей Иванов', role: 'methodologist' },
+        { id: '2', full_name: 'Борис Сидоров', role: 'methodologist' },
       ];
 
       let callCount = 0;

@@ -124,7 +124,7 @@ func (h *BookingHandler) GetBooking(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Преподаватели видят только бронирования на свои занятия
-	if user.IsTeacher() && booking.TeacherID != user.ID {
+	if user.IsMethodologist() && booking.TeacherID != user.ID {
 		response.Forbidden(w, "Unauthorized access to booking")
 		return
 	}
@@ -173,7 +173,7 @@ func (h *BookingHandler) GetBookingStatus(w http.ResponseWriter, r *http.Request
 	}
 
 	// Преподаватели видят только бронирования на свои занятия
-	if user.IsTeacher() && booking.TeacherID != user.ID {
+	if user.IsMethodologist() && booking.TeacherID != user.ID {
 		response.Forbidden(w, "Unauthorized access to booking")
 		return
 	}
@@ -229,11 +229,11 @@ func (h *BookingHandler) GetMyBookings(w http.ResponseWriter, r *http.Request) {
 
 // ListBookings обрабатывает GET /api/v1/bookings
 // @Summary      List bookings
-// @Description  Get filtered list of bookings (students see own, teachers and admins see by filters)
+// @Description  Get filtered list of bookings (students see own, methodologists and admins see by filters)
 // @Tags         bookings
 // @Accept       json
 // @Produce      json
-// @Param        student_id  query  string  false  "Filter by student ID (teachers/admins only)"
+// @Param        student_id  query  string  false  "Filter by student ID (methodologists/admins only)"
 // @Param        lesson_id  query  string  false  "Filter by lesson ID"
 // @Param        status  query  string  false  "Filter by status (active, cancelled)"
 // @Param        page  query  int  false  "Page number (default: 1)"

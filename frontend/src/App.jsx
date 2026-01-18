@@ -10,7 +10,6 @@ import Landing from './pages/Landing.jsx';
 import Login from './pages/Login.jsx';
 import TelegramRegister from './pages/TelegramRegister.jsx';
 import StudentDashboard from './pages/StudentDashboard.jsx';
-import TeacherDashboard from './pages/TeacherDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import MethodologistDashboard from './pages/MethodologistDashboard.jsx';
 import ChatPage from './pages/ChatPage.jsx';
@@ -41,15 +40,6 @@ function App() {
                 />
 
                 <Route
-                  path="/dashboard/teacher/*"
-                  element={
-                    <ProtectedRoute allowedRoles={[ROLES.TEACHER]}>
-                      <TeacherDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
                   path="/dashboard/admin/*"
                   element={
                     <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
@@ -71,7 +61,7 @@ function App() {
                   path="/chat"
                   element={
                     <ErrorBoundary>
-                      <ProtectedRoute allowedRoles={[ROLES.STUDENT, ROLES.TEACHER]}>
+                      <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
                         <ChatPage />
                       </ProtectedRoute>
                     </ErrorBoundary>
@@ -82,7 +72,7 @@ function App() {
                   path="/chat/:roomId"
                   element={
                     <ErrorBoundary>
-                      <ProtectedRoute allowedRoles={[ROLES.STUDENT, ROLES.TEACHER]}>
+                      <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
                         <ChatPage />
                       </ProtectedRoute>
                     </ErrorBoundary>

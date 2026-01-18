@@ -64,7 +64,7 @@ func TestSendLessonBroadcast_Success(t *testing.T) {
 	// Add teacher user to context
 	teacher := &models.User{
 		ID:   teacherID,
-		Role: models.RoleTeacher,
+		Role: models.RoleMethodologist,
 	}
 	ctx := context.WithValue(req.Context(), middleware.UserContextKey, teacher)
 	req = req.WithContext(ctx)
@@ -106,7 +106,7 @@ func TestSendLessonBroadcast_NotTeacher(t *testing.T) {
 	user, ok := middleware.GetUserFromContext(req.Context())
 	require.True(t, ok)
 	assert.Equal(t, models.RoleStudent, user.Role)
-	assert.False(t, user.IsTeacher())
+	assert.False(t, user.IsMethodologist())
 }
 
 // TestSendLessonBroadcast_ValidationEmptyMessage проверяет валидацию пустого сообщения
@@ -176,7 +176,7 @@ func TestTeacherHandler_AccessControl(t *testing.T) {
 	// teacher1 tries to access
 	teacher1 := &models.User{
 		ID:   teacher1ID,
-		Role: models.RoleTeacher,
+		Role: models.RoleMethodologist,
 	}
 
 	// Verify access control logic
@@ -257,19 +257,19 @@ func TestBroadcastModel_Structure(t *testing.T) {
 
 // TestUserRoles проверяет что user roles определены правильно
 func TestUserRoles(t *testing.T) {
-	teacher := &models.User{ID: uuid.New(), Role: models.RoleTeacher}
+	teacher := &models.User{ID: uuid.New(), Role: models.RoleMethodologist}
 	student := &models.User{ID: uuid.New(), Role: models.RoleStudent}
 	admin := &models.User{ID: uuid.New(), Role: models.RoleAdmin}
 
-	assert.True(t, teacher.IsTeacher())
+	assert.False(t, teacher.IsMethodologist())
 	assert.False(t, teacher.IsStudent())
 	assert.False(t, teacher.IsAdmin())
 
-	assert.False(t, student.IsTeacher())
+	assert.False(t, student.IsMethodologist())
 	assert.True(t, student.IsStudent())
 	assert.False(t, student.IsAdmin())
 
-	assert.False(t, admin.IsTeacher())
+	assert.False(t, admin.IsMethodologist())
 	assert.False(t, admin.IsStudent())
 	assert.True(t, admin.IsAdmin())
 }
@@ -300,7 +300,7 @@ func TestGetTeacherSchedule_InvalidDateFormat(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/teacher/schedule?start_date=invalid-date", nil)
 	ctx := context.WithValue(req.Context(), middleware.UserContextKey, &models.User{
 		ID:   teacherID,
-		Role: models.RoleTeacher,
+		Role: models.RoleMethodologist,
 	})
 	req = req.WithContext(ctx)
 
@@ -356,7 +356,7 @@ func TestGetTeacherSchedule_StudentForbidden(t *testing.T) {
 
 	// Verify student role checks
 	assert.True(t, student.IsStudent())
-	assert.False(t, student.IsTeacher())
+	assert.False(t, student.IsMethodologist())
 	assert.False(t, student.IsAdmin())
 }
 
@@ -373,7 +373,7 @@ func TestGetTeacherSchedule_AdminAccess(t *testing.T) {
 
 	// Verify admin role checks
 	assert.True(t, admin.IsAdmin())
-	assert.False(t, admin.IsTeacher())
+	assert.False(t, admin.IsMethodologist())
 	assert.False(t, admin.IsStudent())
 
 	// Verify different IDs

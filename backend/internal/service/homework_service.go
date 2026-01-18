@@ -164,12 +164,6 @@ func (s *HomeworkService) GetHomeworkByLesson(ctx context.Context, userID uuid.U
 		// Методист видит все ДЗ всех уроков (как админ)
 		hasAccess = true
 
-	case models.RoleTeacher:
-		// Teacher видит ДЗ только своих уроков
-		if lesson.TeacherID == userID {
-			hasAccess = true
-		}
-
 	case models.RoleStudent:
 		// Student видит ДЗ:
 		// 1. Групповых уроков (max_students > 1)

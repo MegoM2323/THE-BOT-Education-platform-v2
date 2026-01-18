@@ -7,6 +7,7 @@ import (
 
 	"tutoring-platform/internal/models"
 	"tutoring-platform/internal/repository"
+	"tutoring-platform/internal/sse"
 
 	"github.com/google/uuid"
 )
@@ -15,7 +16,8 @@ import (
 type ChatService struct {
 	chatRepo          chatServiceRepository
 	userRepo          chatServiceUserRepository
-	moderationService *ModerationService // Используется существующий ModerationService из moderation_service.go
+	moderationService *ModerationService
+	sseManager        *sse.ConnectionManagerUUID
 }
 
 // chatServiceRepository - интерфейс для dependency injection в тестах
@@ -24,6 +26,7 @@ type chatServiceRepository interface {
 	GetRoomByID(ctx context.Context, roomID uuid.UUID) (*models.ChatRoom, error)
 	ListRoomsByTeacher(ctx context.Context, teacherID uuid.UUID) ([]*models.ChatRoom, error)
 	ListRoomsByStudent(ctx context.Context, studentID uuid.UUID) ([]*models.ChatRoom, error)
+	ListAllRooms(ctx context.Context) ([]repository.ChatRoomWithDetails, error)
 	CreateMessage(ctx context.Context, msg *models.Message) error
 	UpdateMessageStatus(ctx context.Context, msgID uuid.UUID, status string) error
 	GetMessagesByRoom(ctx context.Context, roomID uuid.UUID, limit, offset int) ([]*models.Message, error)
@@ -33,6 +36,7 @@ type chatServiceRepository interface {
 	GetPendingMessages(ctx context.Context) ([]*models.Message, error)
 	CreateAttachment(ctx context.Context, att *models.FileAttachment) error
 	GetAttachmentByID(ctx context.Context, attachmentID uuid.UUID) (*models.FileAttachment, error)
+	SoftDeleteMessage(ctx context.Context, msgID uuid.UUID) error
 }
 
 // chatServiceUserRepository - интерфейс для dependency injection
@@ -51,6 +55,11 @@ func NewChatService(
 		userRepo:          userRepo,
 		moderationService: moderationService,
 	}
+}
+
+// SetSSEManager устанавливает SSE менеджер для broadcast сообщений
+func (s *ChatService) SetSSEManager(manager *sse.ConnectionManagerUUID) {
+	s.sseManager = manager
 }
 
 // ==================== Chat Room Methods ====================
@@ -77,10 +86,10 @@ func (s *ChatService) GetOrCreateRoom(ctx context.Context, currentUserID, otherU
 	// Определяем кто teacher а кто student
 	var teacherID, studentID uuid.UUID
 
-	if currentUser.IsTeacher() || currentUser.IsAdmin() {
+	if currentUser.IsMethodologist() || currentUser.IsAdmin() {
 		teacherID = currentUserID
 		studentID = otherUserID
-	} else if otherUser.IsTeacher() || otherUser.IsAdmin() {
+	} else if otherUser.IsMethodologist() || otherUser.IsAdmin() {
 		teacherID = otherUserID
 		studentID = currentUserID
 	} else {
@@ -89,7 +98,7 @@ func (s *ChatService) GetOrCreateRoom(ctx context.Context, currentUserID, otherU
 	}
 
 	// Проверяем что другой пользователь действительно student (если currentUser — teacher)
-	if currentUser.IsTeacher() && !otherUser.IsStudent() {
+	if currentUser.IsMethodologist() && !otherUser.IsStudent() {
 		return nil, fmt.Errorf("teachers can only chat with students")
 	}
 
@@ -109,7 +118,7 @@ func (s *ChatService) GetUserChats(ctx context.Context, userID uuid.UUID, role s
 	var err error
 
 	switch role {
-	case string(models.RoleTeacher), string(models.RoleAdmin):
+	case string(models.RoleMethodologist), string(models.RoleAdmin):
 		rooms, err = s.chatRepo.ListRoomsByTeacher(ctx, userID)
 	case string(models.RoleStudent):
 		rooms, err = s.chatRepo.ListRoomsByStudent(ctx, userID)
@@ -178,8 +187,17 @@ func (s *ChatService) SendMessage(ctx context.Context, senderID uuid.UUID, req *
 
 	// Обновляем last_message_at в комнате
 	if err := s.chatRepo.UpdateLastMessageAt(ctx, req.RoomID, message.CreatedAt); err != nil {
-		// Логируем ошибку но не прерываем процесс
 		fmt.Printf("[WARN] Failed to update last_message_at for room %s: %v\n", req.RoomID, err)
+	}
+
+	// SSE broadcast: отправляем участникам чата (кроме отправителя)
+	if s.sseManager != nil {
+		event := models.NewMessageEventFromMessage(req.RoomID, message)
+		sseEvent := sse.EventUUID{
+			Type: event.Type,
+			Data: event.Data,
+		}
+		s.sseManager.SendToChat(req.RoomID, sseEvent, senderID)
 	}
 
 	// Запускаем асинхронную модерацию
@@ -381,4 +399,49 @@ func (s *ChatService) GetMessageWithAttachments(ctx context.Context, userID, mes
 	}
 
 	return message, nil
+}
+
+// ==================== Delete Methods ====================
+
+// DeleteMessage удаляет сообщение и отправляет SSE событие участникам чата
+func (s *ChatService) DeleteMessage(ctx context.Context, userID, messageID uuid.UUID) error {
+	message, err := s.chatRepo.GetMessageByID(ctx, messageID)
+	if err != nil {
+		return fmt.Errorf("failed to get message: %w", err)
+	}
+
+	room, err := s.chatRepo.GetRoomByID(ctx, message.RoomID)
+	if err != nil {
+		return fmt.Errorf("failed to get room: %w", err)
+	}
+
+	if !room.IsParticipant(userID) {
+		return repository.ErrUnauthorized
+	}
+
+	if err := s.chatRepo.SoftDeleteMessage(ctx, messageID); err != nil {
+		return fmt.Errorf("failed to delete message: %w", err)
+	}
+
+	if s.sseManager != nil {
+		event := models.MessageDeletedEvent(message.RoomID, messageID)
+		sseEvent := sse.EventUUID{
+			Type: event.Type,
+			Data: event.Data,
+		}
+		s.sseManager.SendToChat(message.RoomID, sseEvent, uuid.Nil)
+	}
+
+	return nil
+}
+
+// ==================== Admin Methods ====================
+
+// GetAllChats возвращает все чаты для админ-панели
+func (s *ChatService) GetAllChats(ctx context.Context) ([]repository.ChatRoomWithDetails, error) {
+	rooms, err := s.chatRepo.ListAllRooms(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list all chats: %w", err)
+	}
+	return rooms, nil
 }

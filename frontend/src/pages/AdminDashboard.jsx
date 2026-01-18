@@ -37,8 +37,6 @@ export const AdminDashboard = () => {
     if (user.role !== ROLES.ADMIN) {
       if (user.role === ROLES.STUDENT) {
         navigate("/dashboard/student", { replace: true });
-      } else if (user.role === ROLES.TEACHER) {
-        navigate("/dashboard/teacher", { replace: true });
       } else {
         navigate("/", { replace: true });
       }

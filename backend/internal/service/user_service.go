@@ -120,7 +120,6 @@ func (s *UserService) UpdateUser(ctx context.Context, userID uuid.UUID, req *mod
 	}
 	if req.Role != nil {
 		if *req.Role != models.RoleStudent &&
-			*req.Role != models.RoleTeacher &&
 			*req.Role != models.RoleMethodologist &&
 			*req.Role != models.RoleAdmin {
 			return nil, models.ErrInvalidRole

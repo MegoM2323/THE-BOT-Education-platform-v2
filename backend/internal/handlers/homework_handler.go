@@ -98,7 +98,7 @@ func sanitizeFileName(fileName string) (bool, string) {
 
 // UploadHomework загружает файл домашнего задания для урока
 // POST /api/v1/lessons/:id/homework
-// Требует авторизации: admin или teacher урока
+// Требует авторизации: admin или methodologist урока
 // Multipart form data с полем "file"
 // Максимальный размер файла: 10MB
 func (h *HomeworkHandler) UploadHomework(w http.ResponseWriter, r *http.Request) {
@@ -188,7 +188,7 @@ func (h *HomeworkHandler) UploadHomework(w http.ResponseWriter, r *http.Request)
 // Требует авторизации
 // Доступ:
 // - Admin: видит все ДЗ всех уроков
-// - Teacher: видит ДЗ только своих уроков
+// - Methodologist: видит ДЗ только своих уроков
 // - Student: видит ДЗ групповых уроков и индивидуальных уроков, на которые записан
 func (h *HomeworkHandler) GetHomework(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -230,7 +230,7 @@ func (h *HomeworkHandler) GetHomework(w http.ResponseWriter, r *http.Request) {
 
 // DeleteHomework удаляет файл домашнего задания
 // DELETE /api/v1/lessons/:id/homework/:file_id
-// Требует авторизации: admin, creator файла, или teacher урока
+// Требует авторизации: admin, creator файла, или methodologist урока
 // Удаляет файл из файловой системы и запись из БД
 func (h *HomeworkHandler) DeleteHomework(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -349,7 +349,7 @@ func (h *HomeworkHandler) DownloadHomework(w http.ResponseWriter, r *http.Reques
 
 // UpdateHomework обновляет описание домашнего задания
 // PATCH /api/v1/lessons/:id/homework/:file_id
-// Требует авторизации: admin, creator файла, или teacher урока
+// Требует авторизации: admin, creator файла, или methodologist урока
 // Принимает JSON с полем text_content
 func (h *HomeworkHandler) UpdateHomework(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

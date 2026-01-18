@@ -55,7 +55,7 @@ export const Header = () => {
 
   const getLogoUrl = () => {
     if (!isAuthenticated) {
-      return import.meta.env.DEV ? window.location.origin : "https://diploma-m.ru";
+      return import.meta.env.DEV ? window.location.origin : "/";
     }
     // Для авторизованных: если в ЛК - на лендинг, иначе - в ЛК
     return isInDashboard ? "/" : getDashboardUrl();
@@ -82,25 +82,15 @@ export const Header = () => {
             onClick={handleLogoClick}
             className="header-logo"
           >
-            <img
-              src="/DIPLOMA.svg"
-              alt="DIPLOMA"
-              className="header-logo-img"
-              style={{ height: "40px", width: "auto" }}
-            />
+            <span className="header-logo-text">THE BOT</span>
           </Link>
         ) : (
           <a
-            href={import.meta.env.DEV ? window.location.origin : "https://diploma-m.ru"}
+            href={import.meta.env.DEV ? window.location.origin : "/"}
             onClick={handleLogoClick}
             className="header-logo"
           >
-            <img
-              src="/DIPLOMA.svg"
-              alt="DIPLOMA"
-              className="header-logo-img"
-              style={{ height: "40px", width: "auto" }}
-            />
+            <span className="header-logo-text">THE BOT</span>
           </a>
         )}
       </div>

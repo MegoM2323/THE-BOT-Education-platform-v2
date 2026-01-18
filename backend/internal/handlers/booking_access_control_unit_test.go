@@ -75,8 +75,8 @@ func TestBookingAccessControl_TeacherAccess(t *testing.T) {
 	teacher1ID := uuid.New()
 	teacher2ID := uuid.New()
 
-	teacher1 := &models.User{ID: teacher1ID, Role: models.RoleTeacher}
-	teacher2 := &models.User{ID: teacher2ID, Role: models.RoleTeacher}
+	teacher1 := &models.User{ID: teacher1ID, Role: models.RoleMethodologist}
+	teacher2 := &models.User{ID: teacher2ID, Role: models.RoleMethodologist}
 	admin := &models.User{ID: uuid.New(), Role: models.RoleAdmin}
 
 	// Setup booking from teacher1
@@ -126,7 +126,7 @@ func TestBookingAccessControl_TeacherAccess(t *testing.T) {
 
 			if tt.user.IsStudent() && tt.booking.StudentID != tt.user.ID {
 				allowed = false
-			} else if tt.user.IsTeacher() && tt.booking.TeacherID != tt.user.ID {
+			} else if tt.user.IsMethodologist() && tt.booking.TeacherID != tt.user.ID {
 				allowed = false
 			}
 			// Admins always get access (no additional check)
@@ -165,7 +165,7 @@ func TestBookingAccessControl_AdminAccess(t *testing.T) {
 		// Check access control
 		if admin.IsStudent() && booking.StudentID != admin.ID {
 			allowed = false
-		} else if admin.IsTeacher() && booking.TeacherID != admin.ID {
+		} else if admin.IsMethodologist() && booking.TeacherID != admin.ID {
 			allowed = false
 		}
 		// Admin has IsAdmin() == true, so no additional check blocks access
