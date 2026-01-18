@@ -20,12 +20,11 @@ services:
       - tutoring-network
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    image: thebot-backend:latest
+    image: debian:bookworm-slim
     container_name: tutoring-backend
     restart: unless-stopped
+    working_dir: /app
+    command: ["/app/server"]
     dns:
       - 8.8.8.8
       - 8.8.4.4
@@ -56,12 +55,6 @@ services:
       - ./backend/bin/server:/app/server:ro
     expose:
       - "8080"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
     networks:
       - tutoring-network
 

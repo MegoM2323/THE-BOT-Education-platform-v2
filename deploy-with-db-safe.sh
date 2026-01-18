@@ -153,23 +153,14 @@ deploy_docker_safe() {
     log_info "Copying Docker configuration..."
     scp "$PROJECT_DIR/docker-compose.prod.yml" "$REMOTE_HOST:$REMOTE_DIR/"
 
-    # Copy backend files
-    scp "$PROJECT_DIR/backend/Dockerfile" "$REMOTE_HOST:$REMOTE_DIR/backend/"
-    scp "$PROJECT_DIR/backend/entrypoint.sh" "$REMOTE_HOST:$REMOTE_DIR/backend/"
-    scp "$PROJECT_DIR/backend/go.mod" "$REMOTE_HOST:$REMOTE_DIR/backend/"
-    scp "$PROJECT_DIR/backend/go.sum" "$REMOTE_HOST:$REMOTE_DIR/backend/"
+    # Copy pre-built binary instead of source (avoid Docker build DNS issues)
+    log_info "Copying pre-built backend binary..."
+    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend/bin"
+    scp "$PROJECT_DIR/backend/bin/server" "$REMOTE_HOST:$REMOTE_DIR/backend/bin/server"
+    ssh "$REMOTE_HOST" "chmod +x $REMOTE_DIR/backend/bin/server"
 
-    log_info "Copying backend source..."
-    rsync -avz --delete \
-        --exclude='*.out' \
-        --exclude='*.test' \
-        --exclude='tutoring-backend' \
-        --exclude='uploads/*' \
-        "$PROJECT_DIR/backend/cmd" "$REMOTE_HOST:$REMOTE_DIR/backend/"
-    rsync -avz --delete \
-        "$PROJECT_DIR/backend/internal" "$REMOTE_HOST:$REMOTE_DIR/backend/"
-    rsync -avz --delete \
-        "$PROJECT_DIR/backend/pkg" "$REMOTE_HOST:$REMOTE_DIR/backend/"
+    # Copy entrypoint script
+    scp "$PROJECT_DIR/backend/entrypoint.sh" "$REMOTE_HOST:$REMOTE_DIR/backend/"
 
     # Copy frontend files
     log_info "Copying frontend files..."
@@ -182,8 +173,9 @@ deploy_docker_safe() {
 
     rsync -avz --delete \
         --exclude='node_modules' \
-        --exclude='dist' \
         "$PROJECT_DIR/frontend/src" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
+    rsync -avz --delete \
+        "$PROJECT_DIR/frontend/dist" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
     rsync -avz "$PROJECT_DIR/frontend/public" "$REMOTE_HOST:$REMOTE_DIR/frontend/" 2>/dev/null || true
 
     # Manage .env file - preserve existing values and update as needed
@@ -227,21 +219,26 @@ deploy_docker_safe() {
             { print }
         ' "$BASE_ENV" > /tmp/docker.env
 
+        # Disable Telegram bot to avoid DNS timeout crash during init
+        echo "" >> /tmp/docker.env
+        echo "# Telegram disabled to avoid DNS issues in Docker" >> /tmp/docker.env
+        echo "TELEGRAM_BOT_TOKEN=" >> /tmp/docker.env
+
         scp /tmp/docker.env "$REMOTE_HOST:$REMOTE_DIR/.env"
         rm -f /tmp/docker.env /tmp/existing.env
 
-        log_success ".env configuration deployed (existing credentials preserved)"
+        log_success ".env configuration deployed (existing credentials preserved, Telegram disabled)"
     fi
 
-    # Deploy on remote server with DB safety measures
-    log_step "Building and restarting containers (preserving database)..."
-    ssh "$REMOTE_HOST" CERTBOT_EMAIL="$CERTBOT_EMAIL" bash -s << 'DOCKER_SCRIPT'
+    # Deploy on remote server with DB safety measures (NO BUILD - use pre-built binary)
+    log_step "Starting containers with pre-built binary (preserving database)..."
+    ssh "$REMOTE_HOST" bash -s << 'DOCKER_SCRIPT'
 set -euo pipefail
 
 REMOTE_DIR="/opt/THE_BOT_platform"
 cd "$REMOTE_DIR"
 
-echo "=== Docker Safe Deployment (Database Preservation) ==="
+echo "=== Docker Safe Deployment (No Build - Pre-built Binary) ==="
 
 # Check if Docker is installed
 if ! command -v docker &> /dev/null; then
@@ -272,11 +269,17 @@ echo "=== Pre-deployment checks ==="
 echo "Current Docker volumes:"
 docker volume ls | grep postgres_data || echo "Note: postgres_data volume not yet created (will be on first start)"
 
+# Check pre-built binary exists
+if [ ! -f "$REMOTE_DIR/backend/bin/server" ]; then
+    echo "Error: Pre-built binary not found at $REMOTE_DIR/backend/bin/server"
+    exit 1
+fi
+echo "✓ Pre-built binary found: $(ls -lh $REMOTE_DIR/backend/bin/server | awk '{print $5}')"
+
 echo ""
 echo "=== Stopping services (preserving volumes) ==="
 
 # CRITICAL: Use 'down' without --volumes to preserve data
-# This stops containers but leaves volumes intact
 $COMPOSE_CMD -f docker-compose.prod.yml down 2>/dev/null || true
 
 # Wait for services to fully stop
@@ -289,60 +292,19 @@ echo "Stopping legacy services..."
 pkill -f tutoring-backend 2>/dev/null || true
 sudo systemctl stop tutoring-platform.service 2>/dev/null || true
 
-# Install and configure Certbot
 echo ""
-echo "=== SSL Certificate Setup ==="
-if ! command -v certbot &> /dev/null; then
-    sudo apt-get update -qq
-    sudo apt-get install -y certbot python3-certbot-nginx > /dev/null 2>&1
-fi
-
-check_certificate_valid() {
-    if [ ! -d "/etc/letsencrypt/live/the-bot.ru" ]; then
-        return 1
-    fi
-    if command -v certbot &> /dev/null; then
-        certbot certificates 2>/dev/null | grep -q "the-bot.ru" && return 0
-        return 1
-    fi
-    return 0
-}
-
-if ! check_certificate_valid; then
-    if [ -z "${CERTBOT_EMAIL}" ]; then
-        echo "Error: CERTBOT_EMAIL is not set"
-        exit 1
-    fi
-    echo "Requesting Let's Encrypt certificate..."
-    sudo certbot certonly \
-        --standalone \
-        --non-interactive \
-        --agree-tos \
-        --email "${CERTBOT_EMAIL}" \
-        -d the-bot.ru \
-        -d the-bot.ru \
-        2>&1 || echo "⚠ Certificate request failed or already exists"
+echo "=== SSL Certificate Check ==="
+if [ -d "/etc/letsencrypt/live/the-bot.ru" ]; then
+    echo "✓ Certificate exists at /etc/letsencrypt/live/the-bot.ru/"
 else
-    echo "Certificate valid at /etc/letsencrypt/live/the-bot.ru/"
+    echo "⚠ No SSL certificate found - HTTPS may not work"
 fi
 
-# Setup auto-renewal
-sudo systemctl enable certbot.timer 2>/dev/null || true
-sudo systemctl start certbot.timer 2>/dev/null || true
-
-# Ensure permissions
-sudo setfacl -R -m u:root:rx /etc/letsencrypt/live/the-bot.ru 2>/dev/null || \
-    sudo chmod -R 755 /etc/letsencrypt/live/the-bot.ru 2>/dev/null || true
-
 echo ""
-echo "=== Building and starting containers ==="
+echo "=== Starting containers (NO BUILD) ==="
 
-# Build with no cache
-echo "Building Docker images..."
-$COMPOSE_CMD -f docker-compose.prod.yml build --no-cache
-
-# Start containers - this will use existing volume data
-echo "Starting containers (using existing database if available)..."
+# Start containers WITHOUT build - use pre-built binary via volume mount
+echo "Starting containers with pre-built binary..."
 $COMPOSE_CMD -f docker-compose.prod.yml up -d
 
 # Wait for services
@@ -380,7 +342,7 @@ for i in {1..30}; do
     if [ $i -eq 30 ]; then
         echo "⚠ Health check timeout"
         echo "Container logs:"
-        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20
+        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30
     fi
     sleep 2
 done
