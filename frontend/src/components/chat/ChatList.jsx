@@ -3,7 +3,12 @@ import { logger } from "../../utils/logger.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useNotification } from "../../hooks/useNotification.js";
 import { useSSE } from "../../hooks/useSSE.js";
-import { getMyRooms, getOrCreateRoom, getMessages } from "../../api/chat.js";
+import {
+  getMyRooms,
+  getAllRooms,
+  getOrCreateRoom,
+  getMessages,
+} from "../../api/chat.js";
 import { getStudentsAll, getTeachersAll } from "../../api/users.js";
 import Spinner from "../common/Spinner.jsx";
 import "./ChatList.css";
@@ -23,10 +28,16 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
 
   /**
    * Загрузить комнаты текущего пользователя
+   * Админ видит все чаты, остальные видят только свои
    */
   const loadRooms = useCallback(async () => {
     try {
-      const data = await getMyRooms();
+      let data;
+      if (user?.role === "admin") {
+        data = await getAllRooms();
+      } else {
+        data = await getMyRooms();
+      }
       setRooms(data || []);
     } catch (error) {
       console.error("Ошибка загрузки комнат:", error);
@@ -34,11 +45,12 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
     } finally {
       setLoading(false);
     }
-  }, [showNotification]);
+  }, [showNotification, user?.role]);
 
   /**
    * Загрузить список доступных пользователей
    * Студенты видят преподавателей, преподаватели видят студентов
+   * Админ не видит список доступных пользователей (read-only режим)
    */
   const loadAvailableUsers = useCallback(async () => {
     try {
@@ -317,8 +329,8 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
         </div>
       )}
 
-      {/* Список доступных пользователей для начала чата */}
-      {availableUsers.length > 0 && (
+      {/* Список доступных пользователей для начала чата (не показывать админам) */}
+      {availableUsers.length > 0 && user?.role !== "admin" && (
         <div className="chat-users-section">
           <div className="chat-section-header">
             {user?.role === "student" ? "Преподаватели" : "Студенты"}
@@ -365,12 +377,15 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
       )}
 
       {/* Пустое состояние */}
-      {rooms.length === 0 && availableUsers.length === 0 && (
-        <div className="chat-list-empty">
-          <div className="chat-list-empty-icon">💬</div>
-          <p>Нет доступных чатов</p>
-        </div>
-      )}
+      {rooms.length === 0 &&
+        (user?.role === "admin" || availableUsers.length === 0) && (
+          <div className="chat-list-empty">
+            <div className="chat-list-empty-icon">💬</div>
+            <p>
+              {user?.role === "admin" ? "Нет чатов" : "Нет доступных чатов"}
+            </p>
+          </div>
+        )}
     </div>
   );
 };
