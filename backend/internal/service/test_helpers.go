@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"tutoring-platform/internal/database"
 	"tutoring-platform/internal/models"
 
 	"github.com/google/uuid"
@@ -13,30 +14,12 @@ import (
 
 // setupTestDB creates a test database connection for integration tests
 // CRITICAL: This function hardcodes 'tutoring_platform_test' to prevent accidental production data deletion
+// NOTE: Uses GetTestSqlxDB which automatically applies all migrations
 func setupTestDB(t *testing.T) *sqlx.DB {
 	t.Helper()
 
-	dbHost := "localhost"
-	dbPort := "5432"
-	dbUser := "postgres"
-	dbPassword := "postgres"
-	dbName := "tutoring_platform_test" // HARDCODED: Never connect to production
-
-	dsn := "host=" + dbHost + " port=" + dbPort + " user=" + dbUser + " password=" + dbPassword + " dbname=" + dbName + " sslmode=disable"
-
-	db, err := sqlx.Connect("postgres", dsn)
-	require.NoError(t, err, "Failed to connect to test database")
-
-	// CRITICAL SAFETY CHECK: Verify connected database name
-	var connectedDB string
-	err = db.Get(&connectedDB, "SELECT current_database()")
-	if err != nil {
-		t.Fatalf("Failed to verify database name: %v", err)
-	}
-	if connectedDB != "tutoring_platform_test" {
-		db.Close()
-		t.Fatalf("CRITICAL SAFETY VIOLATION: Connected to '%s' instead of 'tutoring_platform_test'. Aborting to prevent data loss.", connectedDB)
-	}
+	// Use GetTestSqlxDB which automatically applies migrations and verifies schema
+	db := database.GetTestSqlxDB(t)
 
 	// Clean up existing data
 	cleanupAllTables(t, db)
@@ -44,13 +27,14 @@ func setupTestDB(t *testing.T) *sqlx.DB {
 	return db
 }
 
-// cleanupTestDB closes the database connection and cleans up
+// cleanupTestDB cleans up test data but does NOT close the connection
+// (connection is managed by GetTestSqlxDB as a shared resource)
 func cleanupTestDB(t *testing.T, db *sqlx.DB) {
 	t.Helper()
 
 	if db != nil {
 		cleanupAllTables(t, db)
-		db.Close()
+		// DO NOT close the connection - it's a shared resource managed by GetTestSqlxDB
 	}
 }
 
@@ -83,6 +67,8 @@ func cleanupAllTables(t *testing.T, db *sqlx.DB) {
 		"lesson_templates",
 		"broadcasts",
 		"broadcast_lists",
+		"chat_rooms",
+		"messages",
 		"telegram_users",
 		"credits",
 		"sessions",
@@ -91,7 +77,8 @@ func cleanupAllTables(t *testing.T, db *sqlx.DB) {
 	}
 
 	for _, table := range tables {
-		_, _ = db.Exec("DELETE FROM " + table)
+		// Use TRUNCATE CASCADE to remove all dependent records
+		_, _ = db.Exec("TRUNCATE TABLE " + table + " CASCADE")
 	}
 }
 

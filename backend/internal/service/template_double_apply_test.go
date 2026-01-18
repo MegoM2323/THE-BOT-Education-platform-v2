@@ -45,7 +45,7 @@ func TestDoubleTemplateApply_ShouldNotFailWithSQLSTATE25P02(t *testing.T) {
 
 	// Создаём пользователей
 	admin := createTestUser(t, db, "admin@test.com", "Test Admin", "admin")
-	teacher := createTestUser(t, db, "teacher@test.com", "Test Teacher", "teacher")
+	teacher := createTestUser(t, db, "teacher@test.com", "Test Teacher", "methodologist")
 	student := createTestUser(t, db, "student@test.com", "Test Student", "student")
 
 	// Добавляем студенту 50 кредитов (достаточно для нескольких применений)

@@ -40,7 +40,7 @@ func TestTemplateOwnershipVerification(t *testing.T) {
 	_, err = db.ExecContext(ctx, `
 		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, teacherID.String()[:8]+"-teacher@example.com", "hash", "Test Teacher", "teacher", time.Now(), time.Now())
+	`, teacherID, teacherID.String()[:8]+"-teacher@example.com", "hash", "Test Teacher", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Cleanup
@@ -137,7 +137,7 @@ func TestTemplateLessonOwnershipVerification(t *testing.T) {
 	_, err = db.ExecContext(ctx, `
 		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, teacherID.String()[:8]+"-teacher@example.com", "hash", "Test Teacher", "teacher", time.Now(), time.Now())
+	`, teacherID, teacherID.String()[:8]+"-teacher@example.com", "hash", "Test Teacher", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Cleanup
@@ -258,7 +258,17 @@ func TestTemplateLessonOwnershipVerification(t *testing.T) {
 				}
 
 			case "delete":
-				err := svc.DeleteTemplateLesson(ctx, tt.adminID, template.ID, lessonID)
+				// Create fresh lesson for delete test since previous delete subtest may have deleted it
+				createLessonReq := &models.CreateTemplateLessonRequest{
+					DayOfWeek:  1,
+					StartTime:  "14:00:00",
+					TeacherID:  teacherID,
+					StudentIDs: []uuid.UUID{},
+				}
+				newLesson, err := svc.CreateTemplateLesson(ctx, creatorID, template.ID, createLessonReq)
+				require.NoError(t, err)
+
+				err = svc.DeleteTemplateLesson(ctx, tt.adminID, template.ID, newLesson.ID)
 				if tt.shouldErr {
 					require.Error(t, err)
 					require.Contains(t, err.Error(), tt.errMsg)

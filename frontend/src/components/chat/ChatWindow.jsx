@@ -35,7 +35,8 @@ const ChatWindow = ({ room }) => {
 
     try {
       const data = await getMessages(room.id, 50, 0);
-      setMessages(data || []);
+      const sorted = (data || []).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      setMessages(sorted);
     } catch (error) {
       console.error('Ошибка загрузки сообщений:', error);
       showNotification('Ошибка загрузки сообщений', 'error');
@@ -155,7 +156,10 @@ const ChatWindow = ({ room }) => {
 
       processedMessageIdsRef.current.add(newMessage.id);
 
-      setMessages((prev) => [...prev, newMessage]);
+      setMessages((prev) => {
+        const updated = [...prev, newMessage];
+        return updated.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      });
 
       // Очистить форму
       setMessageText('');

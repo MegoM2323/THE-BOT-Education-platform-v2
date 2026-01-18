@@ -25,9 +25,9 @@ type Mismatch struct {
 
 // VerificationService проверяет целостность счётчиков и данных в системе
 type VerificationService struct {
-	pool           *pgxpool.Pool
-	lessonRepo     *repository.LessonRepository
-	bookingRepo    *repository.BookingRepository
+	pool        *pgxpool.Pool
+	lessonRepo  *repository.LessonRepository
+	bookingRepo *repository.BookingRepository
 }
 
 // NewVerificationService создает новый VerificationService

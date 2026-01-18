@@ -55,7 +55,7 @@ func TestBookingRaceCondition(t *testing.T) {
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 	_, err := db.ExecContext(ctx, teacherSQL,
-		teacherID, teacherEmail, "hash", "Teacher Race", "teacher",
+		teacherID, teacherEmail, "hash", "Teacher Race", "methodologist",
 		time.Now(), time.Now(),
 	)
 	require.NoError(t, err, "Failed to create teacher")
@@ -213,7 +213,7 @@ func TestBookingRaceConditionMultipleSpots(t *testing.T) {
 	_, err := db.ExecContext(ctx, `
 		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, teacherEmail, "hash", "Teacher Multi", "teacher", time.Now(), time.Now())
+	`, teacherID, teacherEmail, "hash", "Teacher Multi", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 	defer db.ExecContext(ctx, "DELETE FROM users WHERE id = $1", teacherID)
 
@@ -342,7 +342,7 @@ func TestBookingNoRaceWithAvailableSpots(t *testing.T) {
 	_, err := db.ExecContext(ctx, `
 		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, teacherEmail, "hash", "Teacher Available", "teacher", time.Now(), time.Now())
+	`, teacherID, teacherEmail, "hash", "Teacher Available", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 	defer db.ExecContext(ctx, "DELETE FROM users WHERE id = $1", teacherID)
 

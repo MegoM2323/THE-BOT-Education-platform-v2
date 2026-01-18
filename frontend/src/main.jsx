@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import App from './App.jsx';
 import { queryClient } from './lib/queryClient.js';
 import { initializeAuth } from './utils/authInit.js';
+import './index.css';
 import './styles/global.css';
 
 // Инициализируем аутентификацию перед рендерингом приложения

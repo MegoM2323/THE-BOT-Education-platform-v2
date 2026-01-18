@@ -26,6 +26,9 @@ services:
     image: thebot-backend:latest
     container_name: tutoring-backend
     restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       postgres:
         condition: service_healthy

@@ -82,7 +82,7 @@ export const Header = () => {
             onClick={handleLogoClick}
             className="header-logo"
           >
-            <span className="header-logo-text">THE BOT</span>
+            <span className="header-logo-text"><strong>THE BOT</strong></span>
           </Link>
         ) : (
           <a
@@ -90,7 +90,7 @@ export const Header = () => {
             onClick={handleLogoClick}
             className="header-logo"
           >
-            <span className="header-logo-text">THE BOT</span>
+            <span className="header-logo-text"><strong>THE BOT</strong></span>
           </a>
         )}
       </div>

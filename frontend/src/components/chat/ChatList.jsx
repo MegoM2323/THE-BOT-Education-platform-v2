@@ -61,7 +61,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
       let users = [];
 
       if (user?.role === "student") {
-        // Студенты видят преподавателей
+        // Студенты видят только преподавателей
         users = await getTeachersAll();
       } else if (user?.role === "methodologist" || user?.role === "teacher") {
         // Преподаватели видят студентов

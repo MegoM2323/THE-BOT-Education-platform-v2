@@ -39,7 +39,7 @@ func TestTemplateRollback_E2E(t *testing.T) {
 
 	// Create test users
 	admin := createRollbackTestUser(t, db, "admin@test.com", "Admin User", "admin")
-	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "teacher")
+	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "methodologist")
 	student1 := createRollbackTestUser(t, db, "student1@test.com", "Student One", "student")
 	student2 := createRollbackTestUser(t, db, "student2@test.com", "Student Two", "student")
 
@@ -152,7 +152,7 @@ func TestTemplateRollback_Idempotent(t *testing.T) {
 
 	// Create test users
 	admin := createRollbackTestUser(t, db, "admin@test.com", "Admin User", "admin")
-	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "teacher")
+	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "methodologist")
 	student := createRollbackTestUser(t, db, "student@test.com", "Student User", "student")
 
 	// Add credits
@@ -214,7 +214,7 @@ func TestTemplateRollback_DetailedErrorMessages(t *testing.T) {
 
 	// Create test users
 	admin := createRollbackTestUser(t, db, "admin@test.com", "Admin User", "admin")
-	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "teacher")
+	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "methodologist")
 	student := createRollbackTestUser(t, db, "student@test.com", "Student User", "student")
 
 	// Add credits
@@ -357,7 +357,7 @@ func TestTemplateRollback_WithActiveBookings(t *testing.T) {
 
 	// Create test users
 	admin := createRollbackTestUser(t, db, "admin@test.com", "Admin User", "admin")
-	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "teacher")
+	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "methodologist")
 	student := createRollbackTestUser(t, db, "student@test.com", "Student User", "student")
 
 	// Add credits
@@ -433,7 +433,7 @@ func TestTemplateRollback_ConcurrentRollbacks(t *testing.T) {
 
 	// Create test users
 	admin := createRollbackTestUser(t, db, "admin@test.com", "Admin User", "admin")
-	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "teacher")
+	teacher := createRollbackTestUser(t, db, "teacher@test.com", "Teacher User", "methodologist")
 	student := createRollbackTestUser(t, db, "student@test.com", "Student User", "student")
 
 	// Add credits

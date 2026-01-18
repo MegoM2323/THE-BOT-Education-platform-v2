@@ -86,6 +86,11 @@ func (s *ChatService) GetOrCreateRoom(ctx context.Context, currentUserID, otherU
 	// Определяем кто teacher а кто student
 	var teacherID, studentID uuid.UUID
 
+	// Проверяем что оба не студенты
+	if currentUser.IsStudent() && otherUser.IsStudent() {
+		return nil, fmt.Errorf("students cannot chat with each other")
+	}
+
 	if currentUser.IsMethodologist() || currentUser.IsAdmin() {
 		teacherID = currentUserID
 		studentID = otherUserID
@@ -95,11 +100,6 @@ func (s *ChatService) GetOrCreateRoom(ctx context.Context, currentUserID, otherU
 	} else {
 		// Оба студента — невозможно создать комнату (студенты могут общаться только с преподавателями)
 		return nil, fmt.Errorf("chat rooms can only be created between teachers and students")
-	}
-
-	// Проверяем что другой пользователь действительно student (если currentUser — teacher)
-	if currentUser.IsMethodologist() && !otherUser.IsStudent() {
-		return nil, fmt.Errorf("teachers can only chat with students")
 	}
 
 	// Получаем или создаем комнату
@@ -178,12 +178,12 @@ func (s *ChatService) SendMessage(ctx context.Context, senderID uuid.UUID, req *
 		return nil, repository.ErrUnauthorized
 	}
 
-	// Создаем сообщение со статусом pending_moderation
+	// Создаем сообщение со статусом delivered (временно без модерации)
 	message := &models.Message{
 		RoomID:      req.RoomID,
 		SenderID:    senderID,
 		MessageText: req.MessageText,
-		Status:      string(models.MessageStatusPendingModeration),
+		Status:      string(models.MessageStatusDelivered),
 	}
 
 	if err := s.chatRepo.CreateMessage(ctx, message); err != nil {
@@ -205,8 +205,9 @@ func (s *ChatService) SendMessage(ctx context.Context, senderID uuid.UUID, req *
 		s.sseManager.SendToChat(req.RoomID, sseEvent, senderID)
 	}
 
-	// Запускаем асинхронную модерацию
-	go s.moderateMessageAsync(message.ID, message.RoomID)
+	// Модерация временно отключена - все сообщения доставляются напрямую
+	// TODO: включить модерацию после стабилизации системы
+	// go s.moderateMessageAsync(message.ID, message.RoomID)
 
 	return message, nil
 }

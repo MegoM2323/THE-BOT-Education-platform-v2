@@ -262,7 +262,7 @@ func TestChatService_GetOrCreateRoom(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Nil(t, room)
-		assert.Contains(t, err.Error(), "can only be created between teachers and students")
+		assert.Contains(t, err.Error(), "students cannot chat with each other")
 
 		mockUserRepo.AssertExpectations(t)
 		mockChatRepo.AssertNotCalled(t, "GetOrCreateRoom")
