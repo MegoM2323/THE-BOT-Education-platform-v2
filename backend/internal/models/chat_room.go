@@ -194,6 +194,11 @@ func (m *Message) MarshalJSON() ([]byte, error) {
 		"created_at":   m.CreatedAt,
 	}
 
+	// Handle SenderName
+	if m.SenderName != "" {
+		data["sender_name"] = m.SenderName
+	}
+
 	// Handle ModerationCompletedAt
 	if m.ModerationCompletedAt.Valid {
 		data["moderation_completed_at"] = m.ModerationCompletedAt.Time.Format("2006-01-02T15:04:05Z07:00")

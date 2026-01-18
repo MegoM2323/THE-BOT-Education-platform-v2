@@ -272,7 +272,16 @@ func (r *ChatRepository) GetMessagesByRoom(ctx context.Context, roomID uuid.UUID
 		SELECT
 			m.id, m.room_id, m.sender_id, m.message_text, m.status,
 			m.moderation_completed_at, m.created_at, m.deleted_at,
-			COALESCE(u.full_name, 'Пользователь') as sender_name
+			CASE
+				WHEN u.full_name IS NOT NULL AND u.full_name != '' THEN
+					CASE u.role
+						WHEN 'methodologist' THEN u.full_name || ' (Преподаватель)'
+						WHEN 'student' THEN u.full_name || ' (Студент)'
+						WHEN 'admin' THEN u.full_name || ' (Администратор)'
+						ELSE u.full_name
+					END
+				ELSE 'Пользователь'
+			END as sender_name
 		FROM messages m
 		LEFT JOIN users u ON m.sender_id = u.id
 		WHERE m.room_id = $1
