@@ -145,6 +145,7 @@ func TestGetAllTemplatesWithLessonCount(t *testing.T) {
 			TeacherID:   teacherID,
 			LessonType:  "group",
 			MaxStudents: 4,
+			CreditsCost: 1,
 			Color:       "#3B82F6",
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),

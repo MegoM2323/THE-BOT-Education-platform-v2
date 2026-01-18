@@ -75,7 +75,7 @@
 .template-card-selected {
   border-color: var(--primary);
   background: var(--primary-light);
-  box-shadow: 0 4px 12px rgba(0, 66, 49, 0.2);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 .template-card-header {

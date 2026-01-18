@@ -141,12 +141,12 @@ export const getUserStats = async (userId, options = {}) => {
 };
 
 /**
- * Получить список преподавателей
+ * Получить список учителей (методистов)
  * @param {Object} [options] - Опции запроса (включая signal для отмены)
- * @returns {Promise<Array>} Список преподавателей
+ * @returns {Promise<Array>} Список учителей
  */
 export const getTeachers = async (options = {}) => {
-  return await getUsers({ role: 'teacher' }, options);
+  return await getUsers({ role: 'methodologist' }, options);
 };
 
 /**
@@ -259,11 +259,11 @@ export const getStudentsAll = async (filters = {}, options = {}) => {
 };
 
 /**
- * Получить ВСЕ преподавателей с автоматической пагинацией через все страницы
+ * Получить ВСЕ учителей (методистов) с автоматической пагинацией через все страницы
  * (в отличие от getTeachers которая получает только первые 20)
  * @param {Object} filters - Параметры фильтрации (search и т.д., без page/per_page)
  * @param {Object} [options] - Опции запроса (включая signal для отмены)
- * @returns {Promise<Array>} Полный список всех преподавателей
+ * @returns {Promise<Array>} Полный список всех учителей
  */
 export const getTeachersAll = async (filters = {}, options = {}) => {
   try {
@@ -273,7 +273,7 @@ export const getTeachersAll = async (filters = {}, options = {}) => {
 
     while (true) {
       const result = await getUsersWithPagination(
-        { ...filters, role: 'teacher', page, per_page },
+        { ...filters, role: 'methodologist', page, per_page },
         options
       );
 
@@ -284,7 +284,6 @@ export const getTeachersAll = async (filters = {}, options = {}) => {
 
       allTeachers.push(...result.users);
 
-      // Останавливаемся если мы на последней странице
       if (page >= result.meta.total_pages) {
         break;
       }
@@ -345,26 +344,21 @@ export const getUsersAll = async (filters = {}, options = {}) => {
 };
 
 /**
- * Получить ВСЕ пользователей, которые могут быть назначены преподавателями
- * (преподаватели, администраторы, методисты)
+ * Получить ВСЕ пользователей, которые могут быть назначены учителями
+ * (учителя/методисты и администраторы)
  * @param {Object} filters - Параметры фильтрации (search и т.д., без page/per_page)
  * @param {Object} [options] - Опции запроса (включая signal для отмены)
- * @returns {Promise<Array>} Полный список всех пользователей, которые могут быть преподавателями
+ * @returns {Promise<Array>} Полный список всех пользователей, которые могут быть учителями
  */
 export const getAssignableTeachersAll = async (filters = {}, options = {}) => {
   try {
-    // Fetch teachers, admins, and methodologists separately and merge
-    // Since backend doesn't support multi-role filtering, we need 3 requests
-    const [teachers, admins, methodologists] = await Promise.all([
-      getUsersAll({ ...filters, role: 'teacher' }, options),
-      getUsersAll({ ...filters, role: 'admin' }, options),
+    const [methodologists, admins] = await Promise.all([
       getUsersAll({ ...filters, role: 'methodologist' }, options),
+      getUsersAll({ ...filters, role: 'admin' }, options),
     ]);
 
-    // Merge and deduplicate
-    const allAssignableTeachers = [...teachers, ...admins, ...methodologists];
+    const allAssignableTeachers = [...methodologists, ...admins];
 
-    // Deduplicate by ID - keep first occurrence of each unique ID
     const seen = new Set();
     const deduplicated = [];
     for (const user of allAssignableTeachers) {
@@ -374,7 +368,6 @@ export const getAssignableTeachersAll = async (filters = {}, options = {}) => {
       }
     }
 
-    // Sort by full_name for consistent display
     deduplicated.sort((a, b) =>
       (a.full_name || '').localeCompare(b.full_name || '', 'ru')
     );

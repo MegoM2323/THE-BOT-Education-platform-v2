@@ -54,10 +54,8 @@
 
 .my-schedule-item {
   position: relative;
-  transition:
-    opacity 300ms ease-out,
-    transform 300ms ease-out;
-  will-change: transform, opacity;
+  transition: opacity 300ms ease-out;
+  will-change: opacity;
 }
 
 .my-schedule-actions {
@@ -73,8 +71,7 @@
   transition:
     background-color 300ms ease-out,
     border-color 300ms ease-out,
-    box-shadow 300ms ease-out,
-    transform 300ms ease-out;
+    box-shadow 300ms ease-out;
 }
 
 @media (max-width: 768px) {

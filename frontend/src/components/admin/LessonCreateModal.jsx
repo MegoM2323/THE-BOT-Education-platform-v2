@@ -35,7 +35,7 @@ export const LessonCreateModal = ({
     max_students: 4,
     credits_cost: 1,
     subject: '',
-    color: '#004231'
+    color: '#2563eb'
   });
   const [errors, setErrors] = useState({});
 
@@ -59,7 +59,7 @@ export const LessonCreateModal = ({
       max_students: 4,
       credits_cost: 1,
       subject: '',
-      color: '#004231'
+      color: '#2563eb'
     });
     setErrors({});
     setSelectedStudentIds([]);
@@ -306,7 +306,7 @@ export const LessonCreateModal = ({
         end_time: endDateTimeISO,
         max_students: formData.max_students,
         credits_cost: formData.credits_cost || 1,
-        color: formData.color || '#004231'
+        color: formData.color || '#2563eb'
       };
 
       // Добавить subject если указан

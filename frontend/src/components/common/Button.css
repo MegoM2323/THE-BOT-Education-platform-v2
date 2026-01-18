@@ -13,7 +13,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
   box-sizing: border-box;
-  background: rgba(0, 66, 49, 0.05);
+  background: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
   border: none;
   padding: var(--spacing-sm) var(--spacing-md);
@@ -47,12 +47,12 @@
 } */
 
 .btn:hover:not(:disabled) {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .btn:active:not(:disabled),
 .btn.btn-active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
@@ -62,21 +62,21 @@
 
 .btn:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px rgba(0, 66, 49, 0.3);
+  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.3);
   box-sizing: border-box;
 }
 
 /* Переопределяем глобальные стили для кнопок */
 .btn:active:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px rgba(0, 66, 49, 0.3);
+  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.3);
   box-sizing: border-box;
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background: rgba(0, 66, 49, 0.03);
+  background: rgba(37, 99, 235, 0.03);
 }
 
 /* Sizes */
@@ -127,133 +127,133 @@
 .btn-primary {
   background: var(--primary-color);
   color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 66, 49, 0.15);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #003220;
-  box-shadow: 0 4px 8px rgba(0, 66, 49, 0.2);
+  background: #1d4ed8;
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
 }
 
 .btn-primary:active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 66, 49, 0.15);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
 }
 
 /* Активная кнопка (выбранная кнопка, например, для вида календарь/список) */
 .btn-primary.btn-active {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 
 .btn-primary.btn-active:hover:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 
 /* Secondary variant */
 .btn-secondary {
-  background: rgba(0, 66, 49, 0.05);
+  background: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .btn-secondary:active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 
 /* Success variant */
 .btn-success {
-  background: rgba(0, 66, 49, 0.05);
+  background: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
 }
 
 .btn-success:hover:not(:disabled) {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .btn-success:active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 
 /* Error variant */
 .btn-error {
-  background: rgba(0, 66, 49, 0.05);
+  background: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
 }
 
 .btn-error:hover:not(:disabled) {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .btn-error:active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 
 /* Warning variant */
 .btn-warning {
-  background: rgba(0, 66, 49, 0.05);
+  background: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
 }
 
 .btn-warning:hover:not(:disabled) {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .btn-warning:active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 
 /* Outline variant */
 .btn-outline {
-  background: rgba(0, 66, 49, 0.05);
+  background: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .btn-outline:active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 
 /* Ghost variant */
 .btn-ghost {
-  background: rgba(0, 66, 49, 0.05);
+  background: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .btn-ghost:active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 
 /* Danger variant (legacy support) */
 .btn-danger {
-  background: rgba(0, 66, 49, 0.05);
+  background: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .btn-danger:active:not(:disabled) {
-  background: #004231;
+  background: #2563eb;
   color: #ffffff;
 }
 

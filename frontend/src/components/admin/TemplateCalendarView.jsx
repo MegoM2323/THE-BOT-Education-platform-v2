@@ -58,7 +58,7 @@ const formatTimeShort = (time) => {
  * Компактный формат: 2 строки (как в календаре)
  */
 const TemplateLessonCard = memo(({ lesson, onClick }) => {
-  const baseColor = lesson.color || '#004231';
+  const baseColor = lesson.color || '#2563eb';
 
   // Вычисляем количество занятых мест из student_ids или students
   const currentStudents = lesson.student_ids?.length || lesson.students?.length || 0;

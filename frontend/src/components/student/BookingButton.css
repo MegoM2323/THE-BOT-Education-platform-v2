@@ -8,11 +8,11 @@
 .booking-button {
   position: relative;
   overflow: hidden;
-  border-left: 3px solid #004231;
+  border-left: 3px solid #2563eb;
 }
 
 .booking-button:hover {
-  background: rgba(0, 66, 49, 0.15);
+  background: rgba(37, 99, 235, 0.15);
 }
 
 .booking-button-icon {

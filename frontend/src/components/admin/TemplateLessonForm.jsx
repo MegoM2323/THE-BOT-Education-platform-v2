@@ -62,7 +62,7 @@ export const TemplateLessonForm = ({ templateId, onSave, editingLesson = null, o
     max_students: 4,
     credits_cost: 1,
     subject: '',
-    color: '#004231',
+    color: '#2563eb',
     student_ids: [],
   });
 
@@ -136,7 +136,7 @@ export const TemplateLessonForm = ({ templateId, onSave, editingLesson = null, o
         max_students: editingLesson.max_students || 4,
         credits_cost: editingLesson.credits_cost ?? 1,
         subject: editingLesson.subject || '',
-        color: editingLesson.color || '#004231',
+        color: editingLesson.color || '#2563eb',
         student_ids: studentIds,
       };
 
@@ -232,7 +232,7 @@ export const TemplateLessonForm = ({ templateId, onSave, editingLesson = null, o
         max_students: parseInt(formData.max_students),
         credits_cost: parseInt(formData.credits_cost),
         subject: formData.subject.trim().slice(0, 200) || '',
-        color: formData.color || '#004231',
+        color: formData.color || '#2563eb',
         student_ids: formData.student_ids,
       };
 
@@ -280,7 +280,7 @@ export const TemplateLessonForm = ({ templateId, onSave, editingLesson = null, o
         max_students: 4,
         credits_cost: 1,
         subject: '',
-        color: '#004231',
+        color: '#2563eb',
         student_ids: [],
       });
       setErrors({});
@@ -334,7 +334,7 @@ export const TemplateLessonForm = ({ templateId, onSave, editingLesson = null, o
         max_students: editingLesson.max_students || 4,
         credits_cost: editingLesson.credits_cost ?? 1,
         subject: (editingLesson.subject || '').trim(),
-        color: editingLesson.color || '#004231',
+        color: editingLesson.color || '#2563eb',
         student_ids: originalStudentIds,
       };
 
@@ -347,7 +347,7 @@ export const TemplateLessonForm = ({ templateId, onSave, editingLesson = null, o
         max_students: formData.max_students,
         credits_cost: parseInt(formData.credits_cost) || 1,
         subject: (formData.subject || '').trim(),
-        color: formData.color || '#004231',
+        color: formData.color || '#2563eb',
         student_ids: formData.student_ids || [],
       };
 
@@ -424,7 +424,7 @@ export const TemplateLessonForm = ({ templateId, onSave, editingLesson = null, o
         max_students: 4,
         credits_cost: 1,
         subject: '',
-        color: '#004231',
+        color: '#2563eb',
         student_ids: [],
       });
       setErrors({});

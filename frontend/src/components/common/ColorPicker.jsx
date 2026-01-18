@@ -7,7 +7,7 @@ import './ColorPicker.css';
  * @param {function} onChange - Callback when color changes
  * @param {boolean} disabled - Whether the picker is disabled
  */
-export const ColorPicker = ({ value = '#004231', onChange, disabled = false }) => {
+export const ColorPicker = ({ value = '#2563eb', onChange, disabled = false }) => {
   const [hexInput, setHexInput] = useState(value);
   const [showPicker, setShowPicker] = useState(false);
 
@@ -19,7 +19,7 @@ export const ColorPicker = ({ value = '#004231', onChange, disabled = false }) =
     { color: '#006666', name: 'Бирюзовый' },
     { color: '#000066', name: 'Тёмно-синий' },
     { color: '#660066', name: 'Фиолетовый' },
-    { color: '#004231', name: 'Зелёный' },
+    { color: '#2563eb', name: 'Синий' },
     { color: '#000000', name: 'Чёрный' },
   ];
 
@@ -95,7 +95,7 @@ export const ColorPicker = ({ value = '#004231', onChange, disabled = false }) =
           value={hexInput}
           onChange={handleHexInputChange}
           onBlur={handleHexInputBlur}
-          placeholder="#004231"
+          placeholder="#2563eb"
           maxLength={7}
           disabled={disabled}
           aria-label="Введите hex код цвета"
@@ -135,7 +135,7 @@ export const ColorPicker = ({ value = '#004231', onChange, disabled = false }) =
             ))}
           </div>
           <div className="color-palette-footer">
-            <small>Или введите hex код цвета (например, #004231)</small>
+            <small>Или введите hex код цвета (например, #2563eb)</small>
           </div>
         </div>
       )}
@@ -143,7 +143,7 @@ export const ColorPicker = ({ value = '#004231', onChange, disabled = false }) =
       {/* Validation error */}
       {hexInput && !isValidHex(hexInput) && (
         <div className="color-picker-error">
-          Неверный формат. Используйте #RRGGBB (например, #004231)
+          Неверный формат. Используйте #RRGGBB (например, #2563eb)
         </div>
       )}
     </div>

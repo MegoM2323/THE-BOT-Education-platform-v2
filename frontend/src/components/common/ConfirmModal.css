@@ -23,7 +23,7 @@
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  animation: scaleIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  animation: scaleIn 0.3s ease-out;
 }
 
 .confirm-modal-header {

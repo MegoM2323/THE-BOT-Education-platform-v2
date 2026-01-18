@@ -22,7 +22,7 @@ export const LessonCard = ({
   const spotsLeft = (lesson.max_students ?? 0) - (lesson.current_students ?? 0);
   const isFull = spotsLeft <= 0;
 
-  const lessonColor = lesson.color || '#004231';
+  const lessonColor = lesson.color || '#2563eb';
   const cardStyle = {
     borderLeft: `4px solid ${lessonColor}`,
     background: isBooked ? `${lessonColor}15` : `${lessonColor}08`,

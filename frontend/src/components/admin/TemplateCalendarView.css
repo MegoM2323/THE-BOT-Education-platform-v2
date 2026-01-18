@@ -343,9 +343,9 @@
 
 /* Highlight today with accent color */
 .day.today {
-  border: 2px solid #004231;
+  border: 2px solid #2563eb;
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(0, 66, 49, 0.2);
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
   width: 32px;
   height: 32px;
   display: flex;

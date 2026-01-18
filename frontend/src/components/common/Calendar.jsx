@@ -52,7 +52,7 @@ const LessonCard = memo(({
       'lesson-booked': '#000066',       // dark blue
       'lesson-past': '#CCCCCC',         // gray
     };
-    return colorMap[className] || '#004231'; // default green
+    return colorMap[className] || '#2563eb'; // default blue
   };
 
   const baseColor = lesson.color || getFallbackColor(lessonClassName);
@@ -409,6 +409,11 @@ export const Calendar = ({
         <div className="calendar-lesson-spots">
           Свободно {spotsLeft} из {lesson.max_students} мест
         </div>
+        {(lesson.credits_cost ?? 1) > 0 && (
+          <div className="calendar-lesson-credits">
+            {lesson.credits_cost ?? 1} кр.
+          </div>
+        )}
       </>
     );
   }, []);

@@ -119,7 +119,7 @@
   color: var(--color-info-dark);
 }
 
-.role-teacher {
+.role-methodologist {
   background-color: var(--color-success-bg);
   color: var(--color-success-dark);
 }
@@ -173,7 +173,7 @@
 }
 
 .user-actions button:focus-visible {
-  box-shadow: inset 0 0 0 2px rgba(0, 66, 49, 0.3);
+  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.3);
 }
 
 /* Специфичные правила для кнопок редактирования и удаления */
@@ -221,7 +221,7 @@
 
 .user-actions .btn.btn-sm.btn-outline:focus-visible,
 .user-actions .btn.btn-sm.btn-danger:focus-visible {
-  box-shadow: inset 0 0 0 2px rgba(0, 66, 49, 0.3) !important;
+  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.3) !important;
 }
 
 .user-form {

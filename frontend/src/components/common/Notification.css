@@ -49,7 +49,7 @@
 
 /* Success variant - accent green, NO ::after */
 .notification-success {
-  border-left-color: #004231;
+  border-left-color: #2563eb;
   color: var(--color-success);
 }
 

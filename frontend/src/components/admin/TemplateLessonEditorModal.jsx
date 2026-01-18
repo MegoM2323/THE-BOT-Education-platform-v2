@@ -44,7 +44,7 @@ export const TemplateLessonEditorModal = ({
     teacher_id: '',
     max_students: 1,
     student_ids: [],
-    color: '#004231',
+    color: '#2563eb',
     credits_cost: 1,
   });
 
@@ -89,7 +89,7 @@ export const TemplateLessonEditorModal = ({
         teacher_id: prefilledData.teacher_id || '',
         max_students: prefilledData.max_students || 1,
         student_ids: studentIds,
-        color: prefilledData.color || '#004231',
+        color: prefilledData.color || '#2563eb',
         credits_cost: prefilledData.credits_cost || 1,
       });
     } else if (isOpen && mode === 'create') {
@@ -100,7 +100,7 @@ export const TemplateLessonEditorModal = ({
         teacher_id: '',
         max_students: 1,
         student_ids: [],
-        color: '#004231',
+        color: '#2563eb',
         credits_cost: 1,
       });
       setSearchQuery('');

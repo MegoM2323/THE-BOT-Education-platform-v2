@@ -12,10 +12,13 @@ import apiClient from './client.js';
 export const getTemplates = async (options = {}) => {
   try {
     const response = await apiClient.get('/templates', options);
+    console.log('Raw API response for templates:', response);
     if (Array.isArray(response)) {
       return response;
     }
-    return response?.templates || response?.data || [];
+    const templates = response?.templates || response?.data || [];
+    console.log('Parsed templates array:', templates);
+    return templates;
   } catch (error) {
     if (error.name !== 'AbortError') {
       console.error('Error fetching templates:', error);

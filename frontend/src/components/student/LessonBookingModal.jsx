@@ -242,7 +242,7 @@ export const LessonBookingModal = ({
   }, []);
 
   const timeRange = formatDateTimeRange(lesson.start_time, lesson.end_time);
-  const lessonColor = lesson.color || '#004231';
+  const lessonColor = lesson.color || '#2563eb';
   const backgroundColor = hexToRgba(lessonColor, 0.15);
   
   // Вычисляем количество свободных мест - идентично календарю

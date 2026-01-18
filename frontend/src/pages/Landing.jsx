@@ -1,6 +1,7 @@
 import HeroSection from './Landing/components/HeroSection';
 import FeaturesSection from './Landing/components/FeaturesSection';
 import RolesSection from './Landing/components/RolesSection';
+import ContactSection from './Landing/components/ContactSection';
 import CallToActionSection from './Landing/components/CallToActionSection';
 import FooterSection from './Landing/components/FooterSection';
 import { ToastContainer } from 'react-toastify';
@@ -13,6 +14,7 @@ export const Landing = () => {
       <HeroSection />
       <FeaturesSection />
       <RolesSection />
+      <ContactSection />
       <CallToActionSection />
       <FooterSection />
       <ToastContainer

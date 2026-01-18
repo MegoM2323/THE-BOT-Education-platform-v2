@@ -61,7 +61,7 @@ export const LessonEditModal = ({
 
   const [selectedSubject, setSelectedSubject] = useState("");
 
-  const [selectedColor, setSelectedColor] = useState("#004231");
+  const [selectedColor, setSelectedColor] = useState("#2563eb");
 
   const [loading, setLoading] = useState(false);
   const [addingStudent, setAddingStudent] = useState(false);
@@ -310,8 +310,8 @@ export const LessonEditModal = ({
 
         // color - валидация hex
         if (data.color !== undefined) {
-          const newColor = data.color || "#004231";
-          const currentColor = lesson.color || "#004231";
+          const newColor = data.color || "#2563eb";
+          const currentColor = lesson.color || "#2563eb";
           if (newColor !== currentColor) {
             updates.color = newColor;
           }
@@ -587,7 +587,7 @@ export const LessonEditModal = ({
       setSelectedSubject(lesson.subject || "");
 
       // Установить color
-      setSelectedColor(lesson.color || "#004231");
+      setSelectedColor(lesson.color || "#2563eb");
 
       // Инициализировать локальное состояние занятия для управления данными
       setLessonData({

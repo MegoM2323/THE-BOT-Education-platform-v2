@@ -178,11 +178,12 @@
   height: 20px;
   background-color: #fff;
   border-radius: 50%;
-  transition: transform 0.3s ease;
+  transition: left 0.3s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .toggle-switch.enabled .toggle-slider {
+  left: 27px;
 }
 
 .status-label {
@@ -296,5 +297,6 @@
   }
 
   .toggle-switch.enabled .toggle-slider {
+    left: 23px;
   }
 }

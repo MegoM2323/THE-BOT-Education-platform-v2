@@ -4,10 +4,10 @@
 
 :root {
   /* Colors - Primary */
-  --color-primary: #004231;
-  --color-primary-light: rgba(0, 66, 49, 0.1);
-  --color-primary-dark: #003220;
-  --color-primary-hover: rgba(0, 66, 49, 0.9);
+  --color-primary: #2563eb;
+  --color-primary-light: rgba(37, 99, 235, 0.1);
+  --color-primary-dark: #1d4ed8;
+  --color-primary-hover: rgba(37, 99, 235, 0.9);
 
   /* Colors - Secondary */
   --color-secondary: #8b5cf6;
@@ -61,7 +61,7 @@
   --text-secondary: #6b7280;
   --text-tertiary: #9ca3af;
   --text-inverse: #ffffff;
-  --text-link: #004231;
+  --text-link: #2563eb;
 
   /* Border */
   --border-color: #e5e7eb;
@@ -160,7 +160,7 @@
   --input-padding-x: 0.75rem;
   --input-padding-y: 0.5rem;
   --input-border-width: 1px;
-  --input-focus-ring: 0 0 0 3px rgba(0, 66, 49, 0.1);
+  --input-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.1);
 
   /* Touch targets (WCAG 2.1 AAA minimum 44x44px) */
   --touch-target-min: 44px;

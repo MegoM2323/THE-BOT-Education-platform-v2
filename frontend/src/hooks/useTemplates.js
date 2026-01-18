@@ -25,6 +25,13 @@ export const useTemplates = () => {
       try {
         const data = await templatesAPI.getTemplates();
         logger.debug('useQuery: Successfully loaded', data?.length || 0, 'templates');
+        if (data && data.length > 0) {
+          console.log('Templates data with lesson_count:', data.map(t => ({
+            id: t.id,
+            name: t.name,
+            lesson_count: t.lesson_count
+          })));
+        }
         return Array.isArray(data) ? data : [];
       } catch (err) {
         console.error('useQuery error:', err.message);

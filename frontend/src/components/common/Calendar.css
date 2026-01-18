@@ -172,7 +172,7 @@
 }
 
 .calendar-nav .btn:focus-visible {
-  box-shadow: inset 0 0 0 2px rgba(0, 66, 49, 0.3) !important;
+  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.3) !important;
 }
 
 .calendar-view-toggle {
@@ -211,7 +211,7 @@
 }
 
 .calendar-view-toggle .btn:focus-visible {
-  box-shadow: inset 0 0 0 2px rgba(0, 66, 49, 0.3) !important;
+  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.3) !important;
 }
 
 .calendar-header-actions {
@@ -294,7 +294,7 @@
 }
 
 .calendar-day-today {
-  border: 2px solid #004231;
+  border: 2px solid #2563eb;
 }
 
 .calendar-day-number {
