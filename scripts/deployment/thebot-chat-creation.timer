@@ -1,0 +1,18 @@
+[Unit]
+Description=THE BOT Chat Creation Backfill Timer
+Documentation=file:///home/mego/Python%20Projects/THE_BOT_V3/scripts/deployment/CHAT_CREATION_README.md
+Requires=thebot-chat-creation.service
+
+[Timer]
+# Run every 30 minutes
+OnBootSec=5min
+OnUnitActiveSec=30min
+
+# Randomize start time by up to 2 minutes to avoid thundering herd
+RandomizedDelaySec=2min
+
+# Run immediately if missed (e.g., system was down)
+Persistent=true
+
+[Install]
+WantedBy=timers.target

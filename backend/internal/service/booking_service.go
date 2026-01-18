@@ -116,6 +116,11 @@ func (s *BookingService) CreateBooking(ctx context.Context, req *models.CreateBo
 		return nil, fmt.Errorf("failed to get lesson: %w", err)
 	}
 
+	// Verify lesson was found (safety check)
+	if lesson == nil {
+		return nil, fmt.Errorf("lesson not found")
+	}
+
 	creditsCost := lesson.CreditsCost
 	if creditsCost < 0 {
 		creditsCost = 0 // Исправляем отрицательные значения на 0
@@ -125,13 +130,19 @@ func (s *BookingService) CreateBooking(ctx context.Context, req *models.CreateBo
 	// ВАЖНО: этот путь изолирован с помощью раннего return на строке 183
 	// Это гарантирует что кредит списывается ровно 1 раз и путь 2 не выполнится
 	if req.IsAdmin {
+		// Check capacity before reactivation (lesson already locked via SELECT FOR UPDATE at line 114)
+		// This ensures we don't reactivate if lesson is already at capacity
+		if lesson.IsFull() {
+			return nil, repository.ErrLessonFull
+		}
+
 		reactivated, reactivateErr := s.bookingRepo.ReactivateBooking(ctx, tx, req.StudentID, req.LessonID)
 		if reactivateErr == nil && reactivated != nil {
 			log.Info().
 				Str("booking_id", reactivated.ID.String()).
 				Str("student_id", utils.MaskUserID(req.StudentID)).
 				Str("lesson_id", req.LessonID.String()).
-				Msg("Admin reactivated cancelled booking")
+				Msg("Capacity check passed - admin reactivating cancelled booking")
 
 			// Списываем кредиты только если урок платный (creditsCost > 0)
 			if creditsCost > 0 {
@@ -218,14 +229,13 @@ func (s *BookingService) CreateBooking(ctx context.Context, req *models.CreateBo
 			return nil, fmt.Errorf("failed to get credit balance: %w", err)
 		}
 
-		// Проверяем, достаточно ли у студента кредитов (для всех пользователей)
-		if !credit.HasSufficientBalance(creditsCost) {
+		// Calculate final balance after deduction (safety check after SELECT FOR UPDATE)
+		// This is the ONLY balance check - performed after acquiring lock via SELECT FOR UPDATE
+		// Database trigger provides additional safety net to prevent negative balance
+		newBalance = credit.Balance - creditsCost
+		if newBalance < 0 {
 			return nil, repository.ErrInsufficientCredits
 		}
-
-		// Списываем кредиты (для нового бронирования в пути 2)
-		// Двойное списание невозможно: путь 1 заканчивается с return, путь 2 не выполняется
-		newBalance = credit.Balance - creditsCost
 		if err := s.creditRepo.UpdateBalance(ctx, tx, req.StudentID, newBalance); err != nil {
 			return nil, fmt.Errorf("failed to update credit balance: %w", err)
 		}

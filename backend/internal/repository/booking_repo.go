@@ -109,6 +109,7 @@ func (r *BookingRepository) GetByIDForUpdate(ctx context.Context, tx pgx.Tx, id 
 }
 
 // GetWithDetails получает бронирование с деталями занятия и преподавателя
+// Фильтрует soft-deleted lessons для предотвращения exposure удаленных данных
 func (r *BookingRepository) GetWithDetails(ctx context.Context, id uuid.UUID) (*models.BookingWithDetails, error) {
 	query := `
 		SELECT
@@ -116,8 +117,8 @@ func (r *BookingRepository) GetWithDetails(ctx context.Context, id uuid.UUID) (*
 			l.start_time, l.end_time, l.teacher_id, l.subject, l.homework_text,
 			u.full_name as teacher_name
 		FROM bookings b
-		JOIN lessons l ON b.lesson_id = l.id
-		JOIN users u ON l.teacher_id = u.id
+		JOIN lessons l ON b.lesson_id = l.id AND l.deleted_at IS NULL
+		JOIN users u ON l.teacher_id = u.id AND u.deleted_at IS NULL
 		WHERE b.id = $1
 	`
 
@@ -374,11 +375,13 @@ func (r *BookingRepository) HasScheduleConflictExcluding(ctx context.Context, st
 }
 
 // GetActiveBookingByStudentAndLesson получает активное бронирование для студента и занятия
+// Проверяет что lesson существует и не soft-deleted для обеспечения консистентности данных
 func (r *BookingRepository) GetActiveBookingByStudentAndLesson(ctx context.Context, studentID, lessonID uuid.UUID) (*models.Booking, error) {
 	query := `
 		SELECT ` + BookingSelectFields + `
-		FROM bookings
-		WHERE student_id = $1 AND lesson_id = $2 AND status = $3
+		FROM bookings b
+		WHERE b.student_id = $1 AND b.lesson_id = $2 AND b.status = $3
+		AND EXISTS(SELECT 1 FROM lessons WHERE id = $2 AND deleted_at IS NULL)
 	`
 
 	var booking models.Booking
