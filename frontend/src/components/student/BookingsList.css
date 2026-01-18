@@ -40,7 +40,6 @@
 
 .bookings-table tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.02);
-  transform: translateX(2px);
 }
 
 .bookings-table td {

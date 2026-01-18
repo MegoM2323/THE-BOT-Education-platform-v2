@@ -255,11 +255,11 @@ body {
   position: absolute;
   bottom: 0;
   left: 50%;
-  transform: translateX(-50%);
   width: 60px;
   height: 4px;
   background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-green) 100%);
   border-radius: 2px;
+  margin-left: -30px;
 }
 
 /* ============================================================================
@@ -301,20 +301,14 @@ body {
   right: 0;
   height: 3px;
   background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-green) 100%);
-  transform: scaleX(0);
-  transform-origin: left;
   transition: transform var(--transition-fast);
 }
 
 .feature-card:hover {
   box-shadow: var(--shadow-lg);
   border-color: var(--primary-color);
-  transform: translateY(-8px);
 }
 
-.feature-card:hover::before {
-  transform: scaleX(1);
-}
 
 .feature-icon {
   font-size: 3rem;
@@ -323,9 +317,6 @@ body {
   transition: transform var(--transition-base);
 }
 
-.feature-card:hover .feature-icon {
-  transform: scale(1.1) rotate(5deg);
-}
 
 .feature-title {
   font-size: var(--font-size-xl);
@@ -387,7 +378,6 @@ body {
 .role-card:hover {
   box-shadow: var(--shadow-lg);
   border-color: var(--accent-green);
-  transform: translateY(-6px);
 }
 
 .role-card:hover::before {
@@ -403,9 +393,6 @@ body {
   z-index: 2;
 }
 
-.role-card:hover .role-icon {
-  transform: scale(1.15) rotate(-5deg);
-}
 
 .role-card h3 {
   font-size: var(--font-size-lg);
@@ -526,12 +513,10 @@ body {
 
 .btn-primary:hover {
   background: #003220;
-  transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 66, 49, 0.2);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 66, 49, 0.15);
 }
 
@@ -620,7 +605,6 @@ body {
 
 .lesson-card:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-6px);
   border-color: var(--primary-color);
 }
 
@@ -666,7 +650,7 @@ body {
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin: 0 0 var(--spacing-sm) 0;
-  text-transform: none;
+  text-transform: uppercase;
   display: block;
 }
 
@@ -708,7 +692,6 @@ body {
   height: 0;
   border-radius: 50%;
   background: rgba(45, 199, 116, 0.1);
-  transform: translate(-50%, -50%);
   transition: width var(--transition-base), height var(--transition-base);
   pointer-events: none;
 }
@@ -722,13 +705,9 @@ body {
   background: var(--primary-color);
   color: var(--white);
   border-color: var(--primary-color);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
-.task-link:active {
-  transform: translateY(0);
-}
 
 .attached-files {
   margin-top: var(--spacing-lg);
@@ -773,25 +752,12 @@ body {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) translateX(0px);
-  }
-  33% {
-    transform: translateY(-20px) translateX(10px);
-  }
-  66% {
-    transform: translateY(10px) translateX(-10px);
-  }
-}
 
 @keyframes pulse {
   0%, 100% {
@@ -805,34 +771,19 @@ body {
 @keyframes slideInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-10px);
-  }
-  75% {
-    transform: translateX(10px);
-  }
-}
 
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -1138,7 +1089,6 @@ body {
   .lesson-card:hover,
   .btn:hover {
     animation: none;
-    transform: none;
   }
 }
 
