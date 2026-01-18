@@ -17,6 +17,7 @@ import "./ChatList.css";
  * Компонент списка чатов
  */
 const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
+  console.log('[ChatList] Component render, onRoomSelect is function:', typeof onRoomSelect === 'function');
   const { user } = useAuth();
   const { showNotification } = useNotification();
   const { lastMessage, lastDeletedMessage } = useSSE();
@@ -31,6 +32,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
    * Админ видит все чаты, остальные видят только свои
    */
   const loadRooms = useCallback(async () => {
+    console.log('[ChatList] loadRooms called, user role:', user?.role);
     try {
       let data;
       if (user?.role === "admin") {
@@ -38,9 +40,10 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
       } else {
         data = await getMyRooms();
       }
+      console.log('[ChatList] Rooms loaded:', data?.length, 'rooms');
       setRooms(data || []);
     } catch (error) {
-      console.error("Ошибка загрузки комнат:", error);
+      console.error("[ChatList] Ошибка загрузки комнат:", error);
       showNotification("Ошибка загрузки чатов", "error");
     } finally {
       setLoading(false);
@@ -53,6 +56,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
    * Админ не видит список доступных пользователей (read-only режим)
    */
   const loadAvailableUsers = useCallback(async () => {
+    console.log('[ChatList] loadAvailableUsers called, user role:', user?.role);
     try {
       let users = [];
 
@@ -64,9 +68,10 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
         users = await getStudentsAll();
       }
 
+      console.log('[ChatList] Available users loaded:', users?.length, 'users');
       setAvailableUsers(users || []);
     } catch (error) {
-      console.error("Ошибка загрузки пользователей:", error);
+      console.error("[ChatList] Ошибка загрузки пользователей:", error);
     }
   }, [user?.role]);
 
@@ -194,11 +199,13 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
    * Создать или открыть комнату с пользователем
    */
   const handleSelectUser = async (userId) => {
+    console.log('[ChatList] handleSelectUser called with userId:', userId);
     try {
       setCreatingRoom(userId);
 
       // Создать или получить существующую комнату
       const room = await getOrCreateRoom(userId);
+      console.log('[ChatList] Room created/fetched:', room);
 
       // Добавить комнату в список если её ещё нет
       setRooms((prev) => {
@@ -210,9 +217,10 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
       });
 
       // Выбрать комнату
+      console.log('[ChatList] Calling onRoomSelect with room:', room);
       onRoomSelect(room);
     } catch (error) {
-      console.error("Ошибка создания комнаты:", error);
+      console.error("[ChatList] Ошибка создания комнаты:", error);
       const errorMsg =
         error.data?.error?.message || error.message || "Не удалось открыть чат";
       showNotification(errorMsg, "error");
@@ -300,7 +308,10 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
               <div
                 key={room.id}
                 className={`chat-room-item ${selectedRoom?.id === room.id ? "chat-room-selected" : ""}`}
-                onClick={() => onRoomSelect(room)}
+                onClick={() => {
+                  console.log('[ChatList] Room item clicked:', room);
+                  onRoomSelect(room);
+                }}
               >
                 <div className="chat-room-avatar">
                   {room.participant_name?.[0]?.toUpperCase() || "?"}

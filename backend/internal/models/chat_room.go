@@ -33,6 +33,7 @@ type Message struct {
 	ID                    uuid.UUID        `db:"id" json:"id"`
 	RoomID                uuid.UUID        `db:"room_id" json:"room_id"`
 	SenderID              uuid.UUID        `db:"sender_id" json:"sender_id"`
+	SenderName            string           `db:"sender_name" json:"sender_name,omitempty"` // Имя отправителя (для отображения)
 	MessageText           string           `db:"message_text" json:"message_text"`
 	Status                string           `db:"status" json:"status"` // pending_moderation, delivered, blocked
 	ModerationCompletedAt sql.NullTime     `db:"moderation_completed_at" json:"moderation_completed_at,omitempty"`

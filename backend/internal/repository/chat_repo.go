@@ -266,14 +266,19 @@ func (r *ChatRepository) UpdateMessageStatus(ctx context.Context, msgID uuid.UUI
 
 // GetMessagesByRoom получает сообщения из комнаты с пагинацией
 // Возвращает только delivered сообщения (не показывает blocked)
+// Сортировка: старые сообщения первые, новые последние (как в Telegram)
 func (r *ChatRepository) GetMessagesByRoom(ctx context.Context, roomID uuid.UUID, limit, offset int) ([]*models.Message, error) {
 	query := `
-		SELECT ` + MessageSelectFields + `
-		FROM messages
-		WHERE room_id = $1
-		  AND status = $2
-		  AND deleted_at IS NULL
-		ORDER BY created_at DESC
+		SELECT
+			m.id, m.room_id, m.sender_id, m.message_text, m.status,
+			m.moderation_completed_at, m.created_at, m.deleted_at,
+			COALESCE(u.full_name, 'Пользователь') as sender_name
+		FROM messages m
+		LEFT JOIN users u ON m.sender_id = u.id
+		WHERE m.room_id = $1
+		  AND m.status = $2
+		  AND m.deleted_at IS NULL
+		ORDER BY m.created_at ASC
 		LIMIT $3 OFFSET $4
 	`
 
@@ -536,10 +541,11 @@ type ChatParticipant struct {
 
 // ChatRoomWithDetails представляет комнату чата с расширенной информацией для админов
 type ChatRoomWithDetails struct {
-	ID            uuid.UUID         `db:"id" json:"id"`
-	Participants  []ChatParticipant `json:"participants"`
-	MessagesCount int               `db:"messages_count" json:"messages_count"`
-	LastMessageAt *time.Time        `db:"last_message_at" json:"last_message_at,omitempty"`
+	ID              uuid.UUID         `db:"id" json:"id"`
+	Participants    []ChatParticipant `json:"participants"`
+	MessagesCount   int               `db:"messages_count" json:"messages_count"`
+	LastMessageAt   *time.Time        `db:"last_message_at" json:"last_message_at,omitempty"`
+	ParticipantName string            `json:"participant_name,omitempty"`
 }
 
 // ListAllRooms возвращает все чаты с информацией о участниках для админ-панели
@@ -589,8 +595,9 @@ func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetail
 	result := make([]ChatRoomWithDetails, 0, len(rows))
 	for _, row := range rows {
 		room := ChatRoomWithDetails{
-			ID:            row.ID,
-			MessagesCount: row.MessagesCount,
+			ID:              row.ID,
+			MessagesCount:   row.MessagesCount,
+			ParticipantName: row.TeacherName + " ↔ " + row.StudentName,
 			Participants: []ChatParticipant{
 				{
 					ID:       row.TeacherID,

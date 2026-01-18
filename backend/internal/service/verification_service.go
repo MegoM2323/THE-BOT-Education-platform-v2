@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"tutoring-platform/internal/models"
 	"tutoring-platform/internal/repository"
 
 	"github.com/google/uuid"

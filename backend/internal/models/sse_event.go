@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	SSEEventNewMessage     = "new_message"
-	SSEEventMessageDeleted = "message_deleted"
+	SSEEventNewMessage       = "new_message"
+	SSEEventMessageDeleted   = "message_deleted"
+	SSEEventMessageStatusUpdated = "message_status_updated"
 )
 
 type SSEEvent struct {
@@ -34,6 +35,12 @@ type SSEMessagePayload struct {
 type MessageDeletedPayload struct {
 	ChatID    uuid.UUID `json:"chat_id"`
 	MessageID uuid.UUID `json:"message_id"`
+}
+
+type MessageStatusUpdatedPayload struct {
+	ChatID    uuid.UUID `json:"chat_id"`
+	MessageID uuid.UUID `json:"message_id"`
+	Status    string    `json:"status"`
 }
 
 func NewMessageEvent(chatID uuid.UUID, message *ChatMessageWithSender) SSEEvent {
@@ -76,6 +83,17 @@ func MessageDeletedEvent(chatID uuid.UUID, messageID uuid.UUID) SSEEvent {
 		Data: MessageDeletedPayload{
 			ChatID:    chatID,
 			MessageID: messageID,
+		},
+	}
+}
+
+func MessageStatusUpdatedEvent(chatID uuid.UUID, messageID uuid.UUID, status string) SSEEvent {
+	return SSEEvent{
+		Type: SSEEventMessageStatusUpdated,
+		Data: MessageStatusUpdatedPayload{
+			ChatID:    chatID,
+			MessageID: messageID,
+			Status:    status,
 		},
 	}
 }

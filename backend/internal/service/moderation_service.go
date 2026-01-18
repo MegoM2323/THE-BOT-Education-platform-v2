@@ -3,11 +3,14 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
+
 	"tutoring-platform/internal/models"
+	"tutoring-platform/internal/sse"
 )
 
 // chatRepository интерфейс для работы с чат сообщениями
@@ -24,6 +27,7 @@ type ModerationService struct {
 	telegramService  *TelegramService
 	regexFallback    *RegexModerator
 	circuitBreaker   *CircuitBreaker
+	sseManager       *sse.ConnectionManagerUUID
 }
 
 // CircuitBreaker управляет состоянием circuit breaker для защиты от cascading failures
@@ -147,6 +151,11 @@ func NewModerationService(
 	}
 }
 
+// SetSSEManager устанавливает SSE менеджер для отправки уведомлений об изменении статуса
+func (s *ModerationService) SetSSEManager(manager *sse.ConnectionManagerUUID) {
+	s.sseManager = manager
+}
+
 // ModerateMessageAsync асинхронно модерирует сообщение
 func (s *ModerationService) ModerateMessageAsync(ctx context.Context, messageID uuid.UUID) {
 	go func() {
@@ -203,6 +212,9 @@ func (s *ModerationService) ModerateMessageAsync(ctx context.Context, messageID 
 				return
 			}
 
+			// Отправить SSE уведомление об изменении статуса
+			s.sendStatusUpdateSSE(message.RoomID, messageID, models.MessageStatusBlocked)
+
 			// Сохранить в blocked_messages
 			blockedMsg := &models.BlockedMessage{
 				ID:        uuid.New(),
@@ -231,9 +243,27 @@ func (s *ModerationService) ModerateMessageAsync(ctx context.Context, messageID 
 			// Обновить статус на 'delivered'
 			if err := s.chatRepo.UpdateMessageStatus(bgCtx, messageID, models.MessageStatusDelivered); err != nil {
 				log.Println("log")
+				return
 			}
+
+			// Отправить SSE уведомление об изменении статуса
+			s.sendStatusUpdateSSE(message.RoomID, messageID, models.MessageStatusDelivered)
 		}
 	}()
+}
+
+// sendStatusUpdateSSE отправляет SSE событие об изменении статуса сообщения
+func (s *ModerationService) sendStatusUpdateSSE(roomID, messageID uuid.UUID, status string) {
+	if s.sseManager == nil {
+		return
+	}
+
+	event := models.MessageStatusUpdatedEvent(roomID, messageID, status)
+	sseEvent := sse.EventUUID{
+		Type: event.Type,
+		Data: event.Data,
+	}
+	s.sseManager.SendToChat(roomID, sseEvent, uuid.Nil)
 }
 
 // notifyAdminAboutBlockedMessage отправляет уведомление админу о заблокированном сообщении

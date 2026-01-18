@@ -315,7 +315,7 @@ func TestChatService_GetChatHistory(t *testing.T) {
 		mockChatRepo.On("GetMessagesByRoom", mock.Anything, roomID, 50, 0).Return(expectedMessages, nil)
 		mockChatRepo.On("GetAttachmentsByMessage", mock.Anything, mock.Anything).Return([]*models.FileAttachment{}, nil)
 
-		messages, err := service.GetChatHistory(context.Background(), userID, req)
+		messages, err := service.GetChatHistory(context.Background(), userID, string(models.RoleMethodologist), req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, messages)
@@ -348,7 +348,7 @@ func TestChatService_GetChatHistory(t *testing.T) {
 
 		mockChatRepo.On("GetRoomByID", mock.Anything, roomID).Return(room, nil)
 
-		messages, err := service.GetChatHistory(context.Background(), intruderID, req)
+		messages, err := service.GetChatHistory(context.Background(), intruderID, string(models.RoleStudent), req)
 
 		assert.Error(t, err)
 		assert.Nil(t, messages)
@@ -356,6 +356,51 @@ func TestChatService_GetChatHistory(t *testing.T) {
 
 		mockChatRepo.AssertExpectations(t)
 		mockChatRepo.AssertNotCalled(t, "GetMessagesByRoom")
+	})
+
+	t.Run("success - admin can read any chat", func(t *testing.T) {
+		mockChatRepo := new(MockChatRepository)
+		mockUserRepo := new(MockChatUserRepository)
+		service := NewChatService(mockChatRepo, mockUserRepo, nil)
+
+		roomID := uuid.New()
+		teacherID := uuid.New()
+		studentID := uuid.New()
+		adminID := uuid.New()
+
+		room := &models.ChatRoom{
+			ID:        roomID,
+			TeacherID: teacherID,
+			StudentID: studentID,
+		}
+
+		expectedMessages := []*models.Message{
+			{
+				ID:          uuid.New(),
+				RoomID:      roomID,
+				SenderID:    teacherID,
+				MessageText: "Message from teacher",
+				Status:      string(models.MessageStatusDelivered),
+			},
+		}
+
+		req := &models.GetMessagesRequest{
+			RoomID: roomID,
+			Limit:  50,
+			Offset: 0,
+		}
+
+		mockChatRepo.On("GetRoomByID", mock.Anything, roomID).Return(room, nil)
+		mockChatRepo.On("GetMessagesByRoom", mock.Anything, roomID, 50, 0).Return(expectedMessages, nil)
+		mockChatRepo.On("GetAttachmentsByMessage", mock.Anything, mock.Anything).Return([]*models.FileAttachment{}, nil)
+
+		messages, err := service.GetChatHistory(context.Background(), adminID, string(models.RoleAdmin), req)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, messages)
+		assert.Len(t, messages, 1)
+
+		mockChatRepo.AssertExpectations(t)
 	})
 }
 

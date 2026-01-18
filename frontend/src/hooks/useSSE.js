@@ -13,6 +13,7 @@ export const useSSE = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState(null);
   const [lastDeletedMessage, setLastDeletedMessage] = useState(null);
+  const [lastStatusUpdate, setLastStatusUpdate] = useState(null);
 
   const eventSourceRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
@@ -92,6 +93,18 @@ export const useSSE = () => {
           logger.error('[SSE] Failed to parse message_deleted event:', err);
         }
       });
+
+      eventSource.addEventListener('message_status_updated', (event) => {
+        if (!isMountedRef.current) return;
+
+        try {
+          const data = JSON.parse(event.data);
+          logger.debug('[SSE] message_status_updated event:', data);
+          setLastStatusUpdate(data);
+        } catch (err) {
+          logger.error('[SSE] Failed to parse message_status_updated event:', err);
+        }
+      });
     } catch (err) {
       logger.error('[SSE] Failed to create EventSource:', err);
 
@@ -125,6 +138,7 @@ export const useSSE = () => {
     isConnected,
     lastMessage,
     lastDeletedMessage,
+    lastStatusUpdate,
     reconnect,
   };
 };

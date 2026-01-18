@@ -298,17 +298,16 @@ func (h *ChatHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 		Offset: offset,
 	}
 
-	messages, err := h.chatService.GetChatHistory(ctx, session.UserID, getReq)
+	messages, err := h.chatService.GetChatHistory(ctx, session.UserID, string(session.UserRole), getReq)
 	if err != nil {
-		// Логируем полную ошибку для диагностики
 		log.Error().Err(err).
 			Str("user_id", session.UserID.String()).
 			Str("room_id", parsedRoomID.String()).
+			Str("role", string(session.UserRole)).
 			Int("limit", limit).
 			Int("offset", offset).
 			Str("method", "GetChatHistory").
 			Msg("Failed to retrieve chat history")
-		// Возвращаем клиенту только обобщённое сообщение
 		response.BadRequest(w, response.ErrCodeInternalError, "Unable to retrieve messages")
 		return
 	}

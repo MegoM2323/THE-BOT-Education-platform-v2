@@ -40,6 +40,13 @@ func (rw *responseWriter) BytesWritten() int {
 	return rw.bytesWritten
 }
 
+// Flush implements http.Flusher for SSE support
+func (rw *responseWriter) Flush() {
+	if f, ok := rw.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
 // LoggingMiddleware логирует HTTP-запросы
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

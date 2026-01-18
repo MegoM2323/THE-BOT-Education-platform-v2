@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import ChatList from '../components/chat/ChatList.jsx';
 import ChatWindow from '../components/chat/ChatWindow.jsx';
 import './ChatPage.css';
@@ -9,7 +9,6 @@ import './ChatPage.css';
  */
 const ChatPage = () => {
   const { roomId } = useParams();
-  const navigate = useNavigate();
 
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [showMobileChat, setShowMobileChat] = useState(false);
@@ -18,13 +17,10 @@ const ChatPage = () => {
    * Обработчик выбора комнаты
    */
   const handleRoomSelect = (room) => {
+    console.log('[ChatPage] handleRoomSelect called with room:', room);
     setSelectedRoom(room);
     setShowMobileChat(true);
-
-    // Обновить URL
-    if (room?.id) {
-      navigate(`/chat/${room.id}`, { replace: true });
-    }
+    console.log('[ChatPage] selectedRoom set, showMobileChat set to true');
   };
 
   /**
@@ -33,7 +29,7 @@ const ChatPage = () => {
   const handleBackToList = () => {
     setShowMobileChat(false);
     setSelectedRoom(null);
-    navigate('/chat', { replace: true });
+    // URL не обновляем - работаем через state для совместимости со всеми ролями
   };
 
   /**
@@ -45,6 +41,8 @@ const ChatPage = () => {
       setShowMobileChat(true);
     }
   }, [roomId]);
+
+  console.log('[ChatPage] Render - selectedRoom:', selectedRoom, 'showMobileChat:', showMobileChat);
 
   return (
     <div className="chat-page">

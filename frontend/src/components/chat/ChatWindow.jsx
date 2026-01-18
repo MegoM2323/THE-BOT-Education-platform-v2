@@ -14,7 +14,7 @@ import './ChatWindow.css';
 const ChatWindow = ({ room }) => {
   const { user } = useAuth();
   const { showNotification } = useNotification();
-  const { lastMessage, lastDeletedMessage, isConnected } = useSSE();
+  const { lastMessage, lastDeletedMessage, lastStatusUpdate, isConnected } = useSSE();
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,6 +93,25 @@ const ChatWindow = ({ room }) => {
 
     logger.debug('[ChatWindow] SSE message deleted:', lastDeletedMessage.message_id);
   }, [lastDeletedMessage, room?.id]);
+
+  /**
+   * SSE: Обработка обновления статуса сообщения
+   */
+  useEffect(() => {
+    if (!lastStatusUpdate || !room?.id) return;
+
+    if (lastStatusUpdate.chat_id !== room.id) return;
+
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === lastStatusUpdate.message_id
+          ? { ...msg, status: lastStatusUpdate.status }
+          : msg
+      )
+    );
+
+    logger.debug('[ChatWindow] SSE message status updated:', lastStatusUpdate.message_id, lastStatusUpdate.status);
+  }, [lastStatusUpdate, room?.id]);
 
   /**
    * Автоскролл к последнему сообщению

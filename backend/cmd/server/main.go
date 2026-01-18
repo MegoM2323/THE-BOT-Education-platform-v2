@@ -258,56 +258,56 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	if cfg.Telegram.BotToken != "" {
 		telegramClient = telegram.NewClientWithProxy(cfg.Telegram.BotToken, cfg.Telegram.ProxyURL)
 
-		// Validate bot token by calling getMe
+		// Validate bot token by calling getMe - but don't fail startup if Telegram is unavailable
 		botInfo, err := telegramClient.GetMe()
 		if err != nil {
-			// Return error instead of fatal - allows cleanup on error
-			return fmt.Errorf("invalid Telegram bot token: %w", err)
-		}
-		botUsername = botInfo.Username
-		log.Info().Str("bot_username", botUsername).Msg("Telegram bot connected")
-
-		// Setup webhook if in production mode
-		if cfg.IsProduction() {
-			webhookURL := cfg.GetWebhookURL()
-			if webhookURL == "" {
-				// Return error instead of fatal - allows cleanup on error
-				return fmt.Errorf("PRODUCTION_DOMAIN is required for Telegram webhook")
-			}
-
-			if err := telegramClient.SetWebhook(webhookURL, cfg.Telegram.WebhookSecret); err != nil {
-				// Log warning but don't fail startup - webhook will be retried in background
-				log.Warn().Err(err).Str("webhook_url", webhookURL).Msg("Failed to register Telegram webhook on startup, will retry in background")
-
-				// Background task to retry webhook setup after nginx is ready
-				go func() {
-					maxRetries := 30
-					for attempt := 0; attempt < maxRetries; attempt++ {
-						time.Sleep(2 * time.Second)
-						if err := telegramClient.SetWebhook(webhookURL, cfg.Telegram.WebhookSecret); err == nil {
-							log.Info().Str("webhook_url", webhookURL).Msg("Telegram webhook registered successfully (background retry)")
-							return
-						}
-						if attempt%5 == 0 {
-							log.Debug().Err(err).Int("attempt", attempt+1).Msg("Retrying Telegram webhook registration")
-						}
-					}
-					log.Error().Str("webhook_url", webhookURL).Msg("Failed to register Telegram webhook after maximum retries")
-				}()
-			} else {
-				log.Info().Str("webhook_url", webhookURL).Msg("Telegram webhook registered")
-			}
+			// Log warning and continue without Telegram - network issues shouldn't prevent app startup
+			log.Warn().Err(err).Msg("Failed to connect to Telegram API (network issue?). Telegram features will be disabled")
+			telegramClient = nil
 		} else {
-			// In development, remove webhook (use polling mode)
-			if err := telegramClient.DeleteWebhook(); err != nil {
-				log.Warn().Err(err).Msg("Failed to delete Telegram webhook")
-			}
-			log.Info().Msg("Telegram polling mode enabled (development)")
-		}
+			botUsername = botInfo.Username
+			log.Info().Str("bot_username", botUsername).Msg("Telegram bot connected")
 
-		// Validate admin Telegram ID if configured
-		if cfg.Telegram.AdminTelegramID <= 0 {
-			log.Warn().Msg("ADMIN_TELEGRAM_ID not configured, admin notifications will be skipped")
+			// Setup webhook if in production mode
+			if cfg.IsProduction() {
+				webhookURL := cfg.GetWebhookURL()
+				if webhookURL == "" {
+					log.Warn().Msg("PRODUCTION_DOMAIN is required for Telegram webhook, disabling Telegram")
+					telegramClient = nil
+				} else if err := telegramClient.SetWebhook(webhookURL, cfg.Telegram.WebhookSecret); err != nil {
+					// Log warning but don't fail startup - webhook will be retried in background
+					log.Warn().Err(err).Str("webhook_url", webhookURL).Msg("Failed to register Telegram webhook on startup, will retry in background")
+
+					// Background task to retry webhook setup after nginx is ready
+					go func() {
+						maxRetries := 30
+						for attempt := 0; attempt < maxRetries; attempt++ {
+							time.Sleep(2 * time.Second)
+							if err := telegramClient.SetWebhook(webhookURL, cfg.Telegram.WebhookSecret); err == nil {
+								log.Info().Str("webhook_url", webhookURL).Msg("Telegram webhook registered successfully (background retry)")
+								return
+							}
+							if attempt%5 == 0 {
+								log.Debug().Err(err).Int("attempt", attempt+1).Msg("Retrying Telegram webhook registration")
+							}
+						}
+						log.Error().Str("webhook_url", webhookURL).Msg("Failed to register Telegram webhook after maximum retries")
+					}()
+				} else {
+					log.Info().Str("webhook_url", webhookURL).Msg("Telegram webhook registered")
+				}
+			} else {
+				// In development, remove webhook (use polling mode)
+				if err := telegramClient.DeleteWebhook(); err != nil {
+					log.Warn().Err(err).Msg("Failed to delete Telegram webhook")
+				}
+				log.Info().Msg("Telegram polling mode enabled (development)")
+			}
+
+			// Validate admin Telegram ID if configured
+			if cfg.Telegram.AdminTelegramID <= 0 {
+				log.Warn().Msg("ADMIN_TELEGRAM_ID not configured, admin notifications will be skipped")
+			}
 		}
 	} else {
 		log.Warn().Msg("Telegram is not configured (TELEGRAM_BOT_TOKEN not set). Telegram features will be disabled")

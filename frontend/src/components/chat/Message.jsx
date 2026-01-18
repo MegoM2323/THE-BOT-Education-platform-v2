@@ -150,8 +150,8 @@ const Message = ({ message, currentUserId, roomId }) => {
             })}
           </span>
 
-          {/* Статус модерации (только для своих сообщений) */}
-          {isOwnMessage && message.status && (
+          {/* Статус модерации (только для своих сообщений, не показываем для delivered) */}
+          {isOwnMessage && message.status && message.status !== 'delivered' && (
             <span
               className={`message-status ${getModerationStatusClass(message.status)}`}
               title={getModerationStatusText(message.status)}

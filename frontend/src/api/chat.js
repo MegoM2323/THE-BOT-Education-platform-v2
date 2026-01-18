@@ -63,7 +63,7 @@ export const getMyRooms = async () => {
  */
 export const getAllRooms = async () => {
   try {
-    const response = await apiClient.get("/chat/admin/chats");
+    const response = await apiClient.get("/admin/chats");
     const chats = response?.chats || response;
     return Array.isArray(chats) ? chats : [];
   } catch (error) {
@@ -165,7 +165,7 @@ export const getMessages = async (roomId, limit = 50, offset = 0) => {
 export const downloadFile = async (roomId, fileId, signal) => {
   try {
     // Для blob ответов используем прямой fetch с сигналом
-    const baseURL = import.meta.env.VITE_API_URL || "/api";
+    const baseURL = import.meta.env.VITE_API_URL || "/api/v1";
     const response = await fetch(
       `${baseURL}/chat/rooms/${roomId}/files/${fileId}`,
       {
@@ -201,7 +201,7 @@ export const downloadFile = async (roomId, fileId, signal) => {
  * @returns {string} URL для скачивания
  */
 export const getFileDownloadURL = (roomId, fileId) => {
-  const baseURL = import.meta.env.VITE_API_URL || "/api";
+  const baseURL = import.meta.env.VITE_API_URL || "/api/v1";
   return `${baseURL}/chat/rooms/${roomId}/files/${fileId}`;
 };
 

@@ -206,14 +206,14 @@ func (s *ChatService) SendMessage(ctx context.Context, senderID uuid.UUID, req *
 	}
 
 	// Запускаем асинхронную модерацию
-	go s.moderateMessageAsync(message.ID, message.MessageText)
+	go s.moderateMessageAsync(message.ID, message.RoomID)
 
 	return message, nil
 }
 
 // moderateMessageAsync выполняет асинхронную модерацию сообщения
 // Вызывается в горутине из SendMessage
-func (s *ChatService) moderateMessageAsync(messageID uuid.UUID, messageText string) {
+func (s *ChatService) moderateMessageAsync(messageID uuid.UUID, roomID uuid.UUID) {
 	ctx := context.Background()
 
 	// Используем новый ModerationService с автоматическим fallback и circuit breaker
@@ -224,45 +224,39 @@ func (s *ChatService) moderateMessageAsync(messageID uuid.UUID, messageText stri
 	}
 
 	// Если ModerationService не инициализирован, просто доставляем сообщение
-	var blocked bool
-	var reason string
-	blocked = false
-	reason = ""
-
-	// Обновляем статус сообщения
-	var newStatus string
-	if blocked {
-		newStatus = string(models.MessageStatusBlocked)
-	} else {
-		newStatus = string(models.MessageStatusDelivered)
-	}
+	newStatus := string(models.MessageStatusDelivered)
 
 	if err := s.chatRepo.UpdateMessageStatus(ctx, messageID, newStatus); err != nil {
 		fmt.Printf("[ERROR] Failed to update message status for %s: %v\n", messageID, err)
 		return
 	}
 
-	if blocked {
-		fmt.Printf("[INFO] Message %s blocked: %s\n", messageID, reason)
+	// Отправляем SSE уведомление об изменении статуса
+	if s.sseManager != nil {
+		event := models.MessageStatusUpdatedEvent(roomID, messageID, newStatus)
+		sseEvent := sse.EventUUID{
+			Type: event.Type,
+			Data: event.Data,
+		}
+		s.sseManager.SendToChat(roomID, sseEvent, uuid.Nil)
 	}
 }
 
 // GetChatHistory получает историю сообщений в комнате
 // Возвращает только delivered сообщения (не показывает blocked)
-func (s *ChatService) GetChatHistory(ctx context.Context, userID uuid.UUID, req *models.GetMessagesRequest) ([]*models.Message, error) {
-	// Валидация запроса
+// Админы могут читать любые чаты без проверки участия
+func (s *ChatService) GetChatHistory(ctx context.Context, userID uuid.UUID, role string, req *models.GetMessagesRequest) ([]*models.Message, error) {
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 
-	// Получаем комнату
 	room, err := s.chatRepo.GetRoomByID(ctx, req.RoomID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get room: %w", err)
 	}
 
-	// Проверяем что пользователь — участник комнаты
-	if !room.IsParticipant(userID) {
+	isAdmin := role == string(models.RoleAdmin)
+	if !isAdmin && !room.IsParticipant(userID) {
 		return nil, repository.ErrUnauthorized
 	}
 
