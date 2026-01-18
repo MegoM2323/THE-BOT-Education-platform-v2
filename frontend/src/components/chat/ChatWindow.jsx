@@ -151,7 +151,7 @@ const ChatWindow = ({ room }) => {
       }
     } catch (error) {
       console.error('[ChatWindow] Ошибка отправки сообщения:', error);
-      const errorMsg = error.response?.data?.message || error.message || 'Не удалось отправить сообщение';
+      const errorMsg = error.data?.error?.message || error.message || 'Не удалось отправить сообщение';
       showNotification(errorMsg, 'error');
     } finally {
       setSending(false);

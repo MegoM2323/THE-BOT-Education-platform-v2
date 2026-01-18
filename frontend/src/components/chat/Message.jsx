@@ -54,7 +54,7 @@ const Message = ({ message, currentUserId, roomId }) => {
       const url = getFileDownloadURL(roomId, attachment.id);
       const link = document.createElement('a');
       link.href = url;
-      link.download = attachment.filename || 'download';
+      link.download = attachment.file_name || 'download';
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -121,8 +121,8 @@ const Message = ({ message, currentUserId, roomId }) => {
                   {getFileIcon(attachment.mime_type)}
                 </span>
                 <div className="attachment-info">
-                  <div className="attachment-filename" title={attachment.filename}>
-                    {attachment.filename}
+                  <div className="attachment-filename" title={attachment.file_name}>
+                    {attachment.file_name}
                   </div>
                   <div className="attachment-size">
                     {formatFileSize(attachment.file_size)}
@@ -151,12 +151,12 @@ const Message = ({ message, currentUserId, roomId }) => {
           </span>
 
           {/* Статус модерации (только для своих сообщений) */}
-          {isOwnMessage && message.moderation_status && (
+          {isOwnMessage && message.status && (
             <span
-              className={`message-status ${getModerationStatusClass(message.moderation_status)}`}
-              title={getModerationStatusText(message.moderation_status)}
+              className={`message-status ${getModerationStatusClass(message.status)}`}
+              title={getModerationStatusText(message.status)}
             >
-              {getModerationStatusText(message.moderation_status)}
+              {getModerationStatusText(message.status)}
             </span>
           )}
         </div>

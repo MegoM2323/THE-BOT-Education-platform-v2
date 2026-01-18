@@ -214,7 +214,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
     } catch (error) {
       console.error("Ошибка создания комнаты:", error);
       const errorMsg =
-        error.response?.data?.message || "Не удалось открыть чат";
+        error.data?.error?.message || error.message || "Не удалось открыть чат";
       showNotification(errorMsg, "error");
     } finally {
       setCreatingRoom(null);
@@ -255,7 +255,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
     const msg = room.last_message;
 
     // Если сообщение заблокировано модерацией
-    if (msg.moderation_status === "blocked") {
+    if (msg.status === "blocked") {
       return "🚫 Сообщение заблокировано";
     }
 
