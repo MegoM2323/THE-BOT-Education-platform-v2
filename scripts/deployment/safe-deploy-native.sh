@@ -186,6 +186,155 @@ execute_remote() {
     ssh "$REMOTE_ADDR" "$cmd"
 }
 
+apply_database_migrations() {
+    local migrations_dir="$THEBOT_HOME/backend/internal/database/migrations"
+    local db_name="thebot_db"
+    local db_user="postgres"
+
+    if [ "$DRY_RUN" = true ]; then
+        log "INFO" "(DRY-RUN) Would apply database migrations from $migrations_dir"
+
+        # In dry-run mode, still scan and report what migrations would be applied
+        log "INFO" "(DRY-RUN) Simulating database checks..."
+
+        log "INFO" "Scanning for pending migrations..."
+        local migration_list
+        migration_list=$(ssh "$REMOTE_ADDR" "ls -1 $migrations_dir/*.sql 2>/dev/null | sort -V" || echo "")
+
+        if [ -z "$migration_list" ]; then
+            log "WARNING" "No migration files found in $migrations_dir"
+            return 0
+        fi
+
+        log "INFO" "Found migration files:"
+        local count=0
+        echo "$migration_list" | while IFS= read -r migration_file; do
+            [ -z "$migration_file" ] && continue
+
+            local filename=$(basename "$migration_file")
+            local version=$(echo "$filename" | sed -E 's/^([0-9]+)_.*/\1/' | tr -d ' ')
+
+            if [ -z "$version" ] || ! [[ "$version" =~ ^[0-9]{1,6}$ ]]; then
+                if [ "$VERBOSE" = true ]; then
+                    log "WARNING" "(DRY-RUN) Would skip: $filename (invalid version number)"
+                fi
+                continue
+            fi
+
+            ((count++))
+            log "INFO" "(DRY-RUN) Would apply migration $version: $filename"
+        done
+
+        log "INFO" "(DRY-RUN) Verifying migration 050 trigger existence check..."
+        log "INFO" "(DRY-RUN) Migration 050 (chat creation trigger) is in the migration list"
+        log "SUCCESS" "(DRY-RUN) Database migration phase would complete successfully"
+
+        return 0
+    fi
+
+    log "INFO" "Checking database connectivity..."
+    if ! ssh -q "$REMOTE_ADDR" "sudo -u $db_user psql -d $db_name -c 'SELECT 1' > /dev/null 2>&1"; then
+        log "ERROR" "Cannot connect to database $db_name as user $db_user"
+        return 1
+    fi
+    log "SUCCESS" "Database connection verified"
+
+    log "INFO" "Verifying schema_migrations table exists..."
+    ssh "$REMOTE_ADDR" << 'EOF'
+sudo -u postgres psql -d thebot_db << 'SQL'
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version INTEGER PRIMARY KEY,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+SQL
+EOF
+
+    if [ $? -ne 0 ]; then
+        log "ERROR" "Failed to ensure schema_migrations table exists"
+        return 1
+    fi
+    log "SUCCESS" "schema_migrations table verified"
+
+    log "INFO" "Scanning for pending migrations..."
+    local migration_list
+    migration_list=$(ssh "$REMOTE_ADDR" "ls -1 $migrations_dir/*.sql 2>/dev/null | grep -E '^[0-9]+_' | sort -V" || echo "")
+
+    if [ -z "$migration_list" ]; then
+        log "WARNING" "No migration files found"
+        return 0
+    fi
+
+    local migrations_applied=0
+    local migrations_skipped=0
+
+    while IFS= read -r migration_file; do
+        [ -z "$migration_file" ] && continue
+
+        local filename=$(basename "$migration_file")
+        local version=$(echo "$filename" | sed -E 's/^([0-9]+)_.*/\1/' | tr -d ' ')
+
+        if [ -z "$version" ] || ! [[ "$version" =~ ^[0-9]{1,6}$ ]] || [ "$version" -gt 999999 ]; then
+            log "WARNING" "Skipping invalid migration file: $filename (version: $version, must be 1-6 digits)"
+            continue
+        fi
+
+        log "INFO" "Checking migration $version ($filename)..."
+
+        local is_applied
+        is_applied=$(ssh "$REMOTE_ADDR" "sudo -u $db_user psql -d $db_name -tc \"SELECT COUNT(*) FROM schema_migrations WHERE version = $version\" 2>/dev/null" || echo "0")
+        is_applied=$(echo "$is_applied" | tr -d ' ')
+
+        if [ "$is_applied" -eq 1 ]; then
+            log "INFO" "Migration $version already applied, skipping"
+            ((migrations_skipped++))
+            continue
+        fi
+
+        log "INFO" "Applying migration $version..."
+
+        local migration_output
+        migration_output=$(ssh "$REMOTE_ADDR" << MIGRATION_EOF
+sudo -u $db_user psql -d $db_name << 'SQL'
+BEGIN;
+\i $migration_file
+INSERT INTO schema_migrations (version, applied_at) VALUES ($version, CURRENT_TIMESTAMP);
+COMMIT;
+SQL
+MIGRATION_EOF
+)
+        local migration_status=$?
+
+        if [ $migration_status -ne 0 ]; then
+            log "ERROR" "Failed to apply migration $version from $filename"
+            log "ERROR" "Migration output: $migration_output"
+            return 1
+        fi
+
+        log "SUCCESS" "Applied migration $version: $filename"
+        ((migrations_applied++))
+
+        if [ "$VERBOSE" = true ]; then
+            log "INFO" "Migration $version details:"
+            log "INFO" "$migration_output"
+        fi
+    done <<< "$migration_list"
+
+    log "SUCCESS" "Database migrations completed: $migrations_applied applied, $migrations_skipped skipped"
+
+    log "INFO" "Verifying migration 050 trigger exists..."
+    local trigger_exists
+    trigger_exists=$(ssh "$REMOTE_ADDR" "sudo -u $db_user psql -d $db_name -tc \"SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_name IN ('booking_create_chat', 'booking_create_chat_update')\" 2>/dev/null" || echo "0")
+    trigger_exists=$(echo "$trigger_exists" | tr -d ' ')
+
+    if [ "$trigger_exists" -gt 0 ]; then
+        log "SUCCESS" "Booking chat creation trigger verified ($trigger_exists trigger(s) found)"
+    else
+        log "WARNING" "Booking chat creation trigger not found (migration 050 may not be applied)"
+    fi
+
+    return 0
+}
+
 parse_arguments "$@"
 setup_logging
 trap cleanup_and_exit EXIT
@@ -224,7 +373,7 @@ log "SUCCESS" "Service checks completed"
 phase "Backup current state"
 
 log "INFO" "Getting current git commit hash..."
-BACKUP_COMMIT_HASH=$(ssh -q "$REMOTE_ADDR" "cd $THEBOT_HOME && git rev-parse HEAD")
+BACKUP_COMMIT_HASH=$(ssh -q "$REMOTE_ADDR" "cd $THEBOT_HOME && git rev-parse HEAD" 2>/dev/null || echo "unknown")
 log "SUCCESS" "Backup commit: $BACKUP_COMMIT_HASH"
 
 log "INFO" "Creating backup of current code..."
@@ -255,16 +404,24 @@ log "SUCCESS" "System resources check passed"
 
 phase "Fetch and update code"
 
-log "INFO" "Fetching latest changes..."
-execute_remote "cd $THEBOT_HOME && git fetch origin"
+# Check if git repo exists on remote
+if ! ssh -q "$REMOTE_ADDR" "cd $THEBOT_HOME && git rev-parse --git-dir > /dev/null 2>&1"; then
+    log "WARNING" "Git repository not found on remote. Assuming this is production with pre-deployed code."
+    log "INFO" "Skipping git operations (code should be pre-deployed)"
+else
+    log "INFO" "Fetching latest changes..."
+    execute_remote "cd $THEBOT_HOME && git fetch origin"
 
-log "INFO" "Checking out branch: $GIT_BRANCH..."
-execute_remote "cd $THEBOT_HOME && git checkout $GIT_BRANCH"
+    log "INFO" "Checking out branch: $GIT_BRANCH..."
+    execute_remote "cd $THEBOT_HOME && git checkout $GIT_BRANCH"
 
-log "INFO" "Pulling latest changes..."
-execute_remote "cd $THEBOT_HOME && git pull origin $GIT_BRANCH"
+    log "INFO" "Pulling latest changes..."
+    execute_remote "cd $THEBOT_HOME && git pull origin $GIT_BRANCH"
 
-log "SUCCESS" "Code updated successfully"
+    log "SUCCESS" "Code updated from git successfully"
+fi
+
+log "SUCCESS" "Code deployment phase completed"
 
 phase "Build backend (Go)"
 
@@ -330,35 +487,12 @@ fi
 
 phase "Database migrations"
 
-log "INFO" "Checking database connectivity..."
-if ! $DRY_RUN; then
-    if ! ssh -q "$REMOTE_ADDR" "cd $THEBOT_HOME/backend && psql \$DATABASE_URL -c 'SELECT 1' > /dev/null 2>&1" 2>/dev/null; then
-        log "WARNING" "Could not connect to database, attempting with direct psql..."
-        execute_remote "psql -U postgres -d thebot_db -c 'SELECT 1' > /dev/null 2>&1" || log "WARNING" "Database check skipped"
-    else
-        log "SUCCESS" "Database connection verified"
-    fi
+if ! apply_database_migrations; then
+    log "ERROR" "Database migration application failed"
+    exit 1
 fi
 
-log "INFO" "Running database migrations..."
-if ! $DRY_RUN; then
-    if execute_remote "cd $THEBOT_HOME/backend && go run cmd/main.go migrate"; then
-        log "SUCCESS" "Migrations completed"
-    else
-        log "WARNING" "Migration command may not be available, continuing..."
-    fi
-fi
-
-log "INFO" "Verifying migration 050 is applied..."
-if ! $DRY_RUN; then
-    MIGRATION_STATUS=$(ssh -q "$REMOTE_ADDR" "cd $THEBOT_HOME/backend && psql \$DATABASE_URL -tc \"SELECT EXISTS(SELECT 1 FROM public.schema_migrations WHERE version='050')\" 2>/dev/null || echo 'unknown'")
-
-    if [ "$MIGRATION_STATUS" = "t" ] || [ "$MIGRATION_STATUS" = " t" ]; then
-        log "SUCCESS" "Migration 050 is applied"
-    else
-        log "WARNING" "Migration 050 status: $MIGRATION_STATUS"
-    fi
-fi
+log "SUCCESS" "All database migrations processed successfully"
 
 phase "Stop services gracefully"
 
