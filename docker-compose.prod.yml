@@ -20,7 +20,7 @@ services:
       - tutoring-network
 
   backend:
-    image: debian:bookworm-slim
+    image: gcr.io/distroless/static-debian12
     container_name: tutoring-backend
     restart: unless-stopped
     working_dir: /app
@@ -28,6 +28,8 @@ services:
     dns:
       - 8.8.8.8
       - 8.8.4.4
+    extra_hosts:
+      - "api.telegram.org:149.154.166.110"
     depends_on:
       postgres:
         condition: service_healthy

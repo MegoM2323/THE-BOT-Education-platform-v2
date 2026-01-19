@@ -143,6 +143,27 @@ BACKUP_SCRIPT
     log_success "Database backup completed"
 }
 
+# Build backend binary (statically linked for distroless container)
+build_backend() {
+    log_step "Building backend binary (statically linked)..."
+
+    if ! command -v go &> /dev/null; then
+        log_error "Go is not installed"
+        exit 1
+    fi
+
+    cd "$PROJECT_DIR/backend"
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/server ./cmd/server/main.go
+
+    if [ ! -f "bin/server" ]; then
+        log_error "Failed to build backend binary"
+        exit 1
+    fi
+
+    log_success "Backend binary built: $(ls -lh bin/server | awk '{print $5}')"
+    cd "$PROJECT_DIR"
+}
+
 # Deploy with Docker (preserving database)
 deploy_docker_safe() {
     log_step "Starting Docker deployment (with database preservation)..."
@@ -399,6 +420,7 @@ main() {
     fi
 
     if [ "$DEPLOY_MODE" = "docker" ]; then
+        build_backend
         deploy_docker_safe
     else
         log_error "Legacy mode not yet implemented in this script"
