@@ -78,14 +78,20 @@ check_ssh() {
 backup_database() {
     log_step "Creating backup of production database..."
 
-    ssh "$REMOTE_HOST" bash -s << 'BACKUP_SCRIPT'
-set -euo pipefail
+    BACKUP_RESULT=$(ssh "$REMOTE_HOST" bash -s << 'BACKUP_SCRIPT'
+set -uo pipefail
 
 REMOTE_DIR="/opt/THE_BOT_platform"
 BACKUP_DIR="$REMOTE_DIR/backups"
 
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
+
+# Check if .env exists
+if [ ! -f "$REMOTE_DIR/.env" ]; then
+    echo "SKIP: No .env file found (first deployment?)"
+    exit 0
+fi
 
 # Get database credentials
 DB_USER=$(grep "^DB_USER=" "$REMOTE_DIR/.env" 2>/dev/null | cut -d'=' -f2 || echo "tutoring")
@@ -99,48 +105,74 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/db_backup_${TIMESTAMP}.sql"
 BACKUP_FILE_GZ="$BACKUP_FILE.gz"
 
-echo "Creating database backup..."
+echo "Attempting database backup..."
+echo "  DB_USER: $DB_USER"
+echo "  DB_NAME: $DB_NAME"
 
-# Backup using docker exec if PostgreSQL is in container
-if docker ps 2>/dev/null | grep -q tutoring-postgres; then
-    docker exec tutoring-postgres pg_dump \
-        -U "$DB_USER" \
-        -d "$DB_NAME" \
-        --no-owner \
-        --no-privileges \
-        > "$BACKUP_FILE" 2>/dev/null || {
-        echo "Error: Docker backup failed"
-        exit 1
-    }
-else
-    # Try native PostgreSQL if not in Docker
-    PGPASSWORD="$DB_PASSWORD" pg_dump \
-        -h "$DB_HOST" \
-        -p "$DB_PORT" \
-        -U "$DB_USER" \
-        -d "$DB_NAME" \
-        --no-owner \
-        --no-privileges \
-        > "$BACKUP_FILE" 2>/dev/null || {
-        echo "Warning: Native PostgreSQL backup failed, container might be down"
-        # This is not fatal - we'll try to preserve the data anyway
-        rm -f "$BACKUP_FILE"
-        exit 0
-    }
+# Check if PostgreSQL container is running
+if ! docker ps 2>/dev/null | grep -q tutoring-postgres; then
+    echo "SKIP: PostgreSQL container 'tutoring-postgres' not running (first deployment or container down)"
+    exit 0
 fi
 
-if [ -f "$BACKUP_FILE" ]; then
-    # Compress backup
-    gzip -f "$BACKUP_FILE"
+echo "  Container: tutoring-postgres is running"
 
-    # Keep only last 5 backups
-    ls -t "$BACKUP_DIR"/db_backup_*.sql.gz 2>/dev/null | tail -n +6 | xargs -r rm
-
-    echo "✓ Backup created: $(du -h "$BACKUP_FILE_GZ" | cut -f1)"
+# Check if PostgreSQL is ready to accept connections
+if ! docker exec tutoring-postgres pg_isready -U "$DB_USER" -d "$DB_NAME" 2>&1; then
+    echo "SKIP: PostgreSQL is not ready to accept connections"
+    exit 0
 fi
+
+echo "  PostgreSQL: ready"
+
+# Perform backup
+echo "  Running pg_dump..."
+DUMP_OUTPUT=$(docker exec tutoring-postgres pg_dump \
+    -U "$DB_USER" \
+    -d "$DB_NAME" \
+    --no-owner \
+    --no-privileges 2>&1)
+DUMP_EXIT=$?
+
+if [ $DUMP_EXIT -ne 0 ]; then
+    echo "ERROR: pg_dump failed with exit code $DUMP_EXIT"
+    echo "Output: $DUMP_OUTPUT"
+    # Don't exit with error - backup failure shouldn't stop deployment
+    echo "WARN: Continuing without backup"
+    exit 0
+fi
+
+# Write backup to file
+echo "$DUMP_OUTPUT" > "$BACKUP_FILE"
+
+# Check if backup file has content
+if [ ! -s "$BACKUP_FILE" ]; then
+    echo "WARN: Backup file is empty (database might be empty)"
+    rm -f "$BACKUP_FILE"
+    exit 0
+fi
+
+# Compress backup
+gzip -f "$BACKUP_FILE"
+
+# Keep only last 5 backups
+ls -t "$BACKUP_DIR"/db_backup_*.sql.gz 2>/dev/null | tail -n +6 | xargs -r rm
+
+echo "OK: Backup created: $(du -h "$BACKUP_FILE_GZ" | cut -f1)"
 BACKUP_SCRIPT
+    )
 
-    log_success "Database backup completed"
+    echo "$BACKUP_RESULT"
+
+    if echo "$BACKUP_RESULT" | grep -q "^OK:"; then
+        log_success "Database backup completed"
+    elif echo "$BACKUP_RESULT" | grep -q "^SKIP:"; then
+        log_info "Database backup skipped (see details above)"
+    elif echo "$BACKUP_RESULT" | grep -q "^WARN:"; then
+        log_info "Database backup had warnings, continuing deployment"
+    else
+        log_info "Backup status unknown, continuing deployment"
+    fi
 }
 
 # Build backend binary (statically linked for distroless container)
@@ -168,15 +200,19 @@ build_backend() {
 deploy_docker_safe() {
     log_step "Starting Docker deployment (with database preservation)..."
 
-    # Copy all files (same as original deploy-ssh.sh)
-    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend $REMOTE_DIR/frontend"
+    # Stop containers first to release file locks on binary
+    log_info "Stopping containers before file copy..."
+    ssh "$REMOTE_HOST" "bash -c 'cd $REMOTE_DIR && docker-compose -f docker-compose.prod.yml down 2>/dev/null || true'"
+
+    # Create directories with proper permissions
+    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend/bin $REMOTE_DIR/frontend && chmod 755 $REMOTE_DIR/backend/bin"
 
     log_info "Copying Docker configuration..."
     scp "$PROJECT_DIR/docker-compose.prod.yml" "$REMOTE_HOST:$REMOTE_DIR/"
 
-    # Copy pre-built binary instead of source (avoid Docker build DNS issues)
+    # Copy pre-built binary - remove old one first to avoid "text file busy" error
     log_info "Copying pre-built backend binary..."
-    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend/bin"
+    ssh "$REMOTE_HOST" "rm -f $REMOTE_DIR/backend/bin/server"
     scp "$PROJECT_DIR/backend/bin/server" "$REMOTE_HOST:$REMOTE_DIR/backend/bin/server"
     ssh "$REMOTE_HOST" "chmod +x $REMOTE_DIR/backend/bin/server"
 

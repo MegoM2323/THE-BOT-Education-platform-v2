@@ -56,39 +56,31 @@ h6 {
 }
 
 h1 {
-  font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
-  margin-bottom: var(--spacing-lg);
   line-height: 1.2;
 }
 
 h2 {
-  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
-  margin-bottom: var(--spacing-md);
   line-height: 1.3;
 }
 
 h3 {
-  font-size: var(--font-size-2xl);
-  margin-bottom: var(--spacing-md);
+  line-height: 1.3;
 }
 
 h4 {
-  font-size: var(--font-size-xl);
-  margin-bottom: var(--spacing-sm);
+  line-height: 1.3;
 }
 
 h5 {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--spacing-sm);
+  line-height: 1.3;
 }
 
 h6 {
-  font-size: var(--font-size-base);
-  margin-bottom: var(--spacing-xs);
+  line-height: 1.3;
 }
 
 p {
@@ -210,12 +202,14 @@ select:focus {
   width: 100%;
   max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: 0 var(--spacing-lg);
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
 }
 
 .container-fluid {
   width: 100%;
-  padding: 0 var(--spacing-lg);
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
 }
 
 .text-center {
@@ -711,54 +705,27 @@ table {
 /* Responsive */
 @media (max-width: 1024px) {
   .container {
-    padding: 0 var(--spacing-md);
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
   }
 
   .card-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: var(--spacing-md);
   }
-
-  /* Typography scaling for tablet landscape */
-  h1 {
-    font-size: 2.5rem; /* Between 4xl and 3xl */
-  }
-
-  h2 {
-    font-size: 2rem; /* Between 3xl and 2xl */
-  }
-
-  h3 {
-    font-size: 1.5rem; /* Between 2xl and xl */
-  }
 }
 
 @media (max-width: 768px) {
-  html {
-    /* font-size: 14px; - УДАЛЕНО: вызывает проблемы масштабирования rem-единиц */
-  }
-
-  /* Typography scaling for tablet portrait */
-  h1 {
-    font-size: var(--font-size-3xl);
-  }
-
-  h2 {
-    font-size: var(--font-size-2xl);
-  }
-
-  h3 {
-    font-size: var(--font-size-xl);
-  }
-
   .container {
-    padding: 0 var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
     max-width: 100%;
     width: 100%;
   }
 
   .container-fluid {
-    padding: 0 var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
     max-width: 100%;
     width: 100%;
   }
@@ -784,47 +751,7 @@ table {
   }
 }
 
-@media (max-width: 640px) {
-  /* Typography scaling for small tablets */
-  h1 {
-    font-size: 2rem; /* Between 3xl and 2xl */
-  }
-
-  h2 {
-    font-size: 1.625rem; /* Between 2xl and xl */
-  }
-
-  h3 {
-    font-size: 1.25rem; /* xl */
-  }
-
-  h4 {
-    font-size: var(--font-size-lg);
-  }
-}
-
 @media (max-width: 480px) {
-  html {
-    /* font-size: 13px; - УДАЛЕНО: вызывает проблемы масштабирования rem-единиц */
-  }
-
-  /* Typography scaling for mobile */
-  h1 {
-    font-size: 1.75rem; /* Smaller for mobile */
-  }
-
-  h2 {
-    font-size: 1.5rem;
-  }
-
-  h3 {
-    font-size: 1.125rem;
-  }
-
-  h4 {
-    font-size: 1rem;
-  }
-
   .gap-lg {
     gap: var(--spacing-md);
   }

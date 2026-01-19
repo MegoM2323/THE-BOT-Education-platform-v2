@@ -166,20 +166,6 @@ describe('Landing Page Integration Tests (T010)', () => {
       expect(link).toHaveAttribute('href', '/login');
     });
 
-    it('should have "Личный кабинет" button in Hero linking to /login', () => {
-      render(
-        <BrowserRouter>
-          <Landing />
-        </BrowserRouter>
-      );
-
-      const loginButton = screen.getByText('Личный кабинет');
-      expect(loginButton).toBeInTheDocument();
-
-      const link = loginButton.closest('a');
-      expect(link).toHaveAttribute('href', '/login');
-    });
-
     it('should have "Подать заявку" button in CTA section linking to /login', () => {
       render(
         <BrowserRouter>
@@ -519,7 +505,7 @@ describe('Landing Page Integration Tests (T010)', () => {
       );
 
       const links = container.querySelectorAll('a');
-      expect(links.length).toBeGreaterThanOrEqual(3);
+      expect(links.length).toBeGreaterThanOrEqual(2);
 
       links.forEach(link => {
         expect(link).toHaveAttribute('href');

@@ -17,13 +17,12 @@ const Landing = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/login">
-              <Button type="button" size="lg" className="gradient-primary shadow-glow hover:opacity-90 transition-opacity">
+              <Button
+                type="button"
+                size="lg"
+                className="gradient-primary shadow-glow hover:opacity-90 transition-opacity"
+              >
                 Подать заявку
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button type="button" size="lg" variant="outline">
-                Личный кабинет
               </Button>
             </Link>
           </div>
