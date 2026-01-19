@@ -219,15 +219,10 @@ deploy_docker_safe() {
             { print }
         ' "$BASE_ENV" > /tmp/docker.env
 
-        # Disable Telegram bot to avoid DNS timeout crash during init
-        echo "" >> /tmp/docker.env
-        echo "# Telegram disabled to avoid DNS issues in Docker" >> /tmp/docker.env
-        echo "TELEGRAM_BOT_TOKEN=" >> /tmp/docker.env
-
         scp /tmp/docker.env "$REMOTE_HOST:$REMOTE_DIR/.env"
         rm -f /tmp/docker.env /tmp/existing.env
 
-        log_success ".env configuration deployed (existing credentials preserved, Telegram disabled)"
+        log_success ".env configuration deployed (existing credentials preserved)"
     fi
 
     # Deploy on remote server with DB safety measures (NO BUILD - use pre-built binary)

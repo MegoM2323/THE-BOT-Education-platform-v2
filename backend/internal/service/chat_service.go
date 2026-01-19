@@ -357,6 +357,38 @@ func (s *ChatService) GetAttachmentsByMessage(ctx context.Context, userID, messa
 	return attachments, nil
 }
 
+// GetAttachmentByID получает вложение по ID с проверкой доступа к комнате
+// Validation: проверяет что пользователь — участник комнаты, которой принадлежит сообщение с вложением
+func (s *ChatService) GetAttachmentByID(ctx context.Context, userID, roomID, attachmentID uuid.UUID) (*models.FileAttachment, error) {
+	// Проверяем доступ к комнате
+	room, err := s.chatRepo.GetRoomByID(ctx, roomID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get room: %w", err)
+	}
+
+	if !room.IsParticipant(userID) {
+		return nil, repository.ErrUnauthorized
+	}
+
+	// Получаем вложение по ID
+	attachment, err := s.chatRepo.GetAttachmentByID(ctx, attachmentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get attachment: %w", err)
+	}
+
+	// Проверяем что сообщение принадлежит запрошенной комнате
+	message, err := s.chatRepo.GetMessageByID(ctx, attachment.MessageID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get message: %w", err)
+	}
+
+	if message.RoomID != roomID {
+		return nil, repository.ErrUnauthorized
+	}
+
+	return attachment, nil
+}
+
 // GetMessageByIDInternal получает сообщение по ID без проверки авторизации
 // Используется для внутренних операций (например, проверки авторизации для скачивания файлов)
 func (s *ChatService) GetMessageByIDInternal(ctx context.Context, messageID uuid.UUID) (*models.Message, error) {

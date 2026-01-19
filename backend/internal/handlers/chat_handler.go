@@ -345,38 +345,23 @@ func (h *ChatHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	attachments, err := h.chatService.GetAttachmentsByMessage(ctx, session.UserID, parsedFileID)
+	attachment, err := h.chatService.GetAttachmentByID(ctx, session.UserID, parsedRoomID, parsedFileID)
 	if err != nil {
-		// Логируем полную ошибку для диагностики
 		log.Error().Err(err).
 			Str("user_id", session.UserID.String()).
 			Str("file_id", parsedFileID.String()).
 			Str("room_id", parsedRoomID.String()).
-			Str("method", "GetAttachmentsByMessage").
+			Str("method", "GetAttachmentByID").
 			Msg("Failed to retrieve attachment metadata")
-		// Возвращаем клиенту только обобщённое сообщение
 		response.BadRequest(w, response.ErrCodeChatFileNotFound, "File not found")
 		return
 	}
-
-	if len(attachments) == 0 {
-		log.Debug().
-			Str("user_id", session.UserID.String()).
-			Str("file_id", parsedFileID.String()).
-			Msg("No attachment found for file ID")
-		response.BadRequest(w, response.ErrCodeChatFileNotFound, "File not found")
-		return
-	}
-
-	attachment := attachments[0]
 
 	if _, err := os.Stat(attachment.FilePath); err != nil {
-		// Логируем полную ошибку для диагностики
 		log.Error().Err(err).
 			Str("file_path", attachment.FilePath).
 			Str("method", "DownloadFile:os.Stat").
 			Msg("File not found on disk")
-		// Возвращаем клиенту только обобщённое сообщение
 		response.BadRequest(w, response.ErrCodeChatFileNotFound, "File not available")
 		return
 	}
