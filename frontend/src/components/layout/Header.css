@@ -79,11 +79,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--spacing-sm);
   text-decoration: none;
   color: inherit;
   transition: all var(--transition-base);
   border: none;
   outline: none;
+}
+
+.header-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-logo-text {
+  background: linear-gradient(
+    90deg,
+    #8B5CF6 0%,
+    #A855F7 25%,
+    #EC4899 50%,
+    #F97316 75%,
+    #F59E0B 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: var(--font-weight-bold);
 }
 
 .header-logo:focus,

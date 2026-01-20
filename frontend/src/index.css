@@ -153,6 +153,43 @@ All colors MUST be HSL.
     background: var(--gradient-hero);
   }
 
+  .gradient-text {
+    background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary-glow)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    display: inline-block;
+  }
+
+  h1.gradient-text,
+  .gradient-text h1 {
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+
+  .text-gradient-thebot {
+    background: linear-gradient(
+      90deg,
+      #8B5CF6 0%,
+      #A855F7 25%,
+      #EC4899 50%,
+      #F97316 75%,
+      #F59E0B 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    display: inline-block;
+  }
+
+  h1.text-gradient-thebot,
+  .text-gradient-thebot h1 {
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }

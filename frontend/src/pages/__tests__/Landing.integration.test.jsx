@@ -262,12 +262,7 @@ describe('Landing Page Integration Tests (T010)', () => {
       );
 
       const heading = screen.getByText(/Образовательная платформа нового поколения/i);
-      expect(heading).toHaveClass('bg-gradient-to-r');
-      expect(heading).toHaveClass('from-primary');
-      expect(heading).toHaveClass('via-primary-glow');
-      expect(heading).toHaveClass('to-accent');
-      expect(heading).toHaveClass('bg-clip-text');
-      expect(heading).toHaveClass('text-transparent');
+      expect(heading).toHaveClass('gradient-text');
     });
 
     it('should have gradient-primary class on buttons', () => {

@@ -13,7 +13,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
   box-sizing: border-box;
-  background: rgba(37, 99, 235, 0.05);
+  background-color: rgba(37, 99, 235, 0.05);
   color: var(--text-primary);
   border: none;
   padding: var(--spacing-sm) var(--spacing-md);
@@ -47,12 +47,12 @@
 } */
 
 .btn:hover:not(:disabled) {
-  background: rgba(37, 99, 235, 0.15);
+  background-color: rgba(37, 99, 235, 0.15);
 }
 
 .btn:active:not(:disabled),
 .btn.btn-active:not(:disabled) {
-  background: #2563eb;
+  background-color: #2563eb;
   color: #ffffff;
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
@@ -76,7 +76,7 @@
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background: rgba(37, 99, 235, 0.03);
+  background-color: rgba(37, 99, 235, 0.03);
 }
 
 /* Sizes */
@@ -124,32 +124,37 @@
 }
 
 /* Primary variant */
-.btn-primary {
-  background: var(--primary-color);
-  color: #ffffff;
+.btn.btn-primary {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
   box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: #1d4ed8;
+.btn.btn-primary:hover:not(:disabled) {
+  background: #1d4ed8 !important;
+  background-color: #1d4ed8 !important;
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
 }
 
-.btn-primary:active:not(:disabled) {
-  background: #2563eb;
-  color: #ffffff;
+.btn.btn-primary:active:not(:disabled) {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
   box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
 }
 
 /* Активная кнопка (выбранная кнопка, например, для вида календарь/список) */
-.btn-primary.btn-active {
-  background: #2563eb;
-  color: #ffffff;
+.btn.btn-primary.btn-active {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
-.btn-primary.btn-active:hover:not(:disabled) {
-  background: #2563eb;
-  color: #ffffff;
+.btn.btn-primary.btn-active:hover:not(:disabled) {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
 /* Secondary variant */

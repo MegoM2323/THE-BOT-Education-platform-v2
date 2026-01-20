@@ -151,16 +151,16 @@ describe('Button CSS - Color & Style Verification', () => {
   });
 
   describe('CSS Variable Resolution', () => {
-    it('should use --primary-color variable correctly', () => {
-      const primaryColor = '#004231';
-      // Verify that primary-color is the dark green
-      expect(primaryColor).toBe('#004231');
+    it('should use --color-primary variable correctly', () => {
+      const primaryColor = '#2563eb';
+      // Verify that color-primary is the blue color
+      expect(primaryColor).toBe('#2563eb');
     });
 
     it('should not have undefined CSS variables in button styles', () => {
       // These are the key variables used in button styles
       const vars = [
-        '--primary-color',
+        '--color-primary',
         '--text-primary',
         '--spacing-sm',
         '--spacing-md',

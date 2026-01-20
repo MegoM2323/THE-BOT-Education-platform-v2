@@ -82,7 +82,22 @@ export const Header = () => {
             onClick={handleLogoClick}
             className="header-logo"
           >
-            <span className="header-logo-text"><strong>THE BOT</strong></span>
+            <div className="header-logo-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#8B5CF6" />
+                    <stop offset="100%" stopColor="#A78BFA" />
+                  </linearGradient>
+                </defs>
+                <rect width="40" height="40" rx="8" fill="url(#logoGradient)" />
+                <path d="M12 14C12 13.4477 12.4477 13 13 13H20C20.5523 13 21 13.4477 21 14V26C21 26.5523 20.5523 27 20 27H13C12.4477 27 12 26.5523 12 26V14Z" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M19 14C19 13.4477 19.4477 13 20 13H27C27.5523 13 28 13.4477 28 14V26C28 26.5523 27.5523 27 27 27H20C19.4477 27 19 26.5523 19 26V14Z" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M20 20L20 27" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="20" cy="24" r="1.5" fill="white"/>
+              </svg>
+            </div>
+            <span className="header-logo-text">THE BOT</span>
           </Link>
         ) : (
           <a
@@ -90,7 +105,22 @@ export const Header = () => {
             onClick={handleLogoClick}
             className="header-logo"
           >
-            <span className="header-logo-text"><strong>THE BOT</strong></span>
+            <div className="header-logo-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="logoGradientUnauth" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#8B5CF6" />
+                    <stop offset="100%" stopColor="#A78BFA" />
+                  </linearGradient>
+                </defs>
+                <rect width="40" height="40" rx="8" fill="url(#logoGradientUnauth)" />
+                <path d="M12 14C12 13.4477 12.4477 13 13 13H20C20.5523 13 21 13.4477 21 14V26C21 26.5523 20.5523 27 20 27H13C12.4477 27 12 26.5523 12 26V14Z" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M19 14C19 13.4477 19.4477 13 20 13H27C27.5523 13 28 13.4477 28 14V26C28 26.5523 27.5523 27 27 27H20C19.4477 27 19 26.5523 19 26V14Z" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M20 20L20 27" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="20" cy="24" r="1.5" fill="white"/>
+              </svg>
+            </div>
+            <span className="header-logo-text">THE BOT</span>
           </a>
         )}
       </div>
