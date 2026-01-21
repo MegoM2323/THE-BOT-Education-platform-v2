@@ -67,14 +67,14 @@ func (s *LessonService) CreateLesson(ctx context.Context, req *models.CreateLess
 		return nil, fmt.Errorf("user cannot be assigned as teacher (role: %s): %w", teacher.Role, models.ErrInvalidTeacherID)
 	}
 
-	// Создаем урок (after ApplyDefaults, all pointers are non-nil)
+	// Создаем урок
 	lesson := &models.Lesson{
 		TeacherID:   req.TeacherID,
 		StartTime:   req.StartTime,
-		EndTime:     *req.EndTime,     // Safe: ApplyDefaults ensures non-nil
-		MaxStudents: *req.MaxStudents, // Safe: ApplyDefaults ensures non-nil
-		CreditsCost: *req.CreditsCost, // Safe: ApplyDefaults ensures non-nil
-		Color:       *req.Color,       // Safe: ApplyDefaults ensures non-nil
+		EndTime:     req.EndTime,
+		MaxStudents: req.MaxStudents,
+		CreditsCost: req.CreditsCost,
+		Color:       req.Color,
 	}
 
 	// Set subject if provided
@@ -89,6 +89,12 @@ func (s *LessonService) CreateLesson(ctx context.Context, req *models.CreateLess
 		lesson.HomeworkText.Valid = true
 	}
 
+	// Set link if provided
+	if req.Link != nil && *req.Link != "" {
+		lesson.Link.String = *req.Link
+		lesson.Link.Valid = true
+	}
+
 	if err := s.lessonRepo.Create(ctx, lesson); err != nil {
 		return nil, fmt.Errorf("failed to create lesson: %w", err)
 	}
@@ -96,8 +102,8 @@ func (s *LessonService) CreateLesson(ctx context.Context, req *models.CreateLess
 	// Enroll students if provided
 	if len(req.StudentIDs) > 0 && s.bookingCreator != nil {
 		// Validate: number of students must not exceed max_students
-		if len(req.StudentIDs) > *req.MaxStudents {
-			return nil, fmt.Errorf("number of students (%d) exceeds max_students (%d)", len(req.StudentIDs), *req.MaxStudents)
+		if len(req.StudentIDs) > req.MaxStudents {
+			return nil, fmt.Errorf("number of students (%d) exceeds max_students (%d)", len(req.StudentIDs), req.MaxStudents)
 		}
 
 		// Validate: check for duplicate student IDs
@@ -238,6 +244,15 @@ func (s *LessonService) UpdateLesson(ctx context.Context, lessonID uuid.UUID, re
 			updates["homework_text"] = nil
 		} else {
 			updates["homework_text"] = *req.HomeworkText
+		}
+	}
+
+	if req.Link != nil {
+		if *req.Link == "" {
+			// Empty string means clear the link
+			updates["link"] = nil
+		} else {
+			updates["link"] = *req.Link
 		}
 	}
 

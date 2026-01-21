@@ -23,12 +23,14 @@ import (
 // ChatHandler handles HTTP requests for chat
 type ChatHandler struct {
 	chatService *service.ChatService
+	uploadDir   string
 }
 
 // NewChatHandler creates a new ChatHandler
-func NewChatHandler(chatService *service.ChatService) *ChatHandler {
+func NewChatHandler(chatService *service.ChatService, uploadDir string) *ChatHandler {
 	return &ChatHandler{
 		chatService: chatService,
+		uploadDir:   uploadDir,
 	}
 }
 
@@ -168,7 +170,7 @@ func (h *ChatHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 
 	files := r.MultipartForm.File["files"]
 	if len(files) > 0 {
-		uploadsDir := "uploads/chat"
+		uploadsDir := h.uploadDir
 		if err := os.MkdirAll(uploadsDir, 0755); err != nil {
 			// Логируем полную ошибку для диагностики
 			log.Error().Err(err).
@@ -357,9 +359,17 @@ func (h *ChatHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := os.Stat(attachment.FilePath); err != nil {
+	// Проверяем существование файла в файловой системе
+	// Если путь в БД относительный, используем uploadDir как базовую директорию
+	fullPath := attachment.FilePath
+	if !filepath.IsAbs(fullPath) {
+		fullPath = filepath.Join(h.uploadDir, filepath.Base(attachment.FilePath))
+	}
+
+	if _, err := os.Stat(fullPath); err != nil {
 		log.Error().Err(err).
-			Str("file_path", attachment.FilePath).
+			Str("file_path", fullPath).
+			Str("attachment_path", attachment.FilePath).
 			Str("method", "DownloadFile:os.Stat").
 			Msg("File not found on disk")
 		response.BadRequest(w, response.ErrCodeChatFileNotFound, "File not available")
@@ -371,7 +381,7 @@ func (h *ChatHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	})
 	w.Header().Set("Content-Disposition", contentDisposition)
 	w.Header().Set("Content-Type", attachment.MimeType)
-	http.ServeFile(w, r, attachment.FilePath)
+	http.ServeFile(w, r, fullPath)
 }
 
 // ListAllChats returns all chats for admin panel

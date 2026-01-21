@@ -109,6 +109,30 @@
   white-space: nowrap;
 }
 
+.lesson-details .calendar-lesson-link {
+  margin-top: var(--spacing-2);
+}
+
+.lesson-details .lesson-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+  padding: 6px 12px;
+  background-color: rgba(37, 99, 235, 0.1);
+  border-radius: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.lesson-details .lesson-link:hover {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
 .lesson-details.past-details {
   opacity: 0.85;
 }

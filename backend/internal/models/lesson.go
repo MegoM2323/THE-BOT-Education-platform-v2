@@ -36,6 +36,7 @@ type Lesson struct {
 	Color                 string         `db:"color" json:"color"`
 	Subject               sql.NullString `db:"subject" json:"subject,omitempty"`
 	HomeworkText          sql.NullString `db:"homework_text" json:"homework_text,omitempty"`
+	Link                  sql.NullString `db:"link" json:"link,omitempty"`
 	AppliedFromTemplate   bool           `db:"applied_from_template" json:"applied_from_template"`
 	TemplateApplicationID *uuid.UUID     `db:"template_application_id" json:"template_application_id,omitempty"`
 	CreatedAt             time.Time      `db:"created_at" json:"created_at"`
@@ -62,6 +63,7 @@ type LessonResponse struct {
 	Color                 string        `json:"color"`
 	Subject               string        `json:"subject"`
 	HomeworkText          string        `json:"homework_text,omitempty"`
+	Link                  string        `json:"link,omitempty"`
 	AppliedFromTemplate   bool          `json:"applied_from_template"`
 	TemplateApplicationID string        `json:"template_application_id,omitempty"`
 	IsPast                bool          `json:"is_past"` // Вычисляемое поле: занятие уже прошло
@@ -81,6 +83,11 @@ func (l *LessonWithTeacher) ToResponse() *LessonResponse {
 	homeworkText := ""
 	if l.HomeworkText.Valid {
 		homeworkText = l.HomeworkText.String
+	}
+
+	link := ""
+	if l.Link.Valid {
+		link = l.Link.String
 	}
 
 	deletedAt := (*time.Time)(nil)
@@ -105,6 +112,7 @@ func (l *LessonWithTeacher) ToResponse() *LessonResponse {
 		Color:                 l.Color,
 		Subject:               subject,
 		HomeworkText:          homeworkText,
+		Link:                  link,
 		AppliedFromTemplate:   l.AppliedFromTemplate,
 		TemplateApplicationID: templateAppID,
 		IsPast:                l.IsInPast(),
@@ -124,6 +132,11 @@ func (l *Lesson) ToResponseWithoutTeacher() *LessonResponse {
 	homeworkText := ""
 	if l.HomeworkText.Valid {
 		homeworkText = l.HomeworkText.String
+	}
+
+	link := ""
+	if l.Link.Valid {
+		link = l.Link.String
 	}
 
 	deletedAt := (*time.Time)(nil)
@@ -148,6 +161,7 @@ func (l *Lesson) ToResponseWithoutTeacher() *LessonResponse {
 		Color:                 l.Color,
 		Subject:               subject,
 		HomeworkText:          homeworkText,
+		Link:                  link,
 		AppliedFromTemplate:   l.AppliedFromTemplate,
 		TemplateApplicationID: templateAppID,
 		IsPast:                l.IsInPast(),
@@ -161,13 +175,14 @@ func (l *Lesson) ToResponseWithoutTeacher() *LessonResponse {
 type CreateLessonRequest struct {
 	TeacherID    uuid.UUID   `json:"teacher_id"`
 	StartTime    time.Time   `json:"start_time"`
-	EndTime      *time.Time  `json:"end_time,omitempty"`      // Optional: defaults to start_time + 2 hours
+	EndTime      time.Time   `json:"end_time"`                // Required: время окончания
+	MaxStudents  int         `json:"max_students"`            // Required: максимум студентов
+	CreditsCost  int         `json:"credits_cost"`            // Required: стоимость в кредитах
+	Color        string      `json:"color"`                   // Required: цвет занятия
 	LessonType   *LessonType `json:"lesson_type,omitempty"`   // Optional: defaults to individual
-	MaxStudents  *int        `json:"max_students,omitempty"`  // Optional: defaults based on lesson_type
-	CreditsCost  *int        `json:"credits_cost,omitempty"`  // Optional: defaults to 1
-	Color        *string     `json:"color,omitempty"`         // Optional: defaults to #3B82F6
 	Subject      *string     `json:"subject,omitempty"`       // Optional: lesson subject/topic
 	HomeworkText *string     `json:"homework_text,omitempty"` // Optional: homework text instructions
+	Link         *string     `json:"link,omitempty"`          // Optional: link to meeting/resources
 	StudentIDs   []uuid.UUID `json:"student_ids,omitempty"`   // Optional: students to enroll on creation
 }
 
@@ -182,6 +197,7 @@ type UpdateLessonRequest struct {
 	Color        *string     `json:"color,omitempty"`
 	Subject      *string     `json:"subject,omitempty"`
 	HomeworkText *string     `json:"homework_text,omitempty"`
+	Link         *string     `json:"link,omitempty"`
 }
 
 // ListLessonsFilter представляет фильтры для списка уроков
@@ -239,6 +255,10 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 	if lesson.HomeworkText.Valid {
 		homeworkText = lesson.HomeworkText.String
 	}
+	link := ""
+	if lesson.Link.Valid {
+		link = lesson.Link.String
+	}
 	deletedAt := (*time.Time)(nil)
 	if lesson.DeletedAt.Valid {
 		deletedAt = &lesson.DeletedAt.Time
@@ -253,6 +273,7 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 		return json.Marshal(&struct {
 			Subject               string     `json:"subject"`
 			HomeworkText          string     `json:"homework_text,omitempty"`
+			Link                  string     `json:"link,omitempty"`
 			DeletedAt             *time.Time `json:"deleted_at,omitempty"`
 			TemplateApplicationID string     `json:"template_application_id,omitempty"`
 			TeacherName           string     `json:"teacher_name"`
@@ -260,6 +281,7 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 		}{
 			Subject:               subject,
 			HomeworkText:          homeworkText,
+			Link:                  link,
 			DeletedAt:             deletedAt,
 			TemplateApplicationID: templateAppID,
 			TeacherName:           *teacherName,
@@ -271,12 +293,14 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 	return json.Marshal(&struct {
 		Subject               string     `json:"subject"`
 		HomeworkText          string     `json:"homework_text,omitempty"`
+		Link                  string     `json:"link,omitempty"`
 		DeletedAt             *time.Time `json:"deleted_at,omitempty"`
 		TemplateApplicationID string     `json:"template_application_id,omitempty"`
 		*LessonAlias
 	}{
 		Subject:               subject,
 		HomeworkText:          homeworkText,
+		Link:                  link,
 		DeletedAt:             deletedAt,
 		TemplateApplicationID: templateAppID,
 		LessonAlias:           (*LessonAlias)(lesson),
@@ -295,54 +319,16 @@ func (l *LessonWithTeacher) MarshalJSON() ([]byte, error) {
 
 // ApplyDefaults applies default values for optional fields in CreateLessonRequest
 func (r *CreateLessonRequest) ApplyDefaults() {
-	// Default EndTime: start_time + 2 hours
-	if r.EndTime == nil {
-		endTime := r.StartTime.Add(2 * time.Hour)
-		r.EndTime = &endTime
-	}
-
-	// Default MaxStudents and LessonType:
-	// - If lesson_type=Individual is explicitly set → max_students = 1
-	// - If lesson_type=Group is explicitly set → max_students = 4
-	// - If max_students is explicitly set → infer lesson_type from value
-	// - If neither is set → default to INDIVIDUAL lesson with 1 student
-	if r.MaxStudents == nil && r.LessonType == nil {
-		// No constraints specified - default to INDIVIDUAL lesson with 1 student
-		maxStudents := 1
-		r.MaxStudents = &maxStudents
-		lessonType := LessonTypeIndividual
-		r.LessonType = &lessonType
-	} else if r.MaxStudents == nil {
-		// Only lesson_type is set - apply default max_students based on type
-		if r.LessonType != nil && *r.LessonType == LessonTypeIndividual {
-			maxStudents := 1
-			r.MaxStudents = &maxStudents
-		} else if r.LessonType != nil && *r.LessonType == LessonTypeGroup {
-			maxStudents := 4
-			r.MaxStudents = &maxStudents
-		}
-	} else if r.LessonType == nil {
-		// Only max_students is set - infer lesson_type from value
-		if *r.MaxStudents == 1 {
+	// Infer LessonType from MaxStudents if not set
+	if r.LessonType == nil {
+		if r.MaxStudents == 1 {
 			lessonType := LessonTypeIndividual
 			r.LessonType = &lessonType
-		} else if *r.MaxStudents >= 4 {
+		} else if r.MaxStudents >= 4 {
 			lessonType := LessonTypeGroup
 			r.LessonType = &lessonType
 		}
 		// If max_students is 2 or 3, don't set lesson type (will be caught by validation)
-	}
-
-	// Default Color: blue
-	if r.Color == nil {
-		defaultColor := "#3B82F6"
-		r.Color = &defaultColor
-	}
-
-	// Default CreditsCost: 1
-	if r.CreditsCost == nil {
-		defaultCreditsCost := 1
-		r.CreditsCost = &defaultCreditsCost
 	}
 }
 
@@ -356,53 +342,54 @@ func (r *CreateLessonRequest) Validate() error {
 		return ErrInvalidLessonTime
 	}
 
-	// Validate EndTime if provided
-	if r.EndTime != nil {
-		if r.EndTime.IsZero() {
-			return ErrInvalidLessonTime
-		}
-		if r.EndTime.Before(r.StartTime) || r.EndTime.Equal(r.StartTime) {
-			return ErrInvalidLessonTime
-		}
+	// Validate EndTime
+	if r.EndTime.IsZero() {
+		return ErrInvalidLessonTime
+	}
+	if r.EndTime.Before(r.StartTime) || r.EndTime.Equal(r.StartTime) {
+		return ErrInvalidLessonTime
 	}
 
 	// Validate MaxStudents
-	if r.MaxStudents != nil {
-		if *r.MaxStudents <= 0 {
-			return ErrInvalidMaxStudents
-		}
+	if r.MaxStudents <= 0 {
+		return ErrInvalidMaxStudents
+	}
 
-		// Validate constraints based on lesson type
-		if r.LessonType != nil {
-			if *r.LessonType == LessonTypeIndividual {
-				// Individual lessons MUST have exactly 1 student
-				if *r.MaxStudents != 1 {
-					return ErrIndividualLessonMaxStudents
-				}
-			} else if *r.LessonType == LessonTypeGroup {
-				// Group lessons MUST have at least 4 students
-				if *r.MaxStudents < 4 {
-					return ErrGroupLessonMinStudents
-				}
+	// Validate CreditsCost
+	if r.CreditsCost < 0 {
+		return ErrInvalidMaxStudents // Можно добавить специальную ошибку
+	}
+
+	// Validate Color (should not be empty)
+	if r.Color == "" {
+		return ErrInvalidMaxStudents // Можно добавить специальную ошибку
+	}
+
+	// Validate constraints based on lesson type
+	if r.LessonType != nil {
+		if *r.LessonType == LessonTypeIndividual {
+			// Individual lessons MUST have exactly 1 student
+			if r.MaxStudents != 1 {
+				return ErrIndividualLessonMaxStudents
 			}
-		} else {
-			// No lesson type set - infer from max_students and validate
-			// Valid: maxStudents = 1 (individual) or maxStudents >= 4 (group)
-			// Invalid: maxStudents in [2, 3] - treated as failed group lesson
-			if *r.MaxStudents == 1 {
-				// Valid for individual
-			} else if *r.MaxStudents >= 4 {
-				// Valid for group
-			} else {
-				// maxStudents in [2, 3]: invalid - group lessons require at least 4
+		} else if *r.LessonType == LessonTypeGroup {
+			// Group lessons MUST have at least 4 students
+			if r.MaxStudents < 4 {
 				return ErrGroupLessonMinStudents
 			}
 		}
 	} else {
-		// MaxStudents not provided - should be validated after ApplyDefaults is called
-		// If ApplyDefaults was called, MaxStudents would be set
-		// If ApplyDefaults was NOT called before Validate, this is an error
-		// However, we don't fail here - let the default handling occur in ApplyDefaults
+		// No lesson type set - infer from max_students and validate
+		// Valid: maxStudents = 1 (individual) or maxStudents >= 4 (group)
+		// Invalid: maxStudents in [2, 3] - treated as failed group lesson
+		if r.MaxStudents == 1 {
+			// Valid for individual
+		} else if r.MaxStudents >= 4 {
+			// Valid for group
+		} else {
+			// maxStudents in [2, 3]: invalid - group lessons require at least 4
+			return ErrGroupLessonMinStudents
+		}
 	}
 
 	return nil
@@ -464,6 +451,11 @@ func (l *TeacherScheduleLesson) ToResponse() map[string]interface{} {
 		homeworkText = l.HomeworkText.String
 	}
 
+	link := ""
+	if l.Link.Valid {
+		link = l.Link.String
+	}
+
 	templateAppID := ""
 	if l.TemplateApplicationID != nil {
 		templateAppID = l.TemplateApplicationID.String()
@@ -486,6 +478,7 @@ func (l *TeacherScheduleLesson) ToResponse() map[string]interface{} {
 		"color":                   l.Color,
 		"subject":                 subject,
 		"homework_text":           homeworkText,
+		"link":                    link,
 		"applied_from_template":   l.AppliedFromTemplate,
 		"template_application_id": templateAppID,
 		"is_past":                 l.StartTime.Before(time.Now()),

@@ -6,6 +6,8 @@ import Spinner from '../common/Spinner.jsx';
 import ColorPicker from '../common/ColorPicker.jsx';
 import StudentCheckboxList from './StudentCheckboxList.jsx';
 import { useNotification } from '../../hooks/useNotification.js';
+import { useAuth } from '../../hooks/useAuth.js';
+import { ROLES } from '../../utils/constants.js';
 import * as lessonAPI from '../../api/lessons.js';
 import * as userAPI from '../../api/users.js';
 import * as creditAPI from '../../api/credits.js';
@@ -23,7 +25,11 @@ export const LessonCreateModal = ({
   onLessonCreated
 }) => {
   const { showNotification } = useNotification();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Проверка роли: методист может назначать только себя
+  const isMethodologist = user?.role === ROLES.METHODOLOGIST;
 
   // Состояния для формы
   const [teachers, setTeachers] = useState([]);
@@ -35,6 +41,7 @@ export const LessonCreateModal = ({
     max_students: 4,
     credits_cost: 1,
     subject: '',
+    link: '',
     color: '#2563eb'
   });
   const [errors, setErrors] = useState({});
@@ -59,6 +66,7 @@ export const LessonCreateModal = ({
       max_students: 4,
       credits_cost: 1,
       subject: '',
+      link: '',
       color: '#2563eb'
     });
     setErrors({});
@@ -79,9 +87,22 @@ export const LessonCreateModal = ({
 
   /**
    * Загрузить список преподавателей
+   * Методист может назначать только себя
    */
   const loadTeachers = async () => {
     try {
+      // Для методиста показываем только его самого
+      if (isMethodologist && user?.id) {
+        const selfTeacher = {
+          id: user.id,
+          full_name: user.full_name || user.name || user.email
+        };
+        setTeachers([selfTeacher]);
+        setFormData(prev => ({ ...prev, teacher_id: user.id }));
+        return;
+      }
+
+      // Для админа загружаем всех преподавателей
       const teachersResponse = await userAPI.getAssignableTeachersAll();
       const teachersList = Array.isArray(teachersResponse) ? teachersResponse : [];
       setTeachers(teachersList);
@@ -314,6 +335,11 @@ export const LessonCreateModal = ({
         requestData.subject = formData.subject.trim().slice(0, 200);
       }
 
+      // Добавить link если указан
+      if (formData.link && formData.link.trim()) {
+        requestData.link = formData.link.trim();
+      }
+
       // Добавить выбранных студентов
       if (selectedStudentIds.length > 0) {
         requestData.student_ids = selectedStudentIds;
@@ -382,7 +408,8 @@ export const LessonCreateModal = ({
                     name="teacher_id"
                     value={formData.teacher_id}
                     onChange={handleInputChange}
-                    disabled={creating || teachers.length === 0}
+                    disabled={creating || teachers.length === 0 || isMethodologist}
+                    title={isMethodologist ? 'Вы можете назначать только себя' : ''}
                   >
                     <option value="">Выберите преподавателя</option>
                     {teachers.map(teacher => (
@@ -392,6 +419,9 @@ export const LessonCreateModal = ({
                     ))}
                   </select>
                   {errors.teacher_id && <span className="form-error">{errors.teacher_id}</span>}
+                  {isMethodologist && (
+                    <small className="form-hint">Вы можете назначать только себя</small>
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -482,6 +512,20 @@ export const LessonCreateModal = ({
                   disabled={creating}
                 />
                 <small className="form-hint">Максимум 200 символов</small>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Ссылка</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  name="link"
+                  placeholder="Например: https://meet.google.com/..."
+                  value={formData.link}
+                  onChange={handleInputChange}
+                  disabled={creating}
+                />
+                <small className="form-hint">Ссылка на видеоконференцию или материалы</small>
               </div>
 
               <div className="form-group">

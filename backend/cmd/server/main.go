@@ -436,7 +436,8 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	trialRequestHandler := handlers.NewTrialRequestHandler(trialRequestService)
 	templateHandler := handlers.NewTemplateHandler(templateService)
 	methodologistHandler := handlers.NewMethodologistHandler(lessonService, bookingService, lessonBroadcastService, lessonRepo)
-	chatHandler := handlers.NewChatHandler(chatService)
+	chatUploadDir := "./uploads/chat"
+	chatHandler := handlers.NewChatHandler(chatService, chatUploadDir)
 	homeworkHandler := handlers.NewHomeworkHandler(homeworkService)
 	lessonBroadcastHandler := handlers.NewLessonBroadcastHandler(lessonBroadcastService, uploadDir)
 	subjectsHandler := handlers.NewSubjectsHandler(subjectRepo)

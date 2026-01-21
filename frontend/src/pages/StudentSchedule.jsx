@@ -95,7 +95,7 @@ export const StudentSchedule = () => {
     lessons,
     isLoading: lessonsLoading,
     error: lessonsError,
-  } = useStudentLessons(weekStartDate);
+  } = useStudentLessons();
 
   // Only get myBookings for checking if lessons are already booked
   const {
@@ -126,6 +126,8 @@ export const StudentSchedule = () => {
   }, [lessons]);
 
   // Apply filters to lessons
+  // NOTE: useStudentLessons теперь возвращает ТОЛЬКО занятия, на которые студент записан
+  // Поэтому фильтр "myBookings" больше не нужен (все занятия уже "мои")
   const filteredLessons = useMemo(() => {
     if (!Array.isArray(lessons)) return [];
 
@@ -153,7 +155,8 @@ export const StudentSchedule = () => {
         isFiltered = true;
       }
 
-      // Filter by full lessons
+      // Filter by full lessons - оставлен для групповых занятий
+      // (может быть полезен, чтобы видеть, заполнены ли группы)
       if (hideFull && lesson.current_students >= lesson.max_students) {
         isFiltered = true;
       }
@@ -163,18 +166,9 @@ export const StudentSchedule = () => {
         isFiltered = true;
       }
 
-      // Filter by my bookings (show only lessons I've booked)
-      if (myBookings) {
-        const isBooked =
-          Array.isArray(myBookingsData) && !bookingsError
-            ? myBookingsData.some(
-                (b) => b?.lesson_id === lesson?.id && b?.status === "active",
-              )
-            : false;
-        if (!isBooked) {
-          isFiltered = true;
-        }
-      }
+      // NOTE: Фильтр "myBookings" больше не нужен, т.к. все занятия уже "мои"
+      // Оставлен только для обратной совместимости UI (чекбокс остаётся)
+      // Но логически он ничего не делает, т.к. getMyLessons уже возвращает только записанные занятия
 
       return { ...lesson, isFiltered };
     });
@@ -185,9 +179,7 @@ export const StudentSchedule = () => {
     showGroup,
     hideFull,
     selectedTeacher,
-    myBookings,
-    myBookingsData,
-    bookingsError,
+    // myBookings и myBookingsData удалены из dependencies, т.к. больше не используются в фильтрации
   ]);
 
   const handleWeekChange = (newWeek) => {

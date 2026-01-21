@@ -3,31 +3,17 @@ import { useQuery } from '@tanstack/react-query';
 import * as lessonsAPI from '../api/lessons.js';
 import { useNotification } from './useNotification.js';
 
-// Константа для пустого объекта фильтров - предотвращает пересоздание
-const EMPTY_FILTERS = {};
-
 /**
  * Hook for loading lessons visible to student
- * @param {string} weekStartDate - Start date of week (YYYY-MM-DD) - используется только для кэша, не для фильтрации
- * @param {Object} filters - Additional filters (teacher_id, day, time)
+ * Загружает ТОЛЬКО те занятия, на которые студент записан (через активные bookings)
+ * @returns {Object} { lessons, isLoading, error, refetch }
  */
-export const useStudentLessons = (weekStartDate, filters) => {
+export const useStudentLessons = () => {
   const notification = useNotification();
 
-  // Используем стабильную ссылку на пустой объект если фильтры не переданы
-  const filtersToUse = filters || EMPTY_FILTERS;
-
-  // Мемоизировать фильтры чтобы избежать бесконечного цикла
-  const filtersJson = JSON.stringify(filtersToUse);
-  const memoizedFilters = useMemo(
-    () => filtersToUse,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersJson]
-  );
-
   const queryKey = useMemo(
-    () => ['studentLessons', weekStartDate, memoizedFilters],
-    [weekStartDate, memoizedFilters]
+    () => ['studentLessons'],
+    []
   );
 
   const {
@@ -39,12 +25,11 @@ export const useStudentLessons = (weekStartDate, filters) => {
     queryKey,
     queryFn: async () => {
       try {
-        // НЕ передаем start_date в API запрос - студенты должны видеть ВСЕ занятия
-        // включая прошедшие (completed lessons). Фильтрация по дате происходит
-        // на уровне UI компонента (календарь, список)
-        const response = await lessonsAPI.getLessons({
-          ...memoizedFilters,
-        });
+        // FIX: Используем getMyLessons для студентов - возвращает ТОЛЬКО те занятия,
+        // на которые студент записан (через активные bookings).
+        // Раньше использовали getLessons, который показывал ВСЕ групповые занятия,
+        // что было некорректно.
+        const response = await lessonsAPI.getMyLessons();
 
         // Normalize response
         const lessonsArray = Array.isArray(response) ? response : (response?.lessons || []);
@@ -53,7 +38,7 @@ export const useStudentLessons = (weekStartDate, filters) => {
         console.log(`[useStudentLessons] Loaded ${lessonsArray.length} lessons for student view`);
 
         // Возвращаем ВСЕ занятия (прошедшие и будущие)
-        // Студент должен видеть свою полную историю забронированных занятий
+        // Студент видит свою полную историю забронированных занятий
         return lessonsArray;
       } catch (err) {
         // Не показываем generic ошибку при 401 (обрабатывается глобально) или отмене запроса

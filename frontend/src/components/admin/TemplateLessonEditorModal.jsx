@@ -4,6 +4,8 @@ import Button from "../common/Button.jsx";
 import Spinner from '../common/Spinner.jsx';
 import ColorPicker from '../common/ColorPicker';
 import { useNotification } from '../../hooks/useNotification.js';
+import { useAuth } from '../../hooks/useAuth.js';
+import { ROLES } from '../../utils/constants.js';
 import * as usersAPI from '../../api/users.js';
 import apiClient from '../../api/client.js';
 import { allSettledWithLabels, withFallback } from '../../utils/promiseHelpers.js';

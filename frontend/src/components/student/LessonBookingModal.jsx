@@ -306,6 +306,13 @@ export const LessonBookingModal = ({
                   {lesson.credits_cost} {lesson.credits_cost === 1 ? 'кредит' : lesson.credits_cost < 5 ? 'кредита' : 'кредитов'}
                 </div>
               )}
+              {lesson.link && (
+                <div className="calendar-lesson-link">
+                  <a href={lesson.link} target="_blank" rel="noopener noreferrer" className="lesson-link">
+                    🔗 Ссылка на занятие
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* Секция домашних заданий - показываем только для записанных студентов */}

@@ -61,6 +61,8 @@ export const LessonEditModal = ({
 
   const [selectedSubject, setSelectedSubject] = useState("");
 
+  const [selectedLink, setSelectedLink] = useState("");
+
   const [selectedColor, setSelectedColor] = useState("#2563eb");
 
   const [loading, setLoading] = useState(false);
@@ -308,6 +310,16 @@ export const LessonEditModal = ({
           }
         }
 
+        // link - trim и конвертировать пустую строку в null
+        if (data.link !== undefined) {
+          const trimmedLink = (data.link || "").trim();
+          const newLink = trimmedLink === "" ? null : trimmedLink;
+          const currentLink = (lesson.link || "").trim() || null;
+          if (newLink !== currentLink) {
+            updates.link = newLink;
+          }
+        }
+
         // color - валидация hex
         if (data.color !== undefined) {
           const newColor = data.color || "#2563eb";
@@ -392,6 +404,7 @@ export const LessonEditModal = ({
     setAutosaveData({
       teacher_id: selectedTeacherId,
       subject: selectedSubject,
+      link: selectedLink,
       color: selectedColor,
       lessonDate,
       startTime,
@@ -404,6 +417,7 @@ export const LessonEditModal = ({
     isInitialized,
     selectedTeacherId,
     selectedSubject,
+    selectedLink,
     selectedColor,
     lessonDate,
     startTime,
@@ -577,14 +591,30 @@ export const LessonEditModal = ({
       setSelectedStudentId("");
 
       // Установить список преподавателей и текущего преподавателя
-      const teachersList = Array.isArray(teachersResponse)
-        ? teachersResponse
-        : [];
+      // Для методиста показываем только его самого
+      const isUserMethodologist = user?.role === ROLES.METHODOLOGIST;
+      let teachersList;
+      
+      if (isUserMethodologist && user?.id) {
+        // Методист видит только себя в списке
+        teachersList = [{
+          id: user.id,
+          full_name: user.full_name || user.name || user.email
+        }];
+      } else {
+        teachersList = Array.isArray(teachersResponse)
+          ? teachersResponse
+          : [];
+      }
+      
       setTeachers(teachersList);
       setSelectedTeacherId(lesson.teacher_id || "");
 
       // Установить subject
       setSelectedSubject(lesson.subject || "");
+
+      // Установить link
+      setSelectedLink(lesson.link || "");
 
       // Установить color
       setSelectedColor(lesson.color || "#2563eb");
@@ -1092,7 +1122,13 @@ export const LessonEditModal = ({
   }
   const isPastLesson = checkStartTime < new Date();
   const isMethodologist = user?.role === ROLES.METHODOLOGIST;
-  const shouldFreezeInfoTab = isPastLesson && isMethodologist;
+  
+  // Проверка: методист может редактировать только свои занятия
+  const isOwnLesson = !isMethodologist || lesson.teacher_id === user?.id;
+  const canEditLesson = isOwnLesson;
+  
+  // Заморозка редактирования: прошедшее занятие для методиста ИЛИ чужое занятие для методиста
+  const shouldFreezeInfoTab = (isPastLesson && isMethodologist) || (isMethodologist && !isOwnLesson);
 
   /**
    * Получить заголовок модального окна с бейджами
@@ -1122,13 +1158,16 @@ export const LessonEditModal = ({
         footer={
           <div className="lesson-edit-footer">
             <div className="lesson-edit-footer-left">
-              <Button
-                variant="danger"
-                onClick={handleDeleteLesson}
-                loading={deletingLesson}
-              >
-                Удалить занятие
-              </Button>
+              {/* Кнопка удаления доступна только для своих занятий или админа */}
+              {canEditLesson && (
+                <Button
+                  variant="danger"
+                  onClick={handleDeleteLesson}
+                  loading={deletingLesson}
+                >
+                  Удалить занятие
+                </Button>
+              )}
             </div>
             <div className="lesson-edit-footer-right">
               {isAutosaving && (
@@ -1190,8 +1229,34 @@ export const LessonEditModal = ({
             {/* Tab Content */}
             {activeTab === "info" && (
               <>
+                {/* Предупреждение о чужом занятии для методиста */}
+                {isMethodologist && !isOwnLesson && (
+                  <div className="lesson-edit-warning not-own-lesson-warning">
+                    <span className="warning-icon">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span className="warning-text">
+                      Это занятие другого преподавателя. Редактирование недоступно.
+                    </span>
+                  </div>
+                )}
+
                 {/* Предупреждение о редактировании прошедшего занятия */}
-                {isPastLesson && (
+                {isPastLesson && isOwnLesson && (
                   <div className="lesson-edit-warning past-lesson-warning">
                     <span className="warning-icon">
                       <svg
@@ -1233,7 +1298,8 @@ export const LessonEditModal = ({
                               teacher_id: "",
                             }));
                           }}
-                          disabled={shouldFreezeInfoTab || teachers.length === 0}
+                          disabled={shouldFreezeInfoTab || teachers.length === 0 || isMethodologist}
+                          title={isMethodologist ? 'Вы можете назначать только себя' : ''}
                         >
                           <option value="">Выберите преподавателя</option>
                           {teachers.map((teacher) => (
@@ -1246,6 +1312,9 @@ export const LessonEditModal = ({
                           <span className="form-error">
                             {formErrors.teacher_id}
                           </span>
+                        )}
+                        {isMethodologist && isOwnLesson && (
+                          <small className="form-hint">Вы можете назначать только себя</small>
                         )}
                       </div>
 
@@ -1377,6 +1446,19 @@ export const LessonEditModal = ({
                         disabled={shouldFreezeInfoTab}
                       />
                       <small className="form-hint">Максимум 200 символов</small>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Ссылка</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={selectedLink}
+                        onChange={(e) => setSelectedLink(e.target.value)}
+                        placeholder="Например: https://meet.google.com/..."
+                        disabled={shouldFreezeInfoTab}
+                      />
+                      <small className="form-hint">Ссылка на видеоконференцию или материалы</small>
                     </div>
 
                     <div className="form-group">

@@ -13,7 +13,7 @@ const (
 	// LessonSelectFields - поля таблицы lessons
 	LessonSelectFields = `
 		id, teacher_id, start_time, end_time,
-		max_students, current_students, credits_cost, color, subject, homework_text,
+		max_students, current_students, credits_cost, color, subject, homework_text, link,
 		applied_from_template, template_application_id,
 		created_at, updated_at, deleted_at
 	`

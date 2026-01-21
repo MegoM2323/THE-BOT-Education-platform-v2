@@ -26,8 +26,8 @@ func NewLessonRepository(db *sqlx.DB) *LessonRepository {
 // Create создает новое занятие
 func (r *LessonRepository) Create(ctx context.Context, lesson *models.Lesson) error {
 	query := `
-		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, applied_from_template, template_application_id, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, link, applied_from_template, template_application_id, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 	`
 
 	lesson.ID = uuid.New()
@@ -46,6 +46,7 @@ func (r *LessonRepository) Create(ctx context.Context, lesson *models.Lesson) er
 		lesson.Color,
 		lesson.Subject,
 		lesson.HomeworkText,
+		lesson.Link,
 		lesson.AppliedFromTemplate,
 		lesson.TemplateApplicationID,
 		lesson.CreatedAt,
@@ -103,6 +104,7 @@ func (r *LessonRepository) GetByIDForUpdate(ctx context.Context, tx pgx.Tx, id u
 		&lesson.Color,
 		&lesson.Subject,
 		&lesson.HomeworkText,
+		&lesson.Link,
 		&lesson.AppliedFromTemplate,
 		&lesson.TemplateApplicationID,
 		&lesson.CreatedAt,
@@ -124,7 +126,7 @@ func (r *LessonRepository) GetWithTeacher(ctx context.Context, id uuid.UUID) (*m
 	query := `
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			u.full_name as teacher_name
@@ -150,7 +152,7 @@ func (r *LessonRepository) List(ctx context.Context, filter *models.ListLessonsF
 	query := `
 		SELECT DISTINCT
 			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			u.full_name as teacher_name
@@ -210,7 +212,7 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		query = `
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 				l.applied_from_template, l.template_application_id,
 				l.created_at, l.updated_at, l.deleted_at,
 				u.full_name as teacher_name
@@ -224,7 +226,7 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		query = `
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 				l.applied_from_template, l.template_application_id,
 				l.created_at, l.updated_at, l.deleted_at,
 				u.full_name as teacher_name
@@ -242,7 +244,7 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		query = `
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 				l.applied_from_template, l.template_application_id,
 				l.created_at, l.updated_at, l.deleted_at,
 				u.full_name as teacher_name
@@ -263,7 +265,7 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		query = `
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 				l.applied_from_template, l.template_application_id,
 				l.created_at, l.updated_at, l.deleted_at,
 				u.full_name as teacher_name
@@ -326,6 +328,7 @@ func (r *LessonRepository) Update(ctx context.Context, id uuid.UUID, updates map
 		"color":         true,
 		"subject":       true,
 		"homework_text": true,
+		"link":          true,
 	}
 
 	query := `UPDATE lessons SET updated_at = $1`
@@ -427,7 +430,7 @@ func (r *LessonRepository) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*mo
 	query := `
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			u.full_name as teacher_name
@@ -564,7 +567,7 @@ func (r *LessonRepository) GetLessonsByTemplateApplication(ctx context.Context, 
 	query := `
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.color, l.subject, l.homework_text,
+			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			u.full_name as teacher_name
@@ -740,10 +743,10 @@ func (r *LessonRepository) UpdateMaxStudentsTx(ctx context.Context, tx pgx.Tx, l
 // CreateLessonTx creates a lesson within a transaction
 func (r *LessonRepository) CreateLessonTx(ctx context.Context, tx pgx.Tx, lesson *models.Lesson) (*models.Lesson, error) {
 	query := `
-		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text,
+		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, link,
 		                     applied_from_template, template_application_id, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-		RETURNING id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+		RETURNING id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, link,
 		          applied_from_template, template_application_id, created_at, updated_at, deleted_at
 	`
 
@@ -759,6 +762,7 @@ func (r *LessonRepository) CreateLessonTx(ctx context.Context, tx pgx.Tx, lesson
 		lesson.Color,
 		lesson.Subject,
 		lesson.HomeworkText,
+		lesson.Link,
 		lesson.AppliedFromTemplate,
 		lesson.TemplateApplicationID,
 		lesson.CreatedAt,
@@ -774,6 +778,7 @@ func (r *LessonRepository) CreateLessonTx(ctx context.Context, tx pgx.Tx, lesson
 		&created.Color,
 		&created.Subject,
 		&created.HomeworkText,
+		&created.Link,
 		&created.AppliedFromTemplate,
 		&created.TemplateApplicationID,
 		&created.CreatedAt,
@@ -817,6 +822,7 @@ func (r *LessonRepository) GetLessonsByTemplateApplicationTx(ctx context.Context
 			&lesson.Color,
 			&lesson.Subject,
 			&lesson.HomeworkText,
+			&lesson.Link,
 			&lesson.AppliedFromTemplate,
 			&lesson.TemplateApplicationID,
 			&lesson.CreatedAt,
@@ -903,7 +909,7 @@ func (r *LessonRepository) GetTeacherSchedule(ctx context.Context, teacherID uui
 	query := `
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			u.full_name as teacher_name,
@@ -1026,7 +1032,7 @@ func (r *LessonRepository) GetAllTeachersSchedule(ctx context.Context, startDate
 	query := `
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
+			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			u.full_name as teacher_name,

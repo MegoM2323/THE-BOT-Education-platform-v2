@@ -52,14 +52,12 @@ func (v *LessonValidator) ValidateSubject(subject string) error {
 
 // ValidateCreateLessonRequest validates color and subject in CreateLessonRequest
 func (v *LessonValidator) ValidateCreateLessonRequest(req *models.CreateLessonRequest) error {
-	// Validate color if provided
-	if req.Color != nil {
-		if err := v.ValidateColor(*req.Color); err != nil {
-			return err
-		}
+	// Validate color (required)
+	if err := v.ValidateColor(req.Color); err != nil {
+		return err
 	}
 
-	// Validate subject if provided
+	// Validate subject if provided (optional)
 	if req.Subject != nil {
 		if err := v.ValidateSubject(*req.Subject); err != nil {
 			return err
