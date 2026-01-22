@@ -175,6 +175,28 @@ BACKUP_SCRIPT
     fi
 }
 
+# Build frontend
+build_frontend() {
+    log_step "Building frontend..."
+
+    if ! command -v npm &> /dev/null; then
+        log_error "npm is not installed"
+        exit 1
+    fi
+
+    cd "$PROJECT_DIR/frontend"
+    npm ci --legacy-peer-deps
+    npm run build
+
+    if [ ! -d "dist" ]; then
+        log_error "Failed to build frontend"
+        exit 1
+    fi
+
+    log_success "Frontend built successfully"
+    cd "$PROJECT_DIR"
+}
+
 # Build backend binary (statically linked for distroless container)
 build_backend() {
     log_step "Building backend binary (statically linked)..."
@@ -456,6 +478,7 @@ main() {
     fi
 
     if [ "$DEPLOY_MODE" = "docker" ]; then
+        build_frontend
         build_backend
         deploy_docker_safe
     else
