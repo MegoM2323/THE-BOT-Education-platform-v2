@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -22,15 +23,22 @@ import (
 
 // ChatHandler handles HTTP requests for chat
 type ChatHandler struct {
-	chatService *service.ChatService
-	uploadDir   string
+	chatService  *service.ChatService
+	uploadDir    string
+	uploadDirAbs string
 }
 
 // NewChatHandler creates a new ChatHandler
 func NewChatHandler(chatService *service.ChatService, uploadDir string) *ChatHandler {
+	absDir, err := filepath.Abs(uploadDir)
+	if err != nil {
+		log.Error().Err(err).Str("upload_dir", uploadDir).Msg("Failed to resolve absolute path for upload directory")
+		absDir = uploadDir
+	}
 	return &ChatHandler{
-		chatService: chatService,
-		uploadDir:   uploadDir,
+		chatService:  chatService,
+		uploadDir:    uploadDir,
+		uploadDirAbs: absDir,
 	}
 }
 
@@ -183,6 +191,25 @@ func (h *ChatHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, fileHeader := range files {
+			// SECURITY: Валидация MIME типа
+			mimeType := fileHeader.Header.Get("Content-Type")
+			allowedMimeTypes := map[string]bool{
+				"image/jpeg":      true,
+				"image/png":       true,
+				"image/gif":       true,
+				"image/webp":      true,
+				"application/pdf": true,
+				"text/plain":      true,
+			}
+			if !allowedMimeTypes[mimeType] {
+				log.Warn().
+					Str("mime_type", mimeType).
+					Str("filename", fileHeader.Filename).
+					Msg("Attempted upload of disallowed file type")
+				response.BadRequest(w, response.ErrCodeValidationFailed, "Invalid file type")
+				return
+			}
+
 			file, err := fileHeader.Open()
 			if err != nil {
 				// Логируем полную ошибку для диагностики
@@ -196,7 +223,7 @@ func (h *ChatHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 			}
 			defer file.Close()
 
-			filename := uuid.New().String() + filepath.Ext(fileHeader.Filename)
+			filename := uuid.New().String() + filepath.Ext(filepath.Base(filepath.Clean(fileHeader.Filename)))
 			filePath := filepath.Join(uploadsDir, filename)
 			dst, err := os.Create(filePath)
 			if err != nil {
@@ -366,12 +393,30 @@ func (h *ChatHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		fullPath = filepath.Join(h.uploadDir, filepath.Base(attachment.FilePath))
 	}
 
-	if _, err := os.Stat(fullPath); err != nil {
+	// SECURITY: Валидируем путь до файла (защита от path traversal)
+	absPath, err := filepath.Abs(fullPath)
+	if err != nil {
+		log.Error().Err(err).Str("file_path", fullPath).Msg("Failed to get absolute path")
+		response.InternalError(w, "Failed to resolve file path")
+		return
+	}
+	absUploadDir := h.uploadDirAbs
+
+	// Используем filepath.Rel для проверки path traversal
+	rel, err := filepath.Rel(absUploadDir, absPath)
+	if err != nil || strings.HasPrefix(rel, "..") {
+		log.Error().Str("file_path", fullPath).Msg("Path traversal attempt")
+		response.Forbidden(w, "Access denied")
+		return
+	}
+
+	_, err = os.Stat(fullPath)
+	if err != nil {
 		log.Error().Err(err).
 			Str("file_path", fullPath).
 			Str("attachment_path", attachment.FilePath).
 			Str("method", "DownloadFile:os.Stat").
-			Msg("File not found on disk")
+			Msg("Failed to stat file")
 		response.BadRequest(w, response.ErrCodeChatFileNotFound, "File not available")
 		return
 	}
@@ -380,7 +425,13 @@ func (h *ChatHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		"filename": attachment.FileName,
 	})
 	w.Header().Set("Content-Disposition", contentDisposition)
-	w.Header().Set("Content-Type", attachment.MimeType)
+
+	mimeType := attachment.MimeType
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+	w.Header().Set("Content-Type", mimeType)
+
 	http.ServeFile(w, r, fullPath)
 }
 
