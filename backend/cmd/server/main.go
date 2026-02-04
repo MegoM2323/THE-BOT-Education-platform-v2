@@ -248,7 +248,6 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 
 	// Initialize Telegram client (if token is configured)
 	var telegramClient *telegram.Client
-	var telegramService *service.TelegramService
 	var broadcastService *service.BroadcastService
 	var telegramHandler *handlers.TelegramHandler
 	var broadcastHandler *handlers.BroadcastHandler
@@ -323,14 +322,26 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 		log.Warn().Msg("YooKassa is not configured (YOOKASSA_SHOP_ID or YOOKASSA_SECRET_KEY not set). Payment features will be disabled")
 	}
 
+	// Initialize Telegram-related services only if token is configured
+	var telegramService *service.TelegramService
+	if telegramClient != nil {
+		telegramService = service.NewTelegramService(telegramUserRepo, telegramTokenRepo, userRepo, telegramClient, cfg.Telegram.AdminTelegramID)
+	}
+
 	// Initialize services
 	authService := service.NewAuthService(userRepo, sessionRepo, sessionMgr, cfg.Session.MaxAge)
 	userService := service.NewUserService(userRepo, creditRepo)
 	lessonService := service.NewLessonService(lessonRepo, userRepo)
-	bookingService := service.NewBookingService(db.Pool, bookingRepo, lessonRepo, creditRepo, cancelledBookingRepo, bookingValidator)
+	bookingService := service.NewBookingService(db.Pool, bookingRepo, lessonRepo, creditRepo, cancelledBookingRepo, bookingValidator, telegramService, userRepo)
 
 	// Wire up booking creator for lesson service (enables enrolling students on lesson creation)
 	lessonService.SetBookingCreator(bookingService)
+
+	// Wire up Telegram service to lesson service for notifications
+	if telegramService != nil {
+		lessonService.SetTelegramService(telegramService)
+	}
+
 	creditService := service.NewCreditService(db.Pool, creditRepo)
 	swapService := service.NewSwapService(db.Pool, swapRepo, bookingRepo, lessonRepo, swapValidator)
 	trialRequestService := service.NewTrialRequestService(trialRequestRepo, trialRequestValidator, nil) // TelegramService will be created below
@@ -380,11 +391,8 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	// Initialize payment settings service
 	paymentSettingsService := service.NewPaymentSettingsService(userRepo)
 
-	// Initialize Telegram-related services only if token is configured
-	if telegramClient != nil {
-		telegramService = service.NewTelegramService(telegramUserRepo, telegramTokenRepo, userRepo, telegramClient, cfg.Telegram.AdminTelegramID)
-
-		// Now update TrialRequestService with TelegramService
+	// Now update TrialRequestService with TelegramService
+	if telegramService != nil {
 		trialRequestService.SetTelegramService(telegramService)
 
 		// Start polling in development mode (production uses webhook)
@@ -437,6 +445,9 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	templateHandler := handlers.NewTemplateHandler(templateService)
 	methodologistHandler := handlers.NewMethodologistHandler(lessonService, bookingService, lessonBroadcastService, lessonRepo)
 	chatUploadDir := "./uploads/chat"
+	if err := os.MkdirAll(chatUploadDir, 0755); err != nil {
+		log.Error().Err(err).Msg("Failed to create chat upload directory")
+	}
 	chatHandler := handlers.NewChatHandler(chatService, chatUploadDir)
 	homeworkHandler := handlers.NewHomeworkHandler(homeworkService)
 	lessonBroadcastHandler := handlers.NewLessonBroadcastHandler(lessonBroadcastService, uploadDir)

@@ -25,6 +25,7 @@ type TelegramUserRepository interface {
 	GetAllWithUserInfo(ctx context.Context) ([]*models.TelegramUser, error)
 	GetByRoleWithUserInfo(ctx context.Context, role string) ([]*models.TelegramUser, error)
 	GetByRole(ctx context.Context, role string) ([]*models.TelegramUser, error)
+	GetSubscribedUserIDs(ctx context.Context, userIDs []uuid.UUID) ([]uuid.UUID, error)
 	UpdateSubscription(ctx context.Context, userID uuid.UUID, subscribed bool) error
 	UnlinkTelegram(ctx context.Context, userID uuid.UUID) error
 	DeleteByUserID(ctx context.Context, userID uuid.UUID) error
@@ -516,6 +517,23 @@ func (r *TelegramUserRepo) GetByRoleWithUserInfo(ctx context.Context, role strin
 	}
 
 	return telegramUsers, nil
+}
+
+// GetSubscribedUserIDs возвращает список userIDs, которые привязаны к Telegram и подписаны (subscribed=true)
+func (r *TelegramUserRepo) GetSubscribedUserIDs(ctx context.Context, userIDs []uuid.UUID) ([]uuid.UUID, error) {
+	if len(userIDs) == 0 {
+		return []uuid.UUID{}, nil
+	}
+
+	query := `SELECT user_id FROM telegram_users WHERE user_id = ANY($1) AND subscribed = true`
+
+	var subscribedIDs []uuid.UUID
+	err := r.db.SelectContext(ctx, &subscribedIDs, query, userIDs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get subscribed user IDs: %w", err)
+	}
+
+	return subscribedIDs, nil
 }
 
 // isDuplicateKeyError проверяет, является ли ошибка нарушением уникального ключа

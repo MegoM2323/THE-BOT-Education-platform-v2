@@ -24,6 +24,7 @@ type LessonService struct {
 	userRepo        repository.UserRepository
 	lessonValidator *validator.LessonValidator
 	bookingCreator  BookingCreator
+	telegramService *TelegramService
 }
 
 // NewLessonService создает новый LessonService
@@ -38,6 +39,11 @@ func NewLessonService(lessonRepo *repository.LessonRepository, userRepo reposito
 // SetBookingCreator sets the booking creator for enrolling students on lesson creation
 func (s *LessonService) SetBookingCreator(bc BookingCreator) {
 	s.bookingCreator = bc
+}
+
+// SetTelegramService sets the telegram service for sending notifications
+func (s *LessonService) SetTelegramService(ts *TelegramService) {
+	s.telegramService = ts
 }
 
 // CreateLesson создает новый урок
@@ -144,6 +150,45 @@ func (s *LessonService) CreateLesson(ctx context.Context, req *models.CreateLess
 				Str("student_id", studentID.String()).
 				Msg("Student enrolled on lesson creation")
 		}
+
+		// Send Telegram notifications to enrolled students (non-blocking)
+		if s.telegramService != nil && len(req.StudentIDs) > 0 {
+			studentNames := make([]string, 0, len(req.StudentIDs))
+			for _, studentID := range req.StudentIDs {
+				student, err := s.userRepo.GetByID(ctx, studentID)
+				if err == nil {
+					studentNames = append(studentNames, student.FullName)
+				} else {
+					studentNames = append(studentNames, "Студент")
+				}
+			}
+
+			go func() {
+				notifCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+
+				for i, studentID := range req.StudentIDs {
+					// Проверяем отмену контекста перед отправкой каждого уведомления
+					select {
+					case <-notifCtx.Done():
+						log.Warn().
+							Str("lesson_id", lesson.ID.String()).
+							Msg("Lesson booking notification goroutine cancelled")
+						return
+					default:
+					}
+
+					studentName := studentNames[i]
+					if err := s.telegramService.NotifyLessonBooking(notifCtx, lesson, studentName, []uuid.UUID{studentID}); err != nil {
+						log.Warn().
+							Str("lesson_id", lesson.ID.String()).
+							Str("student_id", studentID.String()).
+							Err(err).
+							Msg("Failed to send booking notification to user")
+					}
+				}
+			}()
+		}
 	}
 
 	return lesson, nil
@@ -176,6 +221,9 @@ func (s *LessonService) UpdateLesson(ctx context.Context, lessonID uuid.UUID, re
 	if err != nil {
 		return nil, fmt.Errorf("lesson not found: %w", err)
 	}
+
+	// Save old start time for reschedule notification
+	oldStartTime := currentLesson.StartTime
 
 	// Validate lesson type change: cannot change to individual if multiple students enrolled
 	if req.LessonType != nil && *req.LessonType == models.LessonTypeIndividual {
@@ -264,6 +312,30 @@ func (s *LessonService) UpdateLesson(ctx context.Context, lessonID uuid.UUID, re
 	if err != nil {
 		return nil, fmt.Errorf("failed to get updated lesson: %w", err)
 	}
+
+	// Check if start time changed and send reschedule notifications (non-blocking)
+	if s.telegramService != nil && !lesson.StartTime.Equal(oldStartTime) {
+		bookings, err := s.lessonRepo.GetLessonBookings(ctx, lessonID)
+		if err == nil && len(bookings) > 0 {
+			studentIDs := make([]uuid.UUID, 0, len(bookings))
+			for _, b := range bookings {
+				studentIDs = append(studentIDs, b.StudentID)
+			}
+
+			go func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+
+				if err := s.telegramService.NotifyLessonReschedule(ctx, lesson, oldStartTime, lesson.StartTime, studentIDs); err != nil {
+					log.Warn().
+						Str("lesson_id", lessonID.String()).
+						Err(err).
+						Msg("Failed to send reschedule notification for lesson")
+				}
+			}()
+		}
+	}
+
 	return lesson, nil
 }
 

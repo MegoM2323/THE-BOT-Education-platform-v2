@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -25,6 +26,8 @@ type BookingService struct {
 	creditRepo           *repository.CreditRepository
 	cancelledBookingRepo *repository.CancelledBookingRepository
 	bookingValidator     *validator.BookingValidator
+	telegramService      *TelegramService
+	userRepo             repository.UserRepository
 }
 
 // NewBookingService создает новый BookingService
@@ -35,6 +38,8 @@ func NewBookingService(
 	creditRepo *repository.CreditRepository,
 	cancelledBookingRepo *repository.CancelledBookingRepository,
 	bookingValidator *validator.BookingValidator,
+	telegramService *TelegramService,
+	userRepo repository.UserRepository,
 ) *BookingService {
 	return &BookingService{
 		pool:                 pool,
@@ -43,6 +48,8 @@ func NewBookingService(
 		creditRepo:           creditRepo,
 		cancelledBookingRepo: cancelledBookingRepo,
 		bookingValidator:     bookingValidator,
+		telegramService:      telegramService,
+		userRepo:             userRepo,
 	}
 }
 
@@ -207,6 +214,13 @@ func (s *BookingService) CreateBooking(ctx context.Context, req *models.CreateBo
 			metrics.BookingsCreated.Inc()
 			metrics.CreditsDeducted.Inc()
 
+			// Отправляем уведомление в Telegram (неблокирующая операция)
+			go func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+				s.sendBookingNotification(ctx, reactivated.ID, req.StudentID, lesson)
+			}()
+
 			// РАННИЙ ВЫХОД: гарантирует что путь 2 (создание нового бронирования ниже) не выполнится
 			// Это предотвращает двойное списание кредитов
 			return reactivated, nil
@@ -328,6 +342,13 @@ func (s *BookingService) CreateBooking(ctx context.Context, req *models.CreateBo
 	// Обновляем метрики успешного бронирования
 	metrics.BookingsCreated.Inc()
 	metrics.CreditsDeducted.Inc()
+
+	// Отправляем уведомление в Telegram (неблокирующая операция)
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		s.sendBookingNotification(ctx, booking.ID, req.StudentID, lesson)
+	}()
 
 	return booking, nil
 }
@@ -604,4 +625,41 @@ func (s *BookingService) GetCancelledLessonIDs(ctx context.Context, studentID uu
 		Msg("Successfully retrieved cancelled lesson IDs")
 
 	return lessonIDs, nil
+}
+
+// sendBookingNotification отправляет уведомление о создании бронирования
+func (s *BookingService) sendBookingNotification(ctx context.Context, bookingID, studentID uuid.UUID, lesson *models.Lesson) {
+	if s.telegramService == nil {
+		return
+	}
+
+	student, err := s.userRepo.GetByID(ctx, studentID)
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			log.Info().
+				Str("booking_id", bookingID.String()).
+				Str("student_id", utils.MaskUserID(studentID)).
+				Msg("Student not found (likely deleted), skipping Telegram notification")
+		} else {
+			log.Warn().
+				Str("booking_id", bookingID.String()).
+				Str("student_id", utils.MaskUserID(studentID)).
+				Err(err).
+				Msg("Failed to get student for Telegram notification")
+		}
+		return
+	}
+
+	studentName := student.FullName
+	if studentName == "" {
+		studentName = student.Email
+	}
+
+	if err := s.telegramService.NotifyLessonBooking(ctx, lesson, studentName, []uuid.UUID{studentID}); err != nil {
+		log.Warn().
+			Str("booking_id", bookingID.String()).
+			Str("student_id", utils.MaskUserID(studentID)).
+			Err(err).
+			Msg("Failed to send Telegram notification for booking")
+	}
 }

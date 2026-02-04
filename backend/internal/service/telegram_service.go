@@ -110,6 +110,18 @@ func (ts *TokenStore) CleanExpired() {
 	}
 }
 
+// DeleteByUserID удаляет все токены пользователя
+func (ts *TokenStore) DeleteByUserID(userID uuid.UUID) {
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+
+	for token, data := range ts.tokens {
+		if data.UserID == userID {
+			delete(ts.tokens, token)
+		}
+	}
+}
+
 // TelegramService обрабатывает бизнес-логику для работы с Telegram
 type TelegramService struct {
 	telegramUserRepo  repository.TelegramUserRepository
@@ -168,7 +180,7 @@ func (s *TelegramService) cleanupExpiredTokens() {
 			// Очищаем истекшие токены
 			_, err := s.telegramTokenRepo.DeleteExpiredTokens(ctx)
 			if err != nil {
-				log.Info().Msg("ERROR: Failed to delete expired tokens")
+				log.Error().Err(err).Msg("Failed to delete expired tokens")
 			} else {
 				log.Info().Msg("Cleaned expired telegram tokens")
 			}
@@ -177,7 +189,7 @@ func (s *TelegramService) cleanupExpiredTokens() {
 			// Это решает проблему накопления "мусорных" записей после неудачных попыток привязки
 			cleaned, err := s.telegramUserRepo.CleanupInvalidLinks(ctx)
 			if err != nil {
-				log.Info().Msg("ERROR: Failed to cleanup invalid telegram links")
+				log.Error().Err(err).Msg("Failed to cleanup invalid telegram links")
 			} else if cleaned > 0 {
 				log.Info().Msgf("Cleaned %d invalid telegram links", cleaned)
 			}
@@ -188,7 +200,7 @@ func (s *TelegramService) cleanupExpiredTokens() {
 			s.tokenStore.CleanExpired()
 		case <-s.stopCleanup:
 			// Graceful shutdown
-			log.Info().Msg("log")
+			log.Info().Msg("Telegram token cleanup goroutine shutting down")
 			return
 		}
 	}
@@ -198,7 +210,7 @@ func (s *TelegramService) cleanupExpiredTokens() {
 func (s *TelegramService) Shutdown() {
 	close(s.stopCleanup)
 	<-s.cleanupDone
-	log.Info().Msg("log")
+	log.Info().Msg("Telegram service shutdown complete")
 }
 
 // GenerateLinkToken генерирует токен для привязки пользователя к Telegram
@@ -240,13 +252,8 @@ func (s *TelegramService) GenerateLinkToken(ctx context.Context, userID uuid.UUI
 	}
 
 	// Также удаляем из in-memory хранилища (для backward compatibility)
-	s.tokenStore.mu.Lock()
-	for token, data := range s.tokenStore.tokens {
-		if data.UserID == userID {
-			delete(s.tokenStore.tokens, token)
-		}
-	}
-	s.tokenStore.mu.Unlock()
+	// Используем синхронизированный метод DeleteByUserID
+	s.tokenStore.DeleteByUserID(userID)
 
 	// Генерируем токен на 15 минут
 	token, err := s.tokenStore.GenerateToken(userID, 15*time.Minute)
@@ -302,14 +309,14 @@ func (s *TelegramService) LinkUserAccount(ctx context.Context, token string, tel
 	// Удаляем использованный токен из обеих хранилищ
 	if err := s.telegramTokenRepo.DeleteToken(ctx, token); err != nil {
 		// Логируем ошибку, но не прерываем процесс
-		log.Info().Msg("log")
+		log.Warn().Err(err).Msg("Failed to delete used token from database")
 	}
 	if err := s.tokenStore.DeleteToken(ctx, token); err != nil {
 		// Логируем ошибку, но не прерываем процесс
-		log.Info().Msg("log")
+		log.Warn().Err(err).Msg("Failed to delete used token from memory store")
 	}
 
-	log.Info().Msg("log")
+	log.Info().Msgf("Successfully linked Telegram account for user %s", userID)
 	return nil
 }
 
@@ -349,7 +356,7 @@ func (s *TelegramService) UnlinkUser(ctx context.Context, userID uuid.UUID) erro
 		log.Info().Msgf("Failed to clear telegram username for user %s: %v", userID, err)
 	}
 
-	log.Info().Msg("log")
+	log.Info().Msgf("Successfully unlinked Telegram account for user %s", userID)
 	return nil
 }
 
@@ -395,7 +402,7 @@ func (s *TelegramService) SubscribeToNotifications(ctx context.Context, userID u
 		return fmt.Errorf("failed to subscribe to notifications: %w", err)
 	}
 
-	log.Info().Msg("log")
+	log.Info().Msgf("User %s subscribed to Telegram notifications", userID)
 	return nil
 }
 
@@ -420,7 +427,7 @@ func (s *TelegramService) UnsubscribeFromNotifications(ctx context.Context, user
 		return fmt.Errorf("failed to unsubscribe from notifications: %w", err)
 	}
 
-	log.Info().Msg("log")
+	log.Info().Msgf("User %s unsubscribed from Telegram notifications", userID)
 	return nil
 }
 
@@ -428,28 +435,28 @@ func (s *TelegramService) UnsubscribeFromNotifications(ctx context.Context, user
 func (s *TelegramService) SendAdminNotification(ctx context.Context, message string) error {
 	if s.adminTelegramID == 0 {
 		// Админский Telegram ID не настроен - пропускаем
-		log.Info().Msg("log")
+		log.Debug().Msg("Admin Telegram ID not configured, skipping admin notification")
 		return nil
 	}
 
 	if s.telegramClient == nil {
 		// Telegram клиент не инициализирован
-		log.Info().Msg("log")
+		log.Debug().Msg("Telegram client not initialized, skipping admin notification")
 		return nil
 	}
 
 	// Отправляем сообщение
 	if err := s.telegramClient.SendMessage(s.adminTelegramID, message); err != nil {
-		log.Info().Msg("log")
+		log.Warn().Err(err).Msg("Failed to send admin notification via Telegram")
 
 		// Проверяем, не заблокирован ли бот
 		if telegramErr, ok := err.(*telegram.TelegramError); ok {
 			if telegramErr.ErrorCode == 403 {
-				log.Info().Msg("log")
+				log.Warn().Msg("Bot is blocked by admin user")
 				return fmt.Errorf("bot is blocked by admin user")
 			}
 			if telegramErr.ErrorCode == 400 {
-				log.Info().Msg("log")
+				log.Warn().Msg("Invalid admin Telegram ID")
 				return fmt.Errorf("invalid admin telegram ID")
 			}
 		}
@@ -458,7 +465,7 @@ func (s *TelegramService) SendAdminNotification(ctx context.Context, message str
 		return fmt.Errorf("failed to send admin notification: %w", err)
 	}
 
-	log.Info().Msg("log")
+	log.Debug().Msg("Admin notification sent successfully")
 	return nil
 }
 
@@ -475,7 +482,7 @@ func (s *TelegramService) SendUserNotification(ctx context.Context, userID uuid.
 
 	// Проверяем подписку на уведомления
 	if !telegramUser.Subscribed {
-		log.Info().Msg("log")
+		log.Debug().Str("user_id", userID.String()).Msg("User not subscribed to Telegram notifications, skipping")
 		return nil
 	}
 
@@ -484,17 +491,17 @@ func (s *TelegramService) SendUserNotification(ctx context.Context, userID uuid.
 		// Проверяем, не заблокирован ли бот
 		if telegramErr, ok := err.(*telegram.TelegramError); ok {
 			if telegramErr.ErrorCode == 403 {
-				log.Info().Msg("log")
+				log.Warn().Str("user_id", userID.String()).Msg("User blocked the bot, unsubscribing from notifications")
 				// Можно автоматически отписать пользователя от уведомлений
 				if updateErr := s.telegramUserRepo.UpdateSubscription(ctx, userID, false); updateErr != nil {
-					log.Info().Msg("log")
+					log.Warn().Err(updateErr).Msg("Failed to unsubscribe user after bot block")
 				}
 			}
 		}
 		return fmt.Errorf("failed to send notification to user: %w", err)
 	}
 
-	log.Info().Msg("log")
+	log.Debug().Str("user_id", userID.String()).Msg("User notification sent successfully")
 	return nil
 }
 
@@ -514,11 +521,11 @@ func (s *TelegramService) HandleWebhook(ctx context.Context, update *telegram.Up
 		linkResult, err := s.botHandler.GetLinkResult(ctx, message)
 		if err != nil {
 			// Ошибка валидации токена - отправляем сообщение об ошибке
-			log.Info().Msg("log")
+			log.Warn().Err(err).Msg("Invalid or expired link token")
 			if sendErr := s.telegramClient.SendMessage(message.Chat.ID,
 				"❌ Неверный или истекший токен привязки.\n\n"+
 					"Пожалуйста, получите новую ссылку для привязки в личном кабинете."); sendErr != nil {
-				log.Info().Msg("log")
+				log.Warn().Err(sendErr).Msg("Failed to send invalid token message")
 			}
 			return nil
 		}
@@ -527,10 +534,10 @@ func (s *TelegramService) HandleWebhook(ctx context.Context, update *telegram.Up
 		_, err = s.telegramUserRepo.GetByTelegramID(ctx, linkResult.TelegramID)
 		if err == nil {
 			// Telegram уже привязан к другому пользователю
-			log.Info().Msg("log")
+			log.Warn().Int64("telegram_id", linkResult.TelegramID).Msg("Telegram account already linked to another user")
 			if sendErr := s.telegramClient.SendMessage(linkResult.ChatID,
 				"❌ Этот Telegram аккаунт уже привязан к другому пользователю платформы."); sendErr != nil {
-				log.Info().Msg("log")
+				log.Warn().Err(sendErr).Msg("Failed to send already linked message")
 			}
 			return nil
 		}
@@ -546,10 +553,10 @@ func (s *TelegramService) HandleWebhook(ctx context.Context, update *telegram.Up
 			linkResult.ChatID,
 			linkResult.Username,
 		); err != nil {
-			log.Info().Msg("log")
+			log.Warn().Err(err).Msg("Failed to link user account")
 			if sendErr := s.telegramClient.SendMessage(linkResult.ChatID,
 				"❌ Произошла ошибка при привязке аккаунта. Пожалуйста, попробуйте позже."); sendErr != nil {
-				log.Info().Msg("log")
+				log.Warn().Err(sendErr).Msg("Failed to send error message")
 			}
 			return fmt.Errorf("failed to link user to telegram: %w", err)
 		}
@@ -560,7 +567,7 @@ func (s *TelegramService) HandleWebhook(ctx context.Context, update *telegram.Up
 			log.Info().Msgf("Failed to sync telegram username for user %s: %v", linkResult.UserID, err)
 		}
 
-		log.Info().Msg("log")
+		log.Info().Msgf("Successfully linked Telegram account for user %s", linkResult.UserID)
 
 		// Отправляем приветственное сообщение после успешной привязки
 		username := linkResult.Username
@@ -582,7 +589,7 @@ func (s *TelegramService) HandleWebhook(ctx context.Context, update *telegram.Up
 		)
 
 		if sendErr := s.telegramClient.SendMessage(linkResult.ChatID, welcomeText); sendErr != nil {
-			log.Info().Msg("log")
+			log.Warn().Err(sendErr).Msg("Failed to send welcome message")
 		}
 
 		// ✅ Успешная привязка - выходим, не обрабатываем дальше
@@ -621,7 +628,7 @@ func (s *TelegramService) SetUserTelegram(ctx context.Context, userID uuid.UUID,
 		log.Info().Msgf("Failed to sync telegram username for user %s: %v", userID, err)
 	}
 
-	log.Info().Msg("log")
+	log.Info().Msgf("Successfully set Telegram for user %s", userID)
 	return nil
 }
 
@@ -641,7 +648,7 @@ func (s *TelegramService) SendMessage(ctx context.Context, chatID int64, message
 
 	// Отправляем сообщение
 	if err := s.telegramClient.SendMessage(chatID, message); err != nil {
-		log.Info().Msg("log")
+		log.Warn().Err(err).Int64("chat_id", chatID).Msg("Failed to send message via Telegram")
 
 		// Проверяем специфичные ошибки Telegram API
 		if telegramErr, ok := err.(*telegram.TelegramError); ok {
@@ -649,7 +656,7 @@ func (s *TelegramService) SendMessage(ctx context.Context, chatID int64, message
 				return telegramErr
 			}
 			if telegramErr.ErrorCode == 400 {
-				log.Info().Msg("log")
+				log.Warn().Msg("Invalid chat ID or message format")
 				return fmt.Errorf("invalid chat ID or message format")
 			}
 		}
@@ -658,7 +665,116 @@ func (s *TelegramService) SendMessage(ctx context.Context, chatID int64, message
 	}
 
 	// Обновляем метрики успешной отправки
+	log.Debug().Int64("chat_id", chatID).Msg("Message sent successfully via Telegram")
+	return nil
+}
 
-	log.Info().Msg("log")
+// NotifyLessonBooking отправляет уведомления студентам о бронировании занятия
+func (s *TelegramService) NotifyLessonBooking(ctx context.Context, lesson *models.Lesson, studentName string, studentIDs []uuid.UUID) error {
+	if s.telegramClient == nil {
+		return nil
+	}
+
+	subject := lesson.Subject.String
+	if subject == "" {
+		subject = "Занятие"
+	}
+
+	dateTime := lesson.StartTime.Format("02.01.2006 15:04")
+	message := fmt.Sprintf("📚 Запись на занятие\n\n"+
+		"Предмет: %s\n"+
+		"Дата и время: %s\n"+
+		"Студент: %s\n"+
+		"Стоимость: %s\n\n"+
+		"Вы успешно записаны на занятие!",
+		subject, dateTime, studentName, FormatCreditsWithDeclension(lesson.CreditsCost))
+
+	var wg sync.WaitGroup
+	for _, studentID := range studentIDs {
+		wg.Add(1)
+		go func(id uuid.UUID) {
+			defer wg.Done()
+			notifCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := s.SendUserNotification(notifCtx, id, message); err != nil {
+				log.Warn().Str("user_id", id.String()).Err(err).Msg("Failed to send booking notification to user")
+			}
+		}(studentID)
+	}
+	wg.Wait()
+
+	return nil
+}
+
+// NotifyLessonReschedule отправляет уведомления студентам о переносе занятия
+func (s *TelegramService) NotifyLessonReschedule(ctx context.Context, lesson *models.Lesson, oldStartTime, newStartTime time.Time, studentIDs []uuid.UUID) error {
+	if s.telegramClient == nil {
+		return nil
+	}
+
+	subject := lesson.Subject.String
+	if subject == "" {
+		subject = "Занятие"
+	}
+
+	oldDateTime := oldStartTime.Format("02.01.2006 15:04")
+	newDateTime := newStartTime.Format("02.01.2006 15:04")
+
+	message := fmt.Sprintf("📅 Перенос занятия\n\n"+
+		"Предмет: %s\n\n"+
+		"⏰ Старое время: %s\n"+
+		"✅ Новое время: %s\n\n"+
+		"Занятие было перенесено. Пожалуйста, обновите свой календарь.",
+		subject, oldDateTime, newDateTime)
+
+	var wg sync.WaitGroup
+	for _, studentID := range studentIDs {
+		wg.Add(1)
+		go func(id uuid.UUID) {
+			defer wg.Done()
+			notifCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := s.SendUserNotification(notifCtx, id, message); err != nil {
+				log.Warn().Str("user_id", id.String()).Err(err).Msg("Failed to send reschedule notification to user")
+			}
+		}(studentID)
+	}
+	wg.Wait()
+
+	return nil
+}
+
+// NotifyLessonCancellation отправляет уведомления студентам об отмене занятия
+func (s *TelegramService) NotifyLessonCancellation(ctx context.Context, lesson *models.Lesson, studentIDs []uuid.UUID) error {
+	if s.telegramClient == nil {
+		return nil
+	}
+
+	subject := lesson.Subject.String
+	if subject == "" {
+		subject = "Занятие"
+	}
+
+	dateTime := lesson.StartTime.Format("02.01.2006 15:04")
+	message := fmt.Sprintf("❌ Отмена занятия\n\n"+
+		"Предмет: %s\n"+
+		"Дата и время: %s\n\n"+
+		"К сожалению, занятие было отменено. Кредиты будут возвращены на ваш счет.",
+		subject, dateTime)
+
+	var wg sync.WaitGroup
+	for _, studentID := range studentIDs {
+		wg.Add(1)
+		go func(id uuid.UUID) {
+			defer wg.Done()
+			notifCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := s.SendUserNotification(notifCtx, id, message); err != nil {
+				log.Warn().Str("user_id", id.String()).Err(err).Msg("Failed to send cancellation notification to user")
+			}
+		}(studentID)
+	}
+	wg.Wait()
+
 	return nil
 }

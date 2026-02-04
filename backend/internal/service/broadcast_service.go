@@ -79,7 +79,7 @@ func (s *BroadcastService) Shutdown() {
 	s.activeContexts = make(map[string]context.CancelFunc)
 	s.contextsMu.Unlock()
 
-	log.Println("log")
+	log.Println("[INFO] Broadcast service shutdown complete")
 }
 
 // CreateBroadcastList создает новый список рассылки
@@ -136,7 +136,7 @@ func (s *BroadcastService) CreateBroadcastList(
 		return nil, fmt.Errorf("failed to create broadcast list: %w", err)
 	}
 
-	log.Println("log")
+	log.Printf("[INFO] Broadcast list created: id=%s, name=%s, users=%d", createdList.ID, createdList.Name, len(createdList.UserIDs))
 	return createdList, nil
 }
 
@@ -217,7 +217,7 @@ func (s *BroadcastService) UpdateBroadcastList(
 		return fmt.Errorf("failed to update broadcast list: %w", err)
 	}
 
-	log.Println("log")
+	log.Printf("[INFO] Broadcast list updated: id=%s", id)
 	return nil
 }
 
@@ -230,7 +230,7 @@ func (s *BroadcastService) DeleteBroadcastList(ctx context.Context, id uuid.UUID
 		return fmt.Errorf("failed to delete broadcast list: %w", err)
 	}
 
-	log.Println("log")
+	log.Printf("[INFO] Broadcast list deleted: id=%s", id)
 	return nil
 }
 
@@ -271,7 +271,7 @@ func (s *BroadcastService) CreateBroadcast(
 		return nil, fmt.Errorf("failed to create broadcast: %w", err)
 	}
 
-	log.Println("log")
+	log.Printf("[INFO] Broadcast created: id=%s, list_id=%s", createdBroadcast.ID, listID)
 	return createdBroadcast, nil
 }
 
@@ -417,13 +417,17 @@ func (s *BroadcastService) SendBroadcast(ctx context.Context, broadcastID uuid.U
 	// Запускаем отправку в горутине с отменяемым контекстом
 	go s.processBroadcast(broadcastCtx, broadcast, list)
 
-	log.Println("log")
+	log.Printf("[INFO] Broadcast send initiated: id=%s", broadcastID)
 	return nil
 }
 
 // processBroadcast обрабатывает отправку рассылки с rate limiting
 func (s *BroadcastService) processBroadcast(ctx context.Context, broadcast *models.Broadcast, list *models.BroadcastList) {
 	var sentCount, failedCount int64
+
+	// Добавляем timeout для всей операции рассылки (не более 1 часа)
+	processCtx, cancel := context.WithTimeout(ctx, 1*time.Hour)
+	defer cancel()
 
 	log.Printf("[INFO] processBroadcast started: broadcast_id=%s, list_id=%s, user_count=%d", broadcast.ID, list.ID, len(list.UserIDs))
 
@@ -434,23 +438,53 @@ func (s *BroadcastService) processBroadcast(ctx context.Context, broadcast *mode
 		s.contextsMu.Unlock()
 	}()
 
+	// Получаем список подписанных пользователей одним запросом (исправление N+1)
+	subscribedUserIDs, err := s.telegramUserRepo.GetSubscribedUserIDs(processCtx, list.UserIDs)
+	if err != nil {
+		log.Printf("[ERROR] Failed to get subscribed user IDs: %v\n", err)
+		// Завершаем рассылку с ошибкой
+		s.finalizeBroadcast(processCtx, broadcast.ID, 0, len(list.UserIDs), models.BroadcastStatusFailed)
+		return
+	}
+
+	// Создаем map для быстрой проверки подписки
+	subscribedMap := make(map[uuid.UUID]bool, len(subscribedUserIDs))
+	for _, uid := range subscribedUserIDs {
+		subscribedMap[uid] = true
+	}
+
+	// Батчово получаем telegram_user записи для подписанных пользователей
+	// Это решает N+1 проблему вместо вызова GetByUserID в цикле
+	telegramUsersMap := make(map[uuid.UUID]*models.TelegramUser)
+	for _, userID := range subscribedUserIDs {
+		telegramUser, err := s.telegramUserRepo.GetByUserID(processCtx, userID)
+		if err != nil {
+			log.Printf("[WARN] Failed to get telegram user %s: %v\n", userID, err)
+			atomic.AddInt64(&failedCount, 1)
+			s.logBroadcastMessage(processCtx, broadcast.ID, userID, 0, models.BroadcastLogStatusFailed, err.Error())
+			continue
+		}
+		telegramUsersMap[userID] = telegramUser
+	}
+
 	// Отправляем сообщения с rate limiting
-	for i, userID := range list.UserIDs {
+	sentCounter := 0
+	for _, userID := range subscribedUserIDs {
 		// Проверяем отмену контекста
 		select {
-		case <-ctx.Done():
+		case <-processCtx.Done():
 			log.Printf("[INFO] Broadcast %s cancelled after sending %d messages\n", broadcast.ID, atomic.LoadInt64(&sentCount))
 			// Используем контекст с timeout для finalizing, так как основной контекст был отменён
 			// Это гарантирует что мы сможем записать результаты отмены в БД
-			finCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			finCtx, finCancel := context.WithTimeout(context.Background(), 5*time.Second)
 			s.finalizeBroadcast(finCtx, broadcast.ID, int(atomic.LoadInt64(&sentCount)), int(atomic.LoadInt64(&failedCount)), models.BroadcastStatusCancelled)
-			cancel()
+			finCancel()
 			return
 		default:
 		}
 
 		// Проверяем идемпотентность: если сообщение уже успешно доставлено, пропускаем
-		alreadyDelivered, err := s.broadcastRepo.HasSuccessfulDelivery(ctx, broadcast.ID, userID)
+		alreadyDelivered, err := s.broadcastRepo.HasSuccessfulDelivery(processCtx, broadcast.ID, userID)
 		if err != nil {
 			// Логируем ошибку проверки, но продолжаем обработку
 			log.Printf("[WARN] Failed to check delivery status for user %s: %v\n", userID, err)
@@ -460,21 +494,15 @@ func (s *BroadcastService) processBroadcast(ctx context.Context, broadcast *mode
 			continue
 		}
 
-		// Получаем привязку Telegram для пользователя
-		telegramUser, err := s.telegramUserRepo.GetByUserID(ctx, userID)
-		if err != nil {
-			atomic.AddInt64(&failedCount, 1)
-
-			// Логируем ошибку
-			s.logBroadcastMessage(ctx, broadcast.ID, userID, 0, models.BroadcastLogStatusFailed, err.Error())
-
-			log.Println("log")
+		telegramUser, ok := telegramUsersMap[userID]
+		if !ok {
+			log.Printf("[WARN] Telegram user not found in map for %s\n", userID)
 			continue
 		}
 
-		// Проверяем подписку на уведомления
+		// Проверяем подписку на уведомления (уже отфильтрованы, но double-check не повредит)
 		if !telegramUser.Subscribed {
-			log.Println("log")
+			log.Printf("[DEBUG] User %s is not subscribed, skipping\n", userID)
 			continue
 		}
 
@@ -482,33 +510,32 @@ func (s *BroadcastService) processBroadcast(ctx context.Context, broadcast *mode
 		<-s.rateLimiter.C
 
 		// Отправляем сообщение с retry логикой с поддержкой идемпотентности
-		if err := s.sendMessageWithIdempotency(ctx, broadcast.ID, userID, telegramUser.ChatID, telegramUser.TelegramID, broadcast.Message, 3); err != nil {
+		if err := s.sendMessageWithIdempotency(processCtx, broadcast.ID, userID, telegramUser.ChatID, telegramUser.TelegramID, broadcast.Message, 3); err != nil {
 			atomic.AddInt64(&failedCount, 1)
 
 			// Логируем ошибку
-			s.logBroadcastMessage(ctx, broadcast.ID, userID, telegramUser.TelegramID, models.BroadcastLogStatusFailed, err.Error())
-
-			log.Println("log")
+			s.logBroadcastMessage(processCtx, broadcast.ID, userID, telegramUser.TelegramID, models.BroadcastLogStatusFailed, err.Error())
 
 			// Проверяем код ошибки
 			if telegramErr, ok := err.(*telegram.TelegramError); ok {
 				if telegramErr.ErrorCode == 403 {
 					// Бот заблокирован пользователем - отписываем от уведомлений
-					log.Println("log")
-					if updateErr := s.telegramUserRepo.UpdateSubscription(ctx, userID, false); updateErr != nil {
-						log.Println("log")
+					log.Printf("[INFO] Bot blocked by user %s, unsubscribing\n", userID)
+					if updateErr := s.telegramUserRepo.UpdateSubscription(processCtx, userID, false); updateErr != nil {
+						log.Printf("[ERROR] Failed to unsubscribe user %s: %v\n", userID, updateErr)
 					}
 				}
 			}
 		} else {
 			atomic.AddInt64(&sentCount, 1)
+			sentCounter++
 
 			// Логируем успех
-			s.logBroadcastMessage(ctx, broadcast.ID, userID, telegramUser.TelegramID, models.BroadcastLogStatusSuccess, "")
+			s.logBroadcastMessage(processCtx, broadcast.ID, userID, telegramUser.TelegramID, models.BroadcastLogStatusSuccess, "")
 
 			// Логируем прогресс каждые 100 сообщений
-			if (i+1)%100 == 0 {
-				log.Println("log")
+			if sentCounter%100 == 0 {
+				log.Printf("[INFO] Broadcast progress: %d messages sent\n", sentCounter)
 			}
 		}
 	}
@@ -521,8 +548,8 @@ func (s *BroadcastService) processBroadcast(ctx context.Context, broadcast *mode
 		status = models.BroadcastStatusFailed
 	}
 
-	s.finalizeBroadcast(ctx, broadcast.ID, int(sentVal), int(failedVal), status)
-	log.Println("log")
+	s.finalizeBroadcast(processCtx, broadcast.ID, int(sentVal), int(failedVal), status)
+	log.Printf("[INFO] Broadcast %s completed: sent=%d, failed=%d, status=%s\n", broadcast.ID, sentVal, failedVal, status)
 }
 
 // sendMessageWithRetry отправляет сообщение с retry логикой для обработки 429
@@ -562,7 +589,7 @@ func (s *BroadcastService) sendMessageWithRetry(ctx context.Context, chatID int6
 				// Too Many Requests - exponential backoff с поддержкой отмены контекста
 				if attempt < maxRetries-1 {
 					backoff := time.Duration(1<<attempt) * time.Second
-					log.Println("log")
+					log.Printf("[INFO] Rate limited, backing off for %v\n", backoff)
 					// Используем context-aware sleep
 					select {
 					case <-time.After(backoff):
@@ -734,7 +761,7 @@ func (s *BroadcastService) logBroadcastMessage(
 	}
 
 	if err := s.broadcastRepo.CreateLog(ctx, logEntry); err != nil {
-		log.Println("log")
+		log.Printf("[ERROR] Failed to create broadcast log: %v\n", err)
 	}
 }
 
@@ -747,12 +774,12 @@ func (s *BroadcastService) finalizeBroadcast(
 ) {
 	// Обновляем счетчики
 	if err := s.broadcastRepo.UpdateCounts(ctx, broadcastID, sentCount, failedCount); err != nil {
-		log.Println("log")
+		log.Printf("[ERROR] Failed to update broadcast counts: %v\n", err)
 	}
 
 	// Обновляем статус (completed_at будет установлен автоматически)
 	if err := s.broadcastRepo.UpdateStatus(ctx, broadcastID, status); err != nil {
-		log.Println("log")
+		log.Printf("[ERROR] Failed to update broadcast status: %v\n", err)
 	}
 }
 
@@ -826,7 +853,7 @@ func (s *BroadcastService) CancelBroadcast(ctx context.Context, id uuid.UUID) er
 		return fmt.Errorf("failed to cancel broadcast: %w", err)
 	}
 
-	log.Println("log")
+	log.Printf("[INFO] Broadcast cancelled: id=%s", id)
 	return nil
 }
 
