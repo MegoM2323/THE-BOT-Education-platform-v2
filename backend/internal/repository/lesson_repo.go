@@ -26,8 +26,8 @@ func NewLessonRepository(db *sqlx.DB) *LessonRepository {
 // Create создает новое занятие
 func (r *LessonRepository) Create(ctx context.Context, lesson *models.Lesson) error {
 	query := `
-		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, link, applied_from_template, template_application_id, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, report_text, link, applied_from_template, template_application_id, is_recurring, recurring_group_id, recurring_end_date, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
 	`
 
 	lesson.ID = uuid.New()
@@ -46,9 +46,13 @@ func (r *LessonRepository) Create(ctx context.Context, lesson *models.Lesson) er
 		lesson.Color,
 		lesson.Subject,
 		lesson.HomeworkText,
+		lesson.ReportText,
 		lesson.Link,
 		lesson.AppliedFromTemplate,
 		lesson.TemplateApplicationID,
+		lesson.IsRecurring,
+		lesson.RecurringGroupID,
+		lesson.RecurringEndDate,
 		lesson.CreatedAt,
 		lesson.UpdatedAt,
 	)
@@ -58,6 +62,74 @@ func (r *LessonRepository) Create(ctx context.Context, lesson *models.Lesson) er
 			return ErrLessonOverlapConflict
 		}
 		return fmt.Errorf("failed to create lesson: %w", err)
+	}
+
+	return nil
+}
+
+// CreateBatchLessons создает несколько занятий в одной транзакции
+func (r *LessonRepository) CreateBatchLessons(ctx context.Context, lessons []*models.Lesson) error {
+	if len(lessons) == 0 {
+		return nil
+	}
+
+	tx, err := r.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	for _, lesson := range lessons {
+		if err := r.createInTx(ctx, tx, lesson); err != nil {
+			return fmt.Errorf("failed to create lesson in batch: %w", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit batch lessons: %w", err)
+	}
+
+	return nil
+}
+
+// createInTx создает занятие внутри существующей транзакции sqlx
+func (r *LessonRepository) createInTx(ctx context.Context, tx *sqlx.Tx, lesson *models.Lesson) error {
+	query := `
+		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, report_text, link, applied_from_template, template_application_id, is_recurring, recurring_group_id, recurring_end_date, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+	`
+
+	lesson.ID = uuid.New()
+	lesson.CurrentStudents = 0
+	lesson.CreatedAt = time.Now()
+	lesson.UpdatedAt = time.Now()
+
+	_, err := tx.ExecContext(ctx, query,
+		lesson.ID,
+		lesson.TeacherID,
+		lesson.StartTime,
+		lesson.EndTime,
+		lesson.MaxStudents,
+		lesson.CurrentStudents,
+		lesson.CreditsCost,
+		lesson.Color,
+		lesson.Subject,
+		lesson.HomeworkText,
+		lesson.ReportText,
+		lesson.Link,
+		lesson.AppliedFromTemplate,
+		lesson.TemplateApplicationID,
+		lesson.IsRecurring,
+		lesson.RecurringGroupID,
+		lesson.RecurringEndDate,
+		lesson.CreatedAt,
+		lesson.UpdatedAt,
+	)
+	if err != nil {
+		if IsExclusionViolationError(err) {
+			return ErrLessonOverlapConflict
+		}
+		return fmt.Errorf("failed to create lesson in transaction: %w", err)
 	}
 
 	return nil
@@ -104,9 +176,13 @@ func (r *LessonRepository) GetByIDForUpdate(ctx context.Context, tx pgx.Tx, id u
 		&lesson.Color,
 		&lesson.Subject,
 		&lesson.HomeworkText,
+		&lesson.ReportText,
 		&lesson.Link,
 		&lesson.AppliedFromTemplate,
 		&lesson.TemplateApplicationID,
+		&lesson.IsRecurring,
+		&lesson.RecurringGroupID,
+		&lesson.RecurringEndDate,
 		&lesson.CreatedAt,
 		&lesson.UpdatedAt,
 		&lesson.DeletedAt,
@@ -126,7 +202,7 @@ func (r *LessonRepository) GetWithTeacher(ctx context.Context, id uuid.UUID) (*m
 	query := `
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
+			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			u.full_name as teacher_name
@@ -212,7 +288,7 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		query = `
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
+				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 				l.applied_from_template, l.template_application_id,
 				l.created_at, l.updated_at, l.deleted_at,
 				u.full_name as teacher_name
@@ -226,7 +302,7 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		query = `
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
+				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 				l.applied_from_template, l.template_application_id,
 				l.created_at, l.updated_at, l.deleted_at,
 				u.full_name as teacher_name
@@ -244,7 +320,7 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		query = `
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
+				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 				l.applied_from_template, l.template_application_id,
 				l.created_at, l.updated_at, l.deleted_at,
 				u.full_name as teacher_name
@@ -265,7 +341,7 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		query = `
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
+				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 				l.applied_from_template, l.template_application_id,
 				l.created_at, l.updated_at, l.deleted_at,
 				u.full_name as teacher_name
@@ -328,6 +404,7 @@ func (r *LessonRepository) Update(ctx context.Context, id uuid.UUID, updates map
 		"color":         true,
 		"subject":       true,
 		"homework_text": true,
+		"report_text":   true,
 		"link":          true,
 	}
 
@@ -822,9 +899,13 @@ func (r *LessonRepository) GetLessonsByTemplateApplicationTx(ctx context.Context
 			&lesson.Color,
 			&lesson.Subject,
 			&lesson.HomeworkText,
+			&lesson.ReportText,
 			&lesson.Link,
 			&lesson.AppliedFromTemplate,
 			&lesson.TemplateApplicationID,
+			&lesson.IsRecurring,
+			&lesson.RecurringGroupID,
+			&lesson.RecurringEndDate,
 			&lesson.CreatedAt,
 			&lesson.UpdatedAt,
 			&lesson.DeletedAt,

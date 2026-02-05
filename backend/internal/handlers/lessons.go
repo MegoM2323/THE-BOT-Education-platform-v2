@@ -22,14 +22,16 @@ type LessonHandler struct {
 	lessonService   *service.LessonService
 	bookingService  *service.BookingService
 	bulkEditService *service.BulkEditService
+	telegramService *service.TelegramService
 }
 
 // NewLessonHandler создает новый LessonHandler
-func NewLessonHandler(lessonService *service.LessonService, bookingService *service.BookingService, bulkEditService *service.BulkEditService) *LessonHandler {
+func NewLessonHandler(lessonService *service.LessonService, bookingService *service.BookingService, bulkEditService *service.BulkEditService, telegramService *service.TelegramService) *LessonHandler {
 	return &LessonHandler{
 		lessonService:   lessonService,
 		bookingService:  bookingService,
 		bulkEditService: bulkEditService,
+		telegramService: telegramService,
 	}
 }
 
@@ -134,6 +136,15 @@ func (h *LessonHandler) CreateLesson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Методист (учитель) может назначить только себя преподавателем
+	// Админ может назначить любого преподавателя
+	if user.IsMethodologist() && !user.IsAdmin() {
+		if req.TeacherID != user.ID {
+			response.Forbidden(w, "Вы можете назначить только себя преподавателем занятия")
+			return
+		}
+	}
+
 	// Создаем занятие
 	lesson, err := h.lessonService.CreateLesson(r.Context(), &req)
 	if err != nil {
@@ -198,12 +209,21 @@ func (h *LessonHandler) UpdateLesson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Методист (учитель) может назначить только себя преподавателем
+	// Админ может назначить любого преподавателя
+	if user.IsMethodologist() && !user.IsAdmin() && req.TeacherID != nil {
+		if *req.TeacherID != user.ID {
+			response.Forbidden(w, "Вы можете назначить только себя преподавателем занятия")
+			return
+		}
+	}
+
 	// Проверяем права доступа:
 	// - Admin может редактировать все поля всех занятий
-	// - Teacher может редактировать только homework_text своих занятий
+	// - Teacher может редактировать только homework_text и report_text своих занятий
 	// - Student не может редактировать
 	isTeacherOwnLesson := user.IsMethodologist() && lesson.TeacherID == user.ID
-	isHomeworkTextOnlyUpdate := req.HomeworkText != nil &&
+	isTextFieldsOnlyUpdate := (req.HomeworkText != nil || req.ReportText != nil) &&
 		req.TeacherID == nil &&
 		req.StartTime == nil &&
 		req.EndTime == nil &&
@@ -219,40 +239,41 @@ func (h *LessonHandler) UpdateLesson(w http.ResponseWriter, r *http.Request) {
 		Str("lesson_id", lessonID.String()).
 		Str("lesson_teacher_id", lesson.TeacherID.String()).
 		Bool("is_teacher_own_lesson", isTeacherOwnLesson).
-		Bool("is_homework_text_only", isHomeworkTextOnlyUpdate).
+		Bool("is_text_fields_only", isTextFieldsOnlyUpdate).
 		Bool("has_homework_text", req.HomeworkText != nil).
+		Bool("has_report_text", req.ReportText != nil).
 		Msg("UpdateLesson authorization check")
 
 	if !user.IsAdmin() && !user.IsMethodologist() {
-		// Если преподаватель пытается обновить только homework_text своего урока
-		if isTeacherOwnLesson && isHomeworkTextOnlyUpdate {
-			// Methodologist может редактировать homework_text своих уроков
+		// Если преподаватель пытается обновить только homework_text или report_text своего урока
+		if isTeacherOwnLesson && isTextFieldsOnlyUpdate {
+			// Methodologist может редактировать homework_text и report_text своих уроков
 			log.Debug().
 				Str("teacher_id", user.ID.String()).
 				Str("lesson_id", lessonID.String()).
-				Msg("Methodologist updating homework_text for own lesson")
+				Msg("Methodologist updating text fields for own lesson")
 		} else if user.IsMethodologist() {
 			// Преподаватель пытается обновить что-то другое или не свой урок
-			if isHomeworkTextOnlyUpdate && !isTeacherOwnLesson {
-				// Methodologist пытается обновить homework_text, но урок не его
+			if isTextFieldsOnlyUpdate && !isTeacherOwnLesson {
+				// Methodologist пытается обновить текстовые поля, но урок не его
 				log.Warn().
 					Str("user_id", user.ID.String()).
 					Str("lesson_teacher_id", lesson.TeacherID.String()).
 					Str("lesson_id", lessonID.String()).
-					Msg("Methodologist tried to update homework_text for another methodologist's lesson")
+					Msg("Methodologist tried to update text fields for another methodologist's lesson")
 				response.Forbidden(w, "Вы можете редактировать только свои занятия")
 				return
-			} else if isTeacherOwnLesson && !isHomeworkTextOnlyUpdate {
-				// Methodologist пытается обновить не только homework_text своего урока
+			} else if isTeacherOwnLesson && !isTextFieldsOnlyUpdate {
+				// Methodologist пытается обновить не только текстовые поля своего урока
 				log.Warn().
 					Str("user_id", user.ID.String()).
 					Str("lesson_id", lessonID.String()).
-					Msg("Methodologist tried to update non-homework_text fields for own lesson")
-				response.Forbidden(w, "Преподаватели могут редактировать только описание домашнего задания")
+					Msg("Methodologist tried to update non-text fields for own lesson")
+				response.Forbidden(w, "Преподаватели могут редактировать только текстовые поля (домашнее задание и отчет)")
 				return
 			} else {
 				// Другие случаи для преподавателя
-				response.Forbidden(w, "Вы можете редактировать только описание домашнего задания своих занятий")
+				response.Forbidden(w, "Вы можете редактировать только текстовые поля своих занятий")
 				return
 			}
 		} else {
@@ -262,11 +283,10 @@ func (h *LessonHandler) UpdateLesson(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Проверяем право на редактирование прошлых занятий
-	// Только админ и методист могут редактировать занятия которые уже начались (кроме homework_text)
+	// Проверяем право на редактирование отчета: только после начала занятия
 	isPastLesson := lesson.StartTime.Before(time.Now())
-	if isPastLesson && !user.IsAdmin() && !user.IsMethodologist() && !isHomeworkTextOnlyUpdate {
-		response.Forbidden(w, "Вы не можете редактировать занятия которые уже прошли")
+	if req.ReportText != nil && !isPastLesson && !user.IsAdmin() {
+		response.Forbidden(w, "Отчет можно редактировать только после начала занятия")
 		return
 	}
 
@@ -596,4 +616,51 @@ func (h *LessonHandler) ApplyToAllSubsequent(w http.ResponseWriter, r *http.Requ
 	}
 
 	response.OK(w, modification)
+}
+
+// SendReportToParents отправляет отчет о занятии родителям студентов
+func (h *LessonHandler) SendReportToParents(w http.ResponseWriter, r *http.Request) {
+	user, ok := middleware.GetUserFromContext(r.Context())
+	if !ok {
+		response.Unauthorized(w, "Authentication required")
+		return
+	}
+
+	if !user.IsAdmin() && !user.IsMethodologist() {
+		response.Forbidden(w, "Only admins and methodologists can send reports to parents")
+		return
+	}
+
+	lessonID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid lesson ID")
+		return
+	}
+
+	lesson, err := h.lessonService.GetLesson(r.Context(), lessonID)
+	if err != nil {
+		response.NotFound(w, "Lesson not found")
+		return
+	}
+
+	if !lesson.ReportText.Valid || lesson.ReportText.String == "" {
+		response.BadRequest(w, response.ErrCodeValidationFailed, "Отчет о занятии пустой")
+		return
+	}
+
+	bookings, err := h.lessonService.GetLessonBookings(r.Context(), lessonID)
+	if err != nil {
+		log.Error().Err(err).Str("lesson_id", lessonID.String()).Msg("Failed to get lesson bookings")
+		response.InternalError(w, "Failed to get lesson bookings")
+		return
+	}
+
+	result, err := h.telegramService.SendLessonReportToParents(r.Context(), lesson, lesson.ReportText.String, bookings)
+	if err != nil {
+		log.Error().Err(err).Str("lesson_id", lessonID.String()).Msg("Failed to send report to parents")
+		response.InternalError(w, "Failed to send report to parents")
+		return
+	}
+
+	response.OK(w, result)
 }

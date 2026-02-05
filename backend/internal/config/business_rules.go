@@ -44,3 +44,9 @@ func LoadBusinessRules() BusinessRules {
 	// См. BACKLOG.md: ENV переменные для бизнес-правил (MAX_FILE_SIZE_MB, MAX_MESSAGE_LENGTH, etc.)
 	return DefaultBusinessRules()
 }
+
+// Recurring lessons rules
+const (
+	MaxRecurringWeeks     = 12  // Максимум недель для повторяющегося занятия
+	DefaultRecurringWeeks = 4   // Количество недель по умолчанию
+)

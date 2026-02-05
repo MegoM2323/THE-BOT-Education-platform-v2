@@ -115,7 +115,7 @@ export const LessonEditModal = ({
       loadLessonData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, lesson?.id]);
+  }, [isOpen, lesson?.id, lesson]);
 
   // Отслеживание размера окна для адаптивного текста кнопки
   useEffect(() => {
@@ -1423,8 +1423,9 @@ export const LessonEditModal = ({
                         <input
                           type="number"
                           className="form-input disabled-field"
-                          name="creditsCost" min="0"
-                          value={creditsCost} min="0"
+                          name="creditsCost"
+                          value={creditsCost}
+                          min="0"
                           disabled
                           title="Стоимость нельзя изменить после создания занятия"
                         />
@@ -1569,6 +1570,7 @@ export const LessonEditModal = ({
                   lessonId={lesson.id}
                   lesson={lesson}
                   onHomeworkCountChange={setHomeworkCount}
+                  students={students}
                 />
               </section>
             )}

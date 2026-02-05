@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"tutoring-platform/internal/config"
 	"tutoring-platform/internal/models"
 	"tutoring-platform/internal/repository"
 	"tutoring-platform/internal/validator"
@@ -163,8 +164,8 @@ func (s *LessonService) CreateLesson(ctx context.Context, req *models.CreateLess
 				}
 			}
 
-			go func() {
-				notifCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			go func(lessonCtx context.Context) {
+				notifCtx, cancel := context.WithTimeout(lessonCtx, 10*time.Second)
 				defer cancel()
 
 				for i, studentID := range req.StudentIDs {
@@ -187,7 +188,7 @@ func (s *LessonService) CreateLesson(ctx context.Context, req *models.CreateLess
 							Msg("Failed to send booking notification to user")
 					}
 				}
-			}()
+			}(ctx)
 		}
 	}
 
@@ -322,17 +323,17 @@ func (s *LessonService) UpdateLesson(ctx context.Context, lessonID uuid.UUID, re
 				studentIDs = append(studentIDs, b.StudentID)
 			}
 
-			go func() {
-				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			go func(lessonCtx context.Context) {
+				notifCtx, cancel := context.WithTimeout(lessonCtx, 10*time.Second)
 				defer cancel()
 
-				if err := s.telegramService.NotifyLessonReschedule(ctx, lesson, oldStartTime, lesson.StartTime, studentIDs); err != nil {
+				if err := s.telegramService.NotifyLessonReschedule(notifCtx, lesson, oldStartTime, lesson.StartTime, studentIDs); err != nil {
 					log.Warn().
 						Str("lesson_id", lessonID.String()).
 						Err(err).
 						Msg("Failed to send reschedule notification for lesson")
 				}
-			}()
+			}(ctx)
 		}
 	}
 
@@ -376,4 +377,187 @@ func (s *LessonService) GetLessonBookings(ctx context.Context, lessonID uuid.UUI
 // GetLessonBookingsForLessons получает информацию о студентах для ВСЕХ занятий в одном batch запросе
 func (s *LessonService) GetLessonBookingsForLessons(ctx context.Context, lessonIDs []uuid.UUID) (map[uuid.UUID][]models.BookingInfo, error) {
 	return s.lessonRepo.GetLessonBookingsForLessons(ctx, lessonIDs)
+}
+
+// CreateRecurringLessons создает повторяющиеся занятия на несколько недель
+func (s *LessonService) CreateRecurringLessons(ctx context.Context, req *models.CreateLessonRequest) ([]*models.Lesson, error) {
+	if !req.IsRecurring {
+		return s.createSingleLesson(ctx, req)
+	}
+
+	weeks := config.DefaultRecurringWeeks
+	if req.RecurringWeeks != nil {
+		if *req.RecurringWeeks > config.MaxRecurringWeeks {
+			return nil, fmt.Errorf("max recurring weeks is %d", config.MaxRecurringWeeks)
+		}
+		if *req.RecurringWeeks <= 0 {
+			return nil, fmt.Errorf("recurring weeks must be positive")
+		}
+		weeks = *req.RecurringWeeks
+	}
+
+	groupID := uuid.New()
+	var lessons []*models.Lesson
+
+	for i := 0; i < weeks; i++ {
+		weekReq := *req
+		weekReq.StartTime = req.StartTime.AddDate(0, 0, i*7)
+		weekReq.EndTime = req.EndTime.AddDate(0, 0, i*7)
+		weekReq.IsRecurring = true
+		weekReq.RecurringWeeks = nil
+		weekReq.RecurringEndDate = req.RecurringEndDate
+
+		lesson, err := s.createLessonWithGroup(ctx, &weekReq, &groupID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create week %d lesson: %w", i+1, err)
+		}
+		lessons = append(lessons, lesson)
+	}
+
+	return lessons, nil
+}
+
+func (s *LessonService) createSingleLesson(ctx context.Context, req *models.CreateLessonRequest) ([]*models.Lesson, error) {
+	lesson, err := s.CreateLesson(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return []*models.Lesson{lesson}, nil
+}
+
+func (s *LessonService) createLessonWithGroup(ctx context.Context, req *models.CreateLessonRequest, groupID *uuid.UUID) (*models.Lesson, error) {
+	req.ApplyDefaults()
+
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+
+	if err := s.lessonValidator.ValidateCreateLessonRequest(req); err != nil {
+		return nil, err
+	}
+
+	teacher, err := s.userRepo.GetByID(ctx, req.TeacherID)
+	if err != nil {
+		return nil, fmt.Errorf("teacher not found: %w", err)
+	}
+
+	if !teacher.CanBeAssignedAsTeacher() {
+		return nil, fmt.Errorf("user cannot be assigned as teacher (role: %s): %w", teacher.Role, models.ErrInvalidTeacherID)
+	}
+
+	lesson := &models.Lesson{
+		TeacherID:         req.TeacherID,
+		StartTime:         req.StartTime,
+		EndTime:           req.EndTime,
+		MaxStudents:       req.MaxStudents,
+		CreditsCost:       req.CreditsCost,
+		Color:             req.Color,
+		IsRecurring:       req.IsRecurring,
+		RecurringGroupID:  groupID,
+	}
+
+	if req.Subject != nil && *req.Subject != "" {
+		lesson.Subject.String = *req.Subject
+		lesson.Subject.Valid = true
+	}
+
+	if req.HomeworkText != nil && *req.HomeworkText != "" {
+		lesson.HomeworkText.String = *req.HomeworkText
+		lesson.HomeworkText.Valid = true
+	}
+
+	if req.Link != nil && *req.Link != "" {
+		lesson.Link.String = *req.Link
+		lesson.Link.Valid = true
+	}
+
+	if req.RecurringEndDate != nil {
+		lesson.RecurringEndDate.Time = *req.RecurringEndDate
+		lesson.RecurringEndDate.Valid = true
+	}
+
+	if err := s.lessonRepo.Create(ctx, lesson); err != nil {
+		return nil, fmt.Errorf("failed to create lesson: %w", err)
+	}
+
+	if len(req.StudentIDs) > 0 && s.bookingCreator != nil {
+		if len(req.StudentIDs) > req.MaxStudents {
+			return nil, fmt.Errorf("number of students (%d) exceeds max_students (%d)", len(req.StudentIDs), req.MaxStudents)
+		}
+
+		seenStudents := make(map[uuid.UUID]bool)
+		for _, studentID := range req.StudentIDs {
+			if seenStudents[studentID] {
+				return nil, fmt.Errorf("duplicate student_id: %s", studentID)
+			}
+			seenStudents[studentID] = true
+		}
+
+		for _, studentID := range req.StudentIDs {
+			student, err := s.userRepo.GetByID(ctx, studentID)
+			if err != nil {
+				return nil, fmt.Errorf("student not found: %s", studentID)
+			}
+			if !student.IsStudent() {
+				return nil, fmt.Errorf("user %s is not a student", studentID)
+			}
+		}
+
+		for _, studentID := range req.StudentIDs {
+			bookingReq := &models.CreateBookingRequest{
+				StudentID: studentID,
+				LessonID:  lesson.ID,
+				IsAdmin:   true,
+			}
+
+			_, err := s.bookingCreator.CreateBooking(ctx, bookingReq)
+			if err != nil {
+				return nil, fmt.Errorf("failed to enroll student %s: %w", studentID, err)
+			}
+
+			log.Info().
+				Str("lesson_id", lesson.ID.String()).
+				Str("student_id", studentID.String()).
+				Msg("Student enrolled on lesson creation")
+		}
+
+		if s.telegramService != nil && len(req.StudentIDs) > 0 {
+			studentNames := make([]string, 0, len(req.StudentIDs))
+			for _, studentID := range req.StudentIDs {
+				student, err := s.userRepo.GetByID(ctx, studentID)
+				if err == nil {
+					studentNames = append(studentNames, student.FullName)
+				} else {
+					studentNames = append(studentNames, "Студент")
+				}
+			}
+
+			go func() {
+				notifCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+				defer cancel()
+
+				for i, studentID := range req.StudentIDs {
+					select {
+					case <-notifCtx.Done():
+						log.Warn().
+							Str("lesson_id", lesson.ID.String()).
+							Msg("Lesson booking notification goroutine cancelled")
+						return
+					default:
+					}
+
+					studentName := studentNames[i]
+					if err := s.telegramService.NotifyLessonBooking(notifCtx, lesson, studentName, []uuid.UUID{studentID}); err != nil {
+						log.Warn().
+							Str("lesson_id", lesson.ID.String()).
+							Str("student_id", studentID.String()).
+							Err(err).
+							Msg("Failed to send booking notification to user")
+					}
+				}
+			}()
+		}
+	}
+
+	return lesson, nil
 }

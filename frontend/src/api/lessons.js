@@ -219,6 +219,12 @@ export const createLesson = async (lessonData, options = {}) => {
  * @returns {Promise<Object>} Обновлённое занятие
  */
 export const updateLesson = async (lessonId, updates, options = {}) => {
+  if (!lessonId) {
+    throw new Error('lessonId is required');
+  }
+  if (!updates || typeof updates !== 'object') {
+    throw new Error('updates must be a non-null object');
+  }
   try {
     return await apiClient.put(`/lessons/${lessonId}`, updates, options);
   } catch (error) {
@@ -281,6 +287,27 @@ export const getLessonStudents = async (lessonId, options = {}) => {
   }
 };
 
+/**
+ * Отправить отчет о занятии родителям студентов
+ * @param {string} lessonId - ID занятия
+ * @param {Object} [options] - Опции запроса (включая signal для отмены)
+ * @returns {Promise<Object>} Результат отправки { sent, failed, total_students, errors }
+ */
+export const sendReportToParents = async (lessonId, options = {}) => {
+  try {
+    return await apiClient.post(
+      `/lessons/${lessonId}/report/send-to-parents`,
+      {},
+      options,
+    );
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      console.error("Error sending report to parents:", error);
+    }
+    throw error;
+  }
+};
+
 export default {
   getLessons,
   getMyLessons,
@@ -291,4 +318,5 @@ export default {
   deleteLesson,
   getAvailableSlots,
   getLessonStudents,
+  sendReportToParents,
 };
