@@ -24,6 +24,7 @@ export const UserManagement = () => {
     full_name: '',
     password: '',
     role: 'student',
+    parent_telegram_username: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [dismissedSlowNotice, setDismissedSlowNotice] = useState(false);
@@ -66,6 +67,7 @@ export const UserManagement = () => {
       full_name: '',
       password: '',
       role: 'student',
+      parent_telegram_username: '',
     });
     setShowUserModal(true);
   };
@@ -77,6 +79,7 @@ export const UserManagement = () => {
       full_name: user.full_name,
       password: '',
       role: user.role,
+      parent_telegram_username: user.parent_telegram_username || '',
     });
     setShowUserModal(true);
   };
@@ -89,6 +92,7 @@ export const UserManagement = () => {
       full_name: '',
       password: '',
       role: 'student',
+      parent_telegram_username: '',
     });
   };
 
@@ -129,6 +133,15 @@ export const UserManagement = () => {
         throw new Error('Выберите валидную роль');
       }
 
+      // Валидация parent_telegram_username (если указан)
+      if (formData.parent_telegram_username && formData.parent_telegram_username.trim()) {
+        const telegramUsername = formData.parent_telegram_username.trim();
+        const telegramRegex = /^[a-zA-Z][a-zA-Z0-9_]{4,31}$/;
+        if (!telegramRegex.test(telegramUsername)) {
+          throw new Error('Telegram username должен начинаться с буквы и содержать 5-32 символа (буквы, цифры, подчёркивания)');
+        }
+      }
+
       if (editingUser) {
         // Проверка: админ не может понизить себе роль
         if (currentUser && currentUser.id === editingUser.id && currentUser.role === 'admin') {
@@ -145,6 +158,9 @@ export const UserManagement = () => {
         };
         if (formData.password && formData.password.trim()) {
           updates.password = formData.password; // Только если заполнено
+        }
+        if (formData.parent_telegram_username && formData.parent_telegram_username.trim()) {
+          updates.parent_telegram_username = formData.parent_telegram_username.trim();
         }
         const response = await usersAPI.updateUser(editingUser.id, updates);
 
@@ -166,6 +182,9 @@ export const UserManagement = () => {
           password: formData.password,
           role: formData.role,
         };
+        if (formData.parent_telegram_username && formData.parent_telegram_username.trim()) {
+          userData.parent_telegram_username = formData.parent_telegram_username.trim();
+        }
         const response = await usersAPI.createUser(userData);
         // API может вернуть { user: {...} } или напрямую объект пользователя
         const newUser = response?.user || response;
@@ -399,6 +418,17 @@ export const UserManagement = () => {
               </small>
             )}
           </div>
+          {formData.role === 'student' && (
+            <Input
+              label="Telegram родителя"
+              name="parent_telegram_username"
+              type="text"
+              value={formData.parent_telegram_username || ''}
+              onChange={(e) => setFormData({ ...formData, parent_telegram_username: e.target.value })}
+              placeholder="Например: parent_username"
+              maxLength={32}
+            />
+          )}
           <div className="user-form-actions">
             <Button type="button" variant="secondary" onClick={handleCloseModal}>
               Отмена

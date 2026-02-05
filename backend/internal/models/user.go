@@ -21,17 +21,19 @@ const (
 
 // User представляет учетную запись пользователя в системе
 type User struct {
-	ID               uuid.UUID      `db:"id" json:"id"`
-	Email            string         `db:"email" json:"email"`
-	PasswordHash     string         `db:"password_hash" json:"-"` // Никогда не показывать хеш пароля в JSON
-	FullName         string         `db:"full_name" json:"full_name"`
-	Role             UserRole       `db:"role" json:"role"`
-	PaymentEnabled   bool           `db:"payment_enabled" json:"payment_enabled"`
-	TelegramUsername sql.NullString `db:"telegram_username" json:"telegram_username,omitempty"` // Telegram username
-	TelegramLinked   bool           `db:"-" json:"telegram_linked,omitempty"`                   // Вычисляемое поле, не хранится в БД
-	CreatedAt        time.Time      `db:"created_at" json:"created_at"`
-	UpdatedAt        time.Time      `db:"updated_at" json:"updated_at"`
-	DeletedAt        sql.NullTime   `db:"deleted_at" json:"deleted_at,omitempty"`
+	ID                     uuid.UUID      `db:"id" json:"id"`
+	Email                  string         `db:"email" json:"email"`
+	PasswordHash           string         `db:"password_hash" json:"-"` // Никогда не показывать хеш пароля в JSON
+	FullName               string         `db:"full_name" json:"full_name"`
+	Role                   UserRole       `db:"role" json:"role"`
+	PaymentEnabled         bool           `db:"payment_enabled" json:"payment_enabled"`
+	TelegramUsername       sql.NullString `db:"telegram_username" json:"telegram_username,omitempty"` // Telegram username
+	TelegramLinked         bool           `db:"-" json:"telegram_linked,omitempty"`                   // Вычисляемое поле, не хранится в БД
+	ParentTelegramUsername sql.NullString `db:"parent_telegram_username" json:"parent_telegram_username,omitempty"`
+	ParentChatID           sql.NullInt64  `db:"parent_chat_id" json:"parent_chat_id,omitempty"`
+	CreatedAt              time.Time      `db:"created_at" json:"created_at"`
+	UpdatedAt              time.Time      `db:"updated_at" json:"updated_at"`
+	DeletedAt              sql.NullTime   `db:"deleted_at" json:"deleted_at,omitempty"`
 }
 
 // CreateUserRequest представляет запрос на создание нового пользователя
@@ -44,12 +46,14 @@ type CreateUserRequest struct {
 
 // UpdateUserRequest представляет запрос на обновление пользователя
 type UpdateUserRequest struct {
-	Email            *string   `json:"email,omitempty"`
-	FullName         *string   `json:"full_name,omitempty"`
-	Role             *UserRole `json:"role,omitempty"`
-	PaymentEnabled   *bool     `json:"payment_enabled,omitempty"`
-	TelegramUsername *string   `json:"telegram_username,omitempty"`
-	Password         *string   `json:"password,omitempty"` // Новый пароль (для админа)
+	Email                  *string   `json:"email,omitempty"`
+	FullName               *string   `json:"full_name,omitempty"`
+	Role                   *UserRole `json:"role,omitempty"`
+	PaymentEnabled         *bool     `json:"payment_enabled,omitempty"`
+	TelegramUsername       *string   `json:"telegram_username,omitempty"`
+	ParentTelegramUsername *string   `json:"parent_telegram_username,omitempty"`
+	ParentChatID           *int64    `json:"parent_chat_id,omitempty"`
+	Password               *string   `json:"password,omitempty"` // Новый пароль (для админа)
 }
 
 // ChangePasswordRequest представляет запрос на смену пароля
@@ -87,6 +91,16 @@ func (u *User) MarshalJSON() ([]byte, error) {
 	// Handle TelegramUsername - convert sql.NullString to string or null
 	if u.TelegramUsername.Valid && u.TelegramUsername.String != "" {
 		data["telegram_username"] = u.TelegramUsername.String
+	}
+
+	// Handle ParentTelegramUsername - convert sql.NullString to string or null
+	if u.ParentTelegramUsername.Valid && u.ParentTelegramUsername.String != "" {
+		data["parent_telegram_username"] = u.ParentTelegramUsername.String
+	}
+
+	// Handle ParentChatID - convert sql.NullInt64 to int64 or null
+	if u.ParentChatID.Valid {
+		data["parent_chat_id"] = u.ParentChatID.Int64
 	}
 
 	// Handle DeletedAt - convert sql.NullTime to ISO8601 string or omit if null
@@ -217,6 +231,9 @@ func (r *UpdateUserRequest) Sanitize() {
 	}
 	if r.TelegramUsername != nil {
 		*r.TelegramUsername = sanitize.TelegramUsername(*r.TelegramUsername)
+	}
+	if r.ParentTelegramUsername != nil {
+		*r.ParentTelegramUsername = sanitize.TelegramUsername(*r.ParentTelegramUsername)
 	}
 }
 

@@ -142,6 +142,24 @@ func (s *UserService) UpdateUser(ctx context.Context, userID uuid.UUID, req *mod
 		}
 	}
 
+	if req.ParentTelegramUsername != nil {
+		if *req.ParentTelegramUsername != "" {
+			if !isValidTelegramUsername(*req.ParentTelegramUsername) {
+				return nil, models.ErrInvalidTelegramHandle
+			}
+			currentUser, err := s.userRepo.GetByID(ctx, userID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get current user: %w", err)
+			}
+			if currentUser.Role != models.RoleStudent {
+				return nil, fmt.Errorf("parent_telegram_username can only be set for students")
+			}
+			updates["parent_telegram_username"] = *req.ParentTelegramUsername
+		} else {
+			updates["parent_telegram_username"] = nil
+		}
+	}
+
 	// Обработка изменения пароля (для админа)
 	if req.Password != nil && *req.Password != "" {
 		// Валидация минимальной длины пароля
