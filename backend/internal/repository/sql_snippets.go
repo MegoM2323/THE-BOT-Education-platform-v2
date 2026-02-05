@@ -7,14 +7,15 @@ const (
 	// UserSelectFields - поля таблицы users
 	UserSelectFields = `
 		id, email, password_hash, full_name, role, payment_enabled, telegram_username,
-		created_at, updated_at, deleted_at
+		parent_telegram_username, parent_chat_id, created_at, updated_at, deleted_at
 	`
 
 	// LessonSelectFields - поля таблицы lessons
 	LessonSelectFields = `
 		id, teacher_id, start_time, end_time,
-		max_students, current_students, credits_cost, color, subject, homework_text, link,
+		max_students, current_students, credits_cost, color, subject, homework_text, report_text, link,
 		applied_from_template, template_application_id,
+		is_recurring, recurring_group_id, recurring_end_date,
 		created_at, updated_at, deleted_at
 	`
 

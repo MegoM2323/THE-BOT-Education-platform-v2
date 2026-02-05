@@ -1,0 +1,152 @@
+/* Report Section Styles */
+
+.report-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Warning message for lessons that haven't started */
+.report-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  color: #856404;
+  font-size: 14px;
+}
+
+.report-warning svg {
+  flex-shrink: 0;
+}
+
+/* Report Text Section */
+.report-text-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-text-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.report-text-header label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.report-text-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-parent-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.report-text-status {
+  font-size: 12px;
+  color: #718096;
+}
+
+.saving-indicator {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.saved-indicator {
+  color: #10b981;
+}
+
+.report-text-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #ffffff;
+  min-height: 200px;
+}
+
+.report-text-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.report-text-input:disabled,
+.report-text-input[readonly] {
+  background-color: #f7fafc;
+  color: #4a5568;
+  cursor: not-allowed;
+}
+
+.report-text-input::placeholder {
+  color: #a0aec0;
+}
+
+/* Report Text Display (read-only view) */
+.report-text-display {
+  padding: 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  background-color: #f7fafc;
+  color: #4a5568;
+  min-height: 80px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.report-text-empty {
+  color: #a0aec0;
+  font-style: italic;
+}
+
+.report-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.report-text-content p {
+  margin: 0;
+}
+
+.report-text-content p:empty::before {
+  content: '\00A0';
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .report-text-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .report-text-status {
+    align-self: flex-start;
+  }
+
+  .report-text-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
