@@ -368,6 +368,11 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	// Wire up SSE manager to chat service for broadcasting messages
 	chatService.SetSSEManager(sseManager)
 
+	// Wire up Telegram service to chat service for message notifications
+	if telegramService != nil {
+		chatService.SetTelegramService(telegramService)
+	}
+
 	// Initialize SSE handler
 	sseHandler := handlers.NewSSEHandler(sseManager, chatRepo)
 
@@ -437,7 +442,7 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	authHandler.SetUserService(userService)
 	authHandler.SetCSRFStore(csrfStore)
 	userHandler := handlers.NewUserHandler(userService)
-	lessonHandler := handlers.NewLessonHandler(lessonService, bookingService, bulkEditService)
+	lessonHandler := handlers.NewLessonHandler(lessonService, bookingService, bulkEditService, telegramService)
 	bookingHandler := handlers.NewBookingHandler(bookingService)
 	creditHandler := handlers.NewCreditHandler(creditService, userService)
 	swapHandler := handlers.NewSwapHandler(swapService)
@@ -631,6 +636,7 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 					r.Post("/", lessonHandler.CreateLesson)
 					r.Delete("/{id}", lessonHandler.DeleteLesson)
 					r.Post("/{id}/apply-to-all", lessonHandler.ApplyToAllSubsequent)
+					r.Post("/{id}/report/send-to-parents", lessonHandler.SendReportToParents)
 				})
 
 				// Update lesson - доступно admin и teacher (проверка прав внутри обработчика)

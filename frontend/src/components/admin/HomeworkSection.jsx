@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth.js';
 import Button from "../common/Button.jsx";
 import Spinner from '../common/Spinner.jsx';
 import ConfirmModal from '../common/ConfirmModal.jsx';
+import ReportSection from './ReportSection.jsx';
 import * as homeworkAPI from '../../api/homework.js';
 import * as lessonAPI from '../../api/lessons.js';
 import { formatHomeworkText } from '../../utils/formatHomeworkText.js';
@@ -28,8 +29,9 @@ const formatFileSize = (bytes) => {
  * Компонент секции домашних заданий
  * @param {function} [onHomeworkSaved] - колбэк после успешного сохранения текста
  * @param {boolean} [readOnly] - режим только для чтения (блокирует редактирование)
+ * @param {Array} [students] - список студентов для передачи в ReportSection
  */
-export const HomeworkSection = ({ lessonId, lesson, onHomeworkCountChange, onHomeworkSaved, readOnly = false }) => {
+export const HomeworkSection = ({ lessonId, lesson, onHomeworkCountChange, onHomeworkSaved, readOnly = false, students = [] }) => {
   const { user } = useAuth();
   const { showNotification } = useNotification();
   const queryClient = useQueryClient();
@@ -368,6 +370,13 @@ export const HomeworkSection = ({ lessonId, lesson, onHomeworkCountChange, onHom
 
   return (
     <>
+      {/* Report Section - добавляем перед Homework */}
+      <ReportSection
+        lessonId={lessonId}
+        lesson={lesson}
+        students={students}
+      />
+
       <div className="homework-section" style={{ position: 'relative' }}>
         {/* Показываем ошибку как предупреждение, но не скрываем компонент */}
         {error && (
