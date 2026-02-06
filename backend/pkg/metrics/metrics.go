@@ -109,23 +109,6 @@ var (
 		},
 	)
 
-	// Template metrics
-	// Счетчик применений шаблонов
-	TemplatesApplied = promauto.NewCounter(
-		prometheus.CounterOpts{
-			Name: "templates_applied_total",
-			Help: "Total number of template applications",
-		},
-	)
-
-	// Счетчик откатов шаблонов
-	TemplatesRolledBack = promauto.NewCounter(
-		prometheus.CounterOpts{
-			Name: "templates_rolled_back_total",
-			Help: "Total number of template rollbacks",
-		},
-	)
-
 	// Telegram metrics
 	// Счетчик отправленных Telegram сообщений
 	TelegramMessagesSent = promauto.NewCounterVec(

@@ -34,13 +34,6 @@ vi.mock('../../components/admin/TelegramManagement.jsx', () => ({
   default: () => <div>Telegram</div>,
 }));
 
-vi.mock('../../components/admin/TemplateManagement.jsx', () => ({
-  default: () => <div>Template Management</div>,
-}));
-
-vi.mock('../../components/admin/TemplateList.jsx', () => ({
-  default: () => <div>Template List</div>,
-}));
 
 vi.mock('../../components/methodologist/MethodologistCreditsView.jsx', () => ({
   default: () => <div>Credits View</div>,

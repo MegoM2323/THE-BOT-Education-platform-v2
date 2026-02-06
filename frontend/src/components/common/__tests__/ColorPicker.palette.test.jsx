@@ -277,14 +277,7 @@ describe('ColorPicker - Palette Colors', () => {
   });
 
   describe('Color Picker with Context', () => {
-    it('should work with TemplateLessonEditorModal context', () => {
-      render(<ColorPicker value="#660000" onChange={onChange} />);
-
-      const hexInput = screen.getByDisplayValue('#660000');
-      expect(hexInput).toBeInTheDocument();
-    });
-
-    it('should work with TemplateLessonForm context', () => {
+    it('should work with LessonEditModal context', () => {
       render(<ColorPicker value="#660000" onChange={onChange} />);
 
       const hexInput = screen.getByDisplayValue('#660000');

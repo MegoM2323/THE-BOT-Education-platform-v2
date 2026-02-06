@@ -227,9 +227,6 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	telegramTokenRepo := repository.NewTelegramTokenRepository(db.Sqlx)
 	broadcastRepo := repository.NewBroadcastRepository(db.Sqlx)
 	broadcastListRepo := repository.NewBroadcastListRepository(db.Sqlx)
-	lessonTemplateRepo := repository.NewLessonTemplateRepository(db.Sqlx)
-	templateLessonRepo := repository.NewTemplateLessonRepository(db.Sqlx)
-	templateApplicationRepo := repository.NewTemplateApplicationRepository(db.Sqlx)
 	lessonModificationRepo := repository.NewLessonModificationRepository(db.Sqlx)
 	paymentRepo := repository.NewPaymentRepository(db.Sqlx)
 	chatRepo := repository.NewChatRepository(db.Sqlx)
@@ -345,7 +342,6 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	creditService := service.NewCreditService(db.Pool, creditRepo)
 	swapService := service.NewSwapService(db.Pool, swapRepo, bookingRepo, lessonRepo, swapValidator)
 	trialRequestService := service.NewTrialRequestService(trialRequestRepo, trialRequestValidator, nil) // TelegramService will be created below
-	templateService := service.NewTemplateService(db.Sqlx, lessonTemplateRepo, templateLessonRepo, templateApplicationRepo, lessonRepo, creditRepo, bookingRepo, userRepo)
 	bulkEditService := service.NewBulkEditService(db.Pool, lessonRepo, lessonModificationRepo, userRepo, creditRepo)
 
 	// Initialize chat service (moderation will be handled by the service internally)
@@ -447,7 +443,6 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	creditHandler := handlers.NewCreditHandler(creditService, userService)
 	swapHandler := handlers.NewSwapHandler(swapService)
 	trialRequestHandler := handlers.NewTrialRequestHandler(trialRequestService)
-	templateHandler := handlers.NewTemplateHandler(templateService)
 	methodologistHandler := handlers.NewMethodologistHandler(lessonService, bookingService, lessonBroadcastService, lessonRepo)
 	chatUploadDir := "./uploads/chat"
 	if err := os.MkdirAll(chatUploadDir, 0755); err != nil {
@@ -642,24 +637,6 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 
 				// Update lesson - доступно admin и teacher (проверка прав внутри обработчика)
 				r.With(middleware.CSRFMiddleware(csrfStore)).Put("/{id}", lessonHandler.UpdateLesson)
-			})
-
-			// Template routes (Admin and Methodologist)
-			r.Route("/templates", func(r chi.Router) {
-				r.Use(middleware.RequireAdminOrMethodologist)
-				r.Get("/", templateHandler.GetTemplates)
-				r.Get("/{id}", templateHandler.GetTemplate)
-				// State-changing endpoints с CSRF protection
-				r.With(middleware.CSRFMiddleware(csrfStore)).Post("/", templateHandler.CreateTemplate)
-				r.With(middleware.CSRFMiddleware(csrfStore)).Put("/{id}", templateHandler.UpdateTemplate)
-				r.With(middleware.CSRFMiddleware(csrfStore)).Delete("/{id}", templateHandler.DeleteTemplate)
-				r.With(middleware.CSRFMiddleware(csrfStore)).Post("/{id}/apply", templateHandler.ApplyTemplate)
-				r.With(middleware.CSRFMiddleware(csrfStore)).Post("/{id}/rollback", templateHandler.RollbackTemplate)
-
-				// Template lesson CRUD endpoints с CSRF protection
-				r.With(middleware.CSRFMiddleware(csrfStore)).Post("/{id}/lessons", templateHandler.CreateTemplateLesson)
-				r.With(middleware.CSRFMiddleware(csrfStore)).Put("/{id}/lessons/{lesson_id}", templateHandler.UpdateTemplateLesson)
-				r.With(middleware.CSRFMiddleware(csrfStore)).Delete("/{id}/lessons/{lesson_id}", templateHandler.DeleteTemplateLesson)
 			})
 
 			// Booking routes

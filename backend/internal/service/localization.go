@@ -24,17 +24,10 @@ type Localization struct {
 	PaymentRefunded string
 
 	// Credit операции
-	CreditDeducted         string
-	CreditRefunded         string
-	CreditAdded            string
-	CreditAdminAdded       string
-	CreditTemplateApply    string
-	CreditTemplateRollback string
-
-	// Template сообщения
-	TemplateApplied     string
-	TemplateRolledBack  string
-	TemplateLessonAdded string
+	CreditDeducted   string
+	CreditRefunded   string
+	CreditAdded      string
+	CreditAdminAdded string
 
 	// Telegram сообщения
 	TelegramLinked        string
@@ -70,13 +63,12 @@ type Localization struct {
 	ErrorInvalidTime       string
 
 	// Error сообщения - Resources
-	ErrorNotFound         string
-	ErrorAlreadyExists    string
-	ErrorConflict         string
-	ErrorUserNotFound     string
-	ErrorLessonNotFound   string
-	ErrorBookingNotFound  string
-	ErrorTemplateNotFound string
+	ErrorNotFound        string
+	ErrorAlreadyExists   string
+	ErrorConflict        string
+	ErrorUserNotFound    string
+	ErrorLessonNotFound  string
+	ErrorBookingNotFound string
 
 	// Error сообщения - Business Logic
 	ErrorCannotChangeToIndividual   string
@@ -95,9 +87,6 @@ type Localization struct {
 	SuccessLessonCreated    string
 	SuccessLessonUpdated    string
 	SuccessLessonDeleted    string
-	SuccessTemplateCreated  string
-	SuccessTemplateUpdated  string
-	SuccessTemplateDeleted  string
 	SuccessBulkEditApplied  string
 	SuccessCreditsAdded     string
 	SuccessBroadcastCreated string
@@ -129,17 +118,10 @@ func NewLocalization() *Localization {
 		PaymentRefunded: "Платеж возвращен. Зачислено %d кредитов.",
 
 		// Credit операции
-		CreditDeducted:         "Списан 1 кредит за запись на занятие",
-		CreditRefunded:         "Возврат 1 кредита за отмену записи",
-		CreditAdded:            "Пополнение счета на %d кредитов",
-		CreditAdminAdded:       "Администратор добавил вам %d кредитов",
-		CreditTemplateApply:    "Списание кредитов при применении шаблона расписания",
-		CreditTemplateRollback: "Возврат кредитов при откате шаблона расписания",
-
-		// Template сообщения
-		TemplateApplied:     "Шаблон расписания '%s' применен к неделе от %s",
-		TemplateRolledBack:  "Шаблон расписания '%s' откачен для недели от %s",
-		TemplateLessonAdded: "Добавлено занятие из шаблона '%s'",
+		CreditDeducted:   "Списан 1 кредит за запись на занятие",
+		CreditRefunded:   "Возврат 1 кредита за отмену записи",
+		CreditAdded:      "Пополнение счета на %d кредитов",
+		CreditAdminAdded: "Администратор добавил вам %d кредитов",
 
 		// Telegram сообщения
 		TelegramLinked:        "Ваш Telegram аккаунт успешно привязан",
@@ -175,13 +157,12 @@ func NewLocalization() *Localization {
 		ErrorInvalidTime:       "Некорректное время занятия. Конец занятия должен быть позже начала.",
 
 		// Error сообщения - Resources
-		ErrorNotFound:         "Ресурс не найден",
-		ErrorAlreadyExists:    "Ресурс с такими данными уже существует",
-		ErrorConflict:         "Конфликт данных. Ресурс был изменен другим пользователем.",
-		ErrorUserNotFound:     "Пользователь не найден",
-		ErrorLessonNotFound:   "Занятие не найдено",
-		ErrorBookingNotFound:  "Запись на занятие не найдена",
-		ErrorTemplateNotFound: "Шаблон расписания не найден",
+		ErrorNotFound:        "Ресурс не найден",
+		ErrorAlreadyExists:   "Ресурс с такими данными уже существует",
+		ErrorConflict:        "Конфликт данных. Ресурс был изменен другим пользователем.",
+		ErrorUserNotFound:    "Пользователь не найден",
+		ErrorLessonNotFound:  "Занятие не найдено",
+		ErrorBookingNotFound: "Запись на занятие не найдена",
 
 		// Error сообщения - Business Logic
 		ErrorCannotChangeToIndividual:   "Нельзя изменить тип занятия на индивидуальное, пока на нем несколько студентов. Удалите лишних студентов.",
@@ -200,9 +181,6 @@ func NewLocalization() *Localization {
 		SuccessLessonCreated:    "Занятие успешно создано",
 		SuccessLessonUpdated:    "Занятие успешно обновлено",
 		SuccessLessonDeleted:    "Занятие успешно удалено",
-		SuccessTemplateCreated:  "Шаблон расписания успешно создан",
-		SuccessTemplateUpdated:  "Шаблон расписания успешно обновлен",
-		SuccessTemplateDeleted:  "Шаблон расписания успешно удален",
 		SuccessBulkEditApplied:  "Изменения применены к %d занятиям",
 		SuccessCreditsAdded:     "Добавлено %d кредитов",
 		SuccessBroadcastCreated: "Рассылка создана и запущена",
@@ -272,21 +250,6 @@ func (l *Localization) FormatCreditAdded(amount int) string {
 // FormatCreditAdminAdded форматирует сообщение о добавлении кредитов администратором
 func (l *Localization) FormatCreditAdminAdded(amount int) string {
 	return fmt.Sprintf(l.CreditAdminAdded, amount)
-}
-
-// FormatTemplateApplied форматирует сообщение о применении шаблона
-func (l *Localization) FormatTemplateApplied(templateName, weekStart string) string {
-	return fmt.Sprintf(l.TemplateApplied, templateName, weekStart)
-}
-
-// FormatTemplateRolledBack форматирует сообщение об откате шаблона
-func (l *Localization) FormatTemplateRolledBack(templateName, weekStart string) string {
-	return fmt.Sprintf(l.TemplateRolledBack, templateName, weekStart)
-}
-
-// FormatTemplateLessonAdded форматирует сообщение о добавлении занятия из шаблона
-func (l *Localization) FormatTemplateLessonAdded(templateName string) string {
-	return fmt.Sprintf(l.TemplateLessonAdded, templateName)
 }
 
 // FormatBulkEditApplied форматирует сообщение о применении массовых изменений

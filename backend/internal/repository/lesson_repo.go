@@ -26,8 +26,8 @@ func NewLessonRepository(db *sqlx.DB) *LessonRepository {
 // Create создает новое занятие
 func (r *LessonRepository) Create(ctx context.Context, lesson *models.Lesson) error {
 	query := `
-		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, report_text, link, applied_from_template, template_application_id, is_recurring, recurring_group_id, recurring_end_date, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, report_text, link, is_recurring, recurring_group_id, recurring_end_date, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 	`
 
 	if lesson.ID == uuid.Nil {
@@ -50,8 +50,6 @@ func (r *LessonRepository) Create(ctx context.Context, lesson *models.Lesson) er
 		lesson.HomeworkText,
 		lesson.ReportText,
 		lesson.Link,
-		lesson.AppliedFromTemplate,
-		lesson.TemplateApplicationID,
 		lesson.IsRecurring,
 		lesson.RecurringGroupID,
 		lesson.RecurringEndDate,
@@ -97,8 +95,8 @@ func (r *LessonRepository) CreateBatchLessons(ctx context.Context, lessons []*mo
 // createInTx создает занятие внутри существующей транзакции sqlx
 func (r *LessonRepository) createInTx(ctx context.Context, tx *sqlx.Tx, lesson *models.Lesson) error {
 	query := `
-		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, report_text, link, applied_from_template, template_application_id, is_recurring, recurring_group_id, recurring_end_date, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, report_text, link, is_recurring, recurring_group_id, recurring_end_date, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 	`
 
 	if lesson.ID == uuid.Nil {
@@ -121,8 +119,6 @@ func (r *LessonRepository) createInTx(ctx context.Context, tx *sqlx.Tx, lesson *
 		lesson.HomeworkText,
 		lesson.ReportText,
 		lesson.Link,
-		lesson.AppliedFromTemplate,
-		lesson.TemplateApplicationID,
 		lesson.IsRecurring,
 		lesson.RecurringGroupID,
 		lesson.RecurringEndDate,
@@ -182,8 +178,6 @@ func (r *LessonRepository) GetByIDForUpdate(ctx context.Context, tx pgx.Tx, id u
 		&lesson.HomeworkText,
 		&lesson.ReportText,
 		&lesson.Link,
-		&lesson.AppliedFromTemplate,
-		&lesson.TemplateApplicationID,
 		&lesson.IsRecurring,
 		&lesson.RecurringGroupID,
 		&lesson.RecurringEndDate,
@@ -207,7 +201,6 @@ func (r *LessonRepository) GetWithTeacher(ctx context.Context, id uuid.UUID) (*m
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
-			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM lessons l
@@ -233,7 +226,6 @@ func (r *LessonRepository) List(ctx context.Context, filter *models.ListLessonsF
 		SELECT DISTINCT
 			l.id, l.teacher_id, l.start_time, l.end_time,
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
-			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM lessons l
@@ -293,7 +285,6 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
 				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
-				l.applied_from_template, l.template_application_id,
 				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 				l.created_at, l.updated_at, l.deleted_at,
 				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
@@ -308,7 +299,6 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
 				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
-				l.applied_from_template, l.template_application_id,
 				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 				l.created_at, l.updated_at, l.deleted_at,
 				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
@@ -327,7 +317,6 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
 				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
-				l.applied_from_template, l.template_application_id,
 				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 				l.created_at, l.updated_at, l.deleted_at,
 				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
@@ -349,7 +338,6 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 			SELECT DISTINCT
 				l.id, l.teacher_id, l.start_time, l.end_time,
 				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
-				l.applied_from_template, l.template_application_id,
 				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 				l.created_at, l.updated_at, l.deleted_at,
 				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
@@ -516,7 +504,6 @@ func (r *LessonRepository) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*mo
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
-			l.applied_from_template, l.template_application_id,
 			l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 			l.created_at, l.updated_at, l.deleted_at,
 			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
@@ -646,30 +633,6 @@ func (r *LessonRepository) SyncStudentCounts(ctx context.Context) error {
 	fmt.Printf("[INFO] Synced student counts for %d lessons\n", rows)
 
 	return nil
-}
-
-// GetLessonsByTemplateApplication retrieves all lessons created from a specific template application
-func (r *LessonRepository) GetLessonsByTemplateApplication(ctx context.Context, templateApplicationID uuid.UUID) ([]*models.LessonWithTeacher, error) {
-	query := `
-		SELECT
-			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
-			l.applied_from_template, l.template_application_id,
-			l.created_at, l.updated_at, l.deleted_at,
-			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
-		FROM lessons l
-		JOIN users u ON l.teacher_id = u.id
-		WHERE l.template_application_id = $1 AND l.deleted_at IS NULL
-		ORDER BY l.start_time ASC
-	`
-
-	var lessons []*models.LessonWithTeacher
-	err := r.db.SelectContext(ctx, &lessons, query, templateApplicationID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get lessons by template application: %w", err)
-	}
-
-	return lessons, nil
 }
 
 // GetLessonsByTimePattern finds all lessons matching a specific time pattern (for bulk edit)
@@ -830,10 +793,10 @@ func (r *LessonRepository) UpdateMaxStudentsTx(ctx context.Context, tx pgx.Tx, l
 func (r *LessonRepository) CreateLessonTx(ctx context.Context, tx pgx.Tx, lesson *models.Lesson) (*models.Lesson, error) {
 	query := `
 		INSERT INTO lessons (id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, link,
-		                     applied_from_template, template_application_id, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+		                     created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		RETURNING id, teacher_id, start_time, end_time, max_students, current_students, credits_cost, color, subject, homework_text, link,
-		          applied_from_template, template_application_id, created_at, updated_at, deleted_at
+		          created_at, updated_at, deleted_at
 	`
 
 	var created models.Lesson
@@ -849,8 +812,6 @@ func (r *LessonRepository) CreateLessonTx(ctx context.Context, tx pgx.Tx, lesson
 		lesson.Subject,
 		lesson.HomeworkText,
 		lesson.Link,
-		lesson.AppliedFromTemplate,
-		lesson.TemplateApplicationID,
 		lesson.CreatedAt,
 		lesson.UpdatedAt,
 	).Scan(
@@ -865,8 +826,6 @@ func (r *LessonRepository) CreateLessonTx(ctx context.Context, tx pgx.Tx, lesson
 		&created.Subject,
 		&created.HomeworkText,
 		&created.Link,
-		&created.AppliedFromTemplate,
-		&created.TemplateApplicationID,
 		&created.CreatedAt,
 		&created.UpdatedAt,
 		&created.DeletedAt,
@@ -877,59 +836,6 @@ func (r *LessonRepository) CreateLessonTx(ctx context.Context, tx pgx.Tx, lesson
 	}
 
 	return &created, nil
-}
-
-// GetLessonsByTemplateApplicationTx retrieves all lessons from a specific template application within a transaction
-func (r *LessonRepository) GetLessonsByTemplateApplicationTx(ctx context.Context, tx pgx.Tx, templateApplicationID uuid.UUID) ([]*models.Lesson, error) {
-	query := `
-		SELECT ` + LessonSelectFields + `
-		FROM lessons
-		WHERE template_application_id = $1 AND deleted_at IS NULL
-		ORDER BY start_time ASC
-	`
-
-	rows, err := tx.Query(ctx, query, templateApplicationID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get lessons by template application: %w", err)
-	}
-	defer rows.Close()
-
-	var lessons []*models.Lesson
-	for rows.Next() {
-		var lesson models.Lesson
-		err := rows.Scan(
-			&lesson.ID,
-			&lesson.TeacherID,
-			&lesson.StartTime,
-			&lesson.EndTime,
-			&lesson.MaxStudents,
-			&lesson.CurrentStudents,
-			&lesson.CreditsCost,
-			&lesson.Color,
-			&lesson.Subject,
-			&lesson.HomeworkText,
-			&lesson.ReportText,
-			&lesson.Link,
-			&lesson.AppliedFromTemplate,
-			&lesson.TemplateApplicationID,
-			&lesson.IsRecurring,
-			&lesson.RecurringGroupID,
-			&lesson.RecurringEndDate,
-			&lesson.CreatedAt,
-			&lesson.UpdatedAt,
-			&lesson.DeletedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan lesson: %w", err)
-		}
-		lessons = append(lessons, &lesson)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error reading lesson rows: %w", err)
-	}
-
-	return lessons, nil
 }
 
 // GetBookingsByLessonTx retrieves all bookings for a specific lesson within a transaction
@@ -1000,7 +906,6 @@ func (r *LessonRepository) GetTeacherSchedule(ctx context.Context, teacherID uui
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
-			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			CONCAT(u.first_name, ' ', u.last_name) as teacher_name,
 			COALESCE(
@@ -1123,7 +1028,6 @@ func (r *LessonRepository) GetAllTeachersSchedule(ctx context.Context, startDate
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
-			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
 			CONCAT(u.first_name, ' ', u.last_name) as teacher_name,
 			COALESCE(

@@ -405,7 +405,7 @@ func (r *BookingRepository) GetBookingsWithLessons(ctx context.Context, studentI
 		SELECT DISTINCT
 			l.id, l.teacher_id, l.start_time, l.end_time,
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
-			l.applied_from_template, l.template_application_id, l.created_at, l.updated_at, l.deleted_at,
+			l.created_at, l.updated_at, l.deleted_at,
 			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as teacher_name
 		FROM bookings b
 		INNER JOIN lessons l ON b.lesson_id = l.id

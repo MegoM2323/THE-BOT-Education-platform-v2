@@ -1,7 +1,9 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -48,6 +50,19 @@ func (r *ApplyToAllSubsequentRequest) Validate() error {
 	}
 
 	return nil
+}
+
+// LessonModification represents an audit trail entry for bulk lesson modifications
+type LessonModification struct {
+	ID                   uuid.UUID       `json:"id" db:"id"`
+	OriginalLessonID     uuid.UUID       `json:"original_lesson_id" db:"original_lesson_id"`
+	ModificationType     string          `json:"modification_type" db:"modification_type"`
+	AppliedByID          uuid.UUID       `json:"applied_by_id" db:"applied_by_id"`
+	AppliedByName        string          `json:"applied_by_name" db:"applied_by_name"`
+	AppliedAt            time.Time       `json:"applied_at" db:"applied_at"`
+	AffectedLessonsCount int             `json:"affected_lessons_count" db:"affected_lessons_count"`
+	ChangesJSON          json.RawMessage `json:"changes_json" db:"changes_json"`
+	Notes                string          `json:"notes" db:"notes"`
 }
 
 // ApplyToAllSubsequentResponse represents the response after applying a modification

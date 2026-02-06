@@ -26,26 +26,24 @@ const (
 
 // Lesson представляет урок, созданный преподавателем
 type Lesson struct {
-	ID                    uuid.UUID      `db:"id" json:"id"`
-	TeacherID             uuid.UUID      `db:"teacher_id" json:"teacher_id"`
-	StartTime             time.Time      `db:"start_time" json:"start_time"`
-	EndTime               time.Time      `db:"end_time" json:"end_time"`
-	MaxStudents           int            `db:"max_students" json:"max_students"`
-	CurrentStudents       int            `db:"current_students" json:"current_students"`
-	CreditsCost           int            `db:"credits_cost" json:"credits_cost"`
-	Color                 string         `db:"color" json:"color"`
-	Subject               sql.NullString `db:"subject" json:"subject,omitempty"`
-	HomeworkText          sql.NullString `db:"homework_text" json:"homework_text,omitempty"`
-	ReportText            sql.NullString `db:"report_text" json:"report_text,omitempty"`
-	Link                  sql.NullString `db:"link" json:"link,omitempty"`
-	AppliedFromTemplate   bool           `db:"applied_from_template" json:"applied_from_template"`
-	TemplateApplicationID *uuid.UUID     `db:"template_application_id" json:"template_application_id,omitempty"`
-	IsRecurring           bool           `db:"is_recurring" json:"is_recurring"`
-	RecurringGroupID      *uuid.UUID     `db:"recurring_group_id" json:"recurring_group_id,omitempty"`
-	RecurringEndDate      sql.NullTime   `db:"recurring_end_date" json:"recurring_end_date,omitempty"`
-	CreatedAt             time.Time      `db:"created_at" json:"created_at"`
-	UpdatedAt             time.Time      `db:"updated_at" json:"updated_at"`
-	DeletedAt             sql.NullTime   `db:"deleted_at" json:"deleted_at,omitempty"`
+	ID               uuid.UUID      `db:"id" json:"id"`
+	TeacherID        uuid.UUID      `db:"teacher_id" json:"teacher_id"`
+	StartTime        time.Time      `db:"start_time" json:"start_time"`
+	EndTime          time.Time      `db:"end_time" json:"end_time"`
+	MaxStudents      int            `db:"max_students" json:"max_students"`
+	CurrentStudents  int            `db:"current_students" json:"current_students"`
+	CreditsCost      int            `db:"credits_cost" json:"credits_cost"`
+	Color            string         `db:"color" json:"color"`
+	Subject          sql.NullString `db:"subject" json:"subject,omitempty"`
+	HomeworkText     sql.NullString `db:"homework_text" json:"homework_text,omitempty"`
+	ReportText       sql.NullString `db:"report_text" json:"report_text,omitempty"`
+	Link             sql.NullString `db:"link" json:"link,omitempty"`
+	IsRecurring      bool           `db:"is_recurring" json:"is_recurring"`
+	RecurringGroupID *uuid.UUID     `db:"recurring_group_id" json:"recurring_group_id,omitempty"`
+	RecurringEndDate sql.NullTime   `db:"recurring_end_date" json:"recurring_end_date,omitempty"`
+	CreatedAt        time.Time      `db:"created_at" json:"created_at"`
+	UpdatedAt        time.Time      `db:"updated_at" json:"updated_at"`
+	DeletedAt        sql.NullTime   `db:"deleted_at" json:"deleted_at,omitempty"`
 }
 
 // LessonWithTeacher представляет урок с информацией о преподавателе
@@ -56,26 +54,24 @@ type LessonWithTeacher struct {
 
 // LessonResponse представляет урок в API response с вычисляемыми полями
 type LessonResponse struct {
-	ID                    uuid.UUID     `json:"id"`
-	TeacherID             uuid.UUID     `json:"teacher_id"`
-	TeacherName           string        `json:"teacher_name"`
-	StartTime             time.Time     `json:"start_time"`
-	EndTime               time.Time     `json:"end_time"`
-	MaxStudents           int           `json:"max_students"`
-	CurrentStudents       int           `json:"current_students"`
-	CreditsCost           int           `json:"credits_cost"`
-	Color                 string        `json:"color"`
-	Subject               string        `json:"subject"`
-	HomeworkText          string        `json:"homework_text,omitempty"`
-	ReportText            string        `json:"report_text,omitempty"`
-	Link                  string        `json:"link,omitempty"`
-	AppliedFromTemplate   bool          `json:"applied_from_template"`
-	TemplateApplicationID string        `json:"template_application_id,omitempty"`
-	IsPast                bool          `json:"is_past"` // Вычисляемое поле: занятие уже прошло
-	Bookings              []BookingInfo `json:"bookings,omitempty"`
-	CreatedAt             time.Time     `json:"created_at"`
-	UpdatedAt             time.Time     `json:"updated_at"`
-	DeletedAt             *time.Time    `json:"deleted_at,omitempty"`
+	ID              uuid.UUID     `json:"id"`
+	TeacherID       uuid.UUID     `json:"teacher_id"`
+	TeacherName     string        `json:"teacher_name"`
+	StartTime       time.Time     `json:"start_time"`
+	EndTime         time.Time     `json:"end_time"`
+	MaxStudents     int           `json:"max_students"`
+	CurrentStudents int           `json:"current_students"`
+	CreditsCost     int           `json:"credits_cost"`
+	Color           string        `json:"color"`
+	Subject         string        `json:"subject"`
+	HomeworkText    string        `json:"homework_text,omitempty"`
+	ReportText      string        `json:"report_text,omitempty"`
+	Link            string        `json:"link,omitempty"`
+	IsPast          bool          `json:"is_past"` // Вычисляемое поле: занятие уже прошло
+	Bookings        []BookingInfo `json:"bookings,omitempty"`
+	CreatedAt       time.Time     `json:"created_at"`
+	UpdatedAt       time.Time     `json:"updated_at"`
+	DeletedAt       *time.Time    `json:"deleted_at,omitempty"`
 }
 
 // ToResponse преобразует LessonWithTeacher в LessonResponse с вычисляемым полем is_past
@@ -105,31 +101,24 @@ func (l *LessonWithTeacher) ToResponse() *LessonResponse {
 		deletedAt = &l.DeletedAt.Time
 	}
 
-	templateAppID := ""
-	if l.TemplateApplicationID != nil {
-		templateAppID = l.TemplateApplicationID.String()
-	}
-
 	return &LessonResponse{
-		ID:                    l.ID,
-		TeacherID:             l.TeacherID,
-		TeacherName:           l.TeacherName,
-		StartTime:             l.StartTime,
-		EndTime:               l.EndTime,
-		MaxStudents:           l.MaxStudents,
-		CurrentStudents:       l.CurrentStudents,
-		CreditsCost:           l.CreditsCost,
-		Color:                 l.Color,
-		Subject:               subject,
-		HomeworkText:          homeworkText,
-		ReportText:            reportText,
-		Link:                  link,
-		AppliedFromTemplate:   l.AppliedFromTemplate,
-		TemplateApplicationID: templateAppID,
-		IsPast:                l.IsInPast(),
-		CreatedAt:             l.CreatedAt,
-		UpdatedAt:             l.UpdatedAt,
-		DeletedAt:             deletedAt,
+		ID:              l.ID,
+		TeacherID:       l.TeacherID,
+		TeacherName:     l.TeacherName,
+		StartTime:       l.StartTime,
+		EndTime:         l.EndTime,
+		MaxStudents:     l.MaxStudents,
+		CurrentStudents: l.CurrentStudents,
+		CreditsCost:     l.CreditsCost,
+		Color:           l.Color,
+		Subject:         subject,
+		HomeworkText:    homeworkText,
+		ReportText:      reportText,
+		Link:            link,
+		IsPast:          l.IsInPast(),
+		CreatedAt:       l.CreatedAt,
+		UpdatedAt:       l.UpdatedAt,
+		DeletedAt:       deletedAt,
 	}
 }
 
@@ -160,31 +149,24 @@ func (l *Lesson) ToResponseWithoutTeacher() *LessonResponse {
 		deletedAt = &l.DeletedAt.Time
 	}
 
-	templateAppID := ""
-	if l.TemplateApplicationID != nil {
-		templateAppID = l.TemplateApplicationID.String()
-	}
-
 	return &LessonResponse{
-		ID:                    l.ID,
-		TeacherID:             l.TeacherID,
-		TeacherName:           "", // Не загружено
-		StartTime:             l.StartTime,
-		EndTime:               l.EndTime,
-		MaxStudents:           l.MaxStudents,
-		CurrentStudents:       l.CurrentStudents,
-		CreditsCost:           l.CreditsCost,
-		Color:                 l.Color,
-		Subject:               subject,
-		HomeworkText:          homeworkText,
-		ReportText:            reportText,
-		Link:                  link,
-		AppliedFromTemplate:   l.AppliedFromTemplate,
-		TemplateApplicationID: templateAppID,
-		IsPast:                l.IsInPast(),
-		CreatedAt:             l.CreatedAt,
-		UpdatedAt:             l.UpdatedAt,
-		DeletedAt:             deletedAt,
+		ID:              l.ID,
+		TeacherID:       l.TeacherID,
+		TeacherName:     "", // Не загружено
+		StartTime:       l.StartTime,
+		EndTime:         l.EndTime,
+		MaxStudents:     l.MaxStudents,
+		CurrentStudents: l.CurrentStudents,
+		CreditsCost:     l.CreditsCost,
+		Color:           l.Color,
+		Subject:         subject,
+		HomeworkText:    homeworkText,
+		ReportText:      reportText,
+		Link:            link,
+		IsPast:          l.IsInPast(),
+		CreatedAt:       l.CreatedAt,
+		UpdatedAt:       l.UpdatedAt,
+		DeletedAt:       deletedAt,
 	}
 }
 
@@ -192,34 +174,34 @@ func (l *Lesson) ToResponseWithoutTeacher() *LessonResponse {
 type CreateLessonRequest struct {
 	TeacherID        uuid.UUID   `json:"teacher_id"`
 	StartTime        time.Time   `json:"start_time"`
-	EndTime          time.Time   `json:"end_time"`                // Required: время окончания
-	MaxStudents      int         `json:"max_students"`            // Required: максимум студентов
-	CreditsCost      int         `json:"credits_cost"`            // Required: стоимость в кредитах
-	Color            string      `json:"color"`                   // Required: цвет занятия
-	LessonType       *LessonType `json:"lesson_type,omitempty"`   // Optional: defaults to individual
-	Subject          *string     `json:"subject,omitempty"`       // Optional: lesson subject/topic
-	HomeworkText     *string     `json:"homework_text,omitempty"` // Optional: homework text instructions
-	Link             *string     `json:"link,omitempty"`          // Optional: link to meeting/resources
-	StudentIDs       []uuid.UUID `json:"student_ids,omitempty"`   // Optional: students to enroll on creation
-	IsRecurring      bool        `json:"is_recurring,omitempty"`  // Optional: создать повторяющееся занятие
-	RecurringWeeks   *int        `json:"recurring_weeks,omitempty"`   // Optional: количество недель (4, 8, 12)
+	EndTime          time.Time   `json:"end_time"`                     // Required: время окончания
+	MaxStudents      int         `json:"max_students"`                 // Required: максимум студентов
+	CreditsCost      int         `json:"credits_cost"`                 // Required: стоимость в кредитах
+	Color            string      `json:"color"`                        // Required: цвет занятия
+	LessonType       *LessonType `json:"lesson_type,omitempty"`        // Optional: defaults to individual
+	Subject          *string     `json:"subject,omitempty"`            // Optional: lesson subject/topic
+	HomeworkText     *string     `json:"homework_text,omitempty"`      // Optional: homework text instructions
+	Link             *string     `json:"link,omitempty"`               // Optional: link to meeting/resources
+	StudentIDs       []uuid.UUID `json:"student_ids,omitempty"`        // Optional: students to enroll on creation
+	IsRecurring      bool        `json:"is_recurring,omitempty"`       // Optional: создать повторяющееся занятие
+	RecurringWeeks   *int        `json:"recurring_weeks,omitempty"`    // Optional: количество недель (4, 8, 12)
 	RecurringEndDate *time.Time  `json:"recurring_end_date,omitempty"` // Optional: дата окончания повторений
 }
 
 // UpdateLessonRequest представляет запрос на обновление урока
 type UpdateLessonRequest struct {
-	TeacherID    *uuid.UUID  `json:"teacher_id,omitempty"`
-	StartTime    *time.Time  `json:"start_time,omitempty"`
-	EndTime      *time.Time  `json:"end_time,omitempty"`
-	LessonType   *LessonType `json:"lesson_type,omitempty"`
-	MaxStudents  *int        `json:"max_students,omitempty"`
-	CreditsCost  *int        `json:"credits_cost,omitempty"`
-	Color        *string     `json:"color,omitempty"`
-	Subject      *string     `json:"subject,omitempty"`
-	HomeworkText *string     `json:"homework_text,omitempty"`
-	ReportText   *string     `json:"report_text,omitempty"`
-	Link         *string     `json:"link,omitempty"`
-	ApplyToFuture *bool      `json:"apply_to_future,omitempty"` // Optional: применить ко всем будущим занятиям серии
+	TeacherID     *uuid.UUID  `json:"teacher_id,omitempty"`
+	StartTime     *time.Time  `json:"start_time,omitempty"`
+	EndTime       *time.Time  `json:"end_time,omitempty"`
+	LessonType    *LessonType `json:"lesson_type,omitempty"`
+	MaxStudents   *int        `json:"max_students,omitempty"`
+	CreditsCost   *int        `json:"credits_cost,omitempty"`
+	Color         *string     `json:"color,omitempty"`
+	Subject       *string     `json:"subject,omitempty"`
+	HomeworkText  *string     `json:"homework_text,omitempty"`
+	ReportText    *string     `json:"report_text,omitempty"`
+	Link          *string     `json:"link,omitempty"`
+	ApplyToFuture *bool       `json:"apply_to_future,omitempty"` // Optional: применить ко всем будущим занятиям серии
 }
 
 // CreateRecurringSeriesRequest запрос на создание серии повторяющихся занятий
@@ -229,8 +211,8 @@ type CreateRecurringSeriesRequest struct {
 
 // RecurringSeriesResponse ответ на создание серии
 type RecurringSeriesResponse struct {
-	RecurringGroupID uuid.UUID              `json:"recurring_group_id"`
-	Lessons           []*LessonWithTeacher `json:"lessons"`
+	RecurringGroupID uuid.UUID            `json:"recurring_group_id"`
+	Lessons          []*LessonWithTeacher `json:"lessons"`
 }
 
 // ListLessonsFilter представляет фильтры для списка уроков
@@ -304,55 +286,47 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 	if lesson.RecurringEndDate.Valid {
 		recurringEndDate = &lesson.RecurringEndDate.Time
 	}
-	templateAppID := ""
-	if lesson.TemplateApplicationID != nil {
-		templateAppID = lesson.TemplateApplicationID.String()
-	}
 
 	// For LessonWithTeacher: include teacher_name field
 	if teacherName != nil {
 		return json.Marshal(&struct {
-			Subject               string     `json:"subject"`
-			HomeworkText          string     `json:"homework_text,omitempty"`
-			ReportText            string     `json:"report_text,omitempty"`
-			Link                  string     `json:"link,omitempty"`
-			DeletedAt             *time.Time `json:"deleted_at,omitempty"`
-			RecurringEndDate      *time.Time `json:"recurring_end_date,omitempty"`
-			TemplateApplicationID string     `json:"template_application_id,omitempty"`
-			TeacherName           string     `json:"teacher_name"`
+			Subject          string     `json:"subject"`
+			HomeworkText     string     `json:"homework_text,omitempty"`
+			ReportText       string     `json:"report_text,omitempty"`
+			Link             string     `json:"link,omitempty"`
+			DeletedAt        *time.Time `json:"deleted_at,omitempty"`
+			RecurringEndDate *time.Time `json:"recurring_end_date,omitempty"`
+			TeacherName      string     `json:"teacher_name"`
 			*LessonAlias
 		}{
-			Subject:               subject,
-			HomeworkText:          homeworkText,
-			ReportText:            reportText,
-			Link:                  link,
-			DeletedAt:             deletedAt,
-			RecurringEndDate:      recurringEndDate,
-			TemplateApplicationID: templateAppID,
-			TeacherName:           *teacherName,
-			LessonAlias:           (*LessonAlias)(lesson),
+			Subject:          subject,
+			HomeworkText:     homeworkText,
+			ReportText:       reportText,
+			Link:             link,
+			DeletedAt:        deletedAt,
+			RecurringEndDate: recurringEndDate,
+			TeacherName:      *teacherName,
+			LessonAlias:      (*LessonAlias)(lesson),
 		})
 	}
 
 	// For Lesson only: exclude teacher_name
 	return json.Marshal(&struct {
-		Subject               string     `json:"subject"`
-		HomeworkText          string     `json:"homework_text,omitempty"`
-		ReportText            string     `json:"report_text,omitempty"`
-		Link                  string     `json:"link,omitempty"`
-		DeletedAt             *time.Time `json:"deleted_at,omitempty"`
-		RecurringEndDate      *time.Time `json:"recurring_end_date,omitempty"`
-		TemplateApplicationID string     `json:"template_application_id,omitempty"`
+		Subject          string     `json:"subject"`
+		HomeworkText     string     `json:"homework_text,omitempty"`
+		ReportText       string     `json:"report_text,omitempty"`
+		Link             string     `json:"link,omitempty"`
+		DeletedAt        *time.Time `json:"deleted_at,omitempty"`
+		RecurringEndDate *time.Time `json:"recurring_end_date,omitempty"`
 		*LessonAlias
 	}{
-		Subject:               subject,
-		HomeworkText:          homeworkText,
-		ReportText:            reportText,
-		Link:                  link,
-		DeletedAt:             deletedAt,
-		RecurringEndDate:      recurringEndDate,
-		TemplateApplicationID: templateAppID,
-		LessonAlias:           (*LessonAlias)(lesson),
+		Subject:          subject,
+		HomeworkText:     homeworkText,
+		ReportText:       reportText,
+		Link:             link,
+		DeletedAt:        deletedAt,
+		RecurringEndDate: recurringEndDate,
+		LessonAlias:      (*LessonAlias)(lesson),
 	})
 }
 
@@ -511,11 +485,6 @@ func (l *TeacherScheduleLesson) ToResponse() map[string]interface{} {
 		link = l.Link.String
 	}
 
-	templateAppID := ""
-	if l.TemplateApplicationID != nil {
-		templateAppID = l.TemplateApplicationID.String()
-	}
-
 	// Обрабатываем nil slice
 	enrolledStudents := l.EnrolledStudents
 	if enrolledStudents == nil {
@@ -534,8 +503,6 @@ func (l *TeacherScheduleLesson) ToResponse() map[string]interface{} {
 		"subject":                 subject,
 		"homework_text":           homeworkText,
 		"link":                    link,
-		"applied_from_template":   l.AppliedFromTemplate,
-		"template_application_id": templateAppID,
 		"is_past":                 l.StartTime.Before(time.Now()),
 		"enrolled_students_count": l.EnrolledStudentsCount,
 		"enrolled_students":       enrolledStudents,

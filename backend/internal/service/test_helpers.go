@@ -62,10 +62,6 @@ func cleanupAllTables(t *testing.T, db *sqlx.DB) {
 		"swaps",
 		"bookings",
 		"lessons",
-		"template_lesson_students",
-		"template_lessons",
-		"template_applications",
-		"lesson_templates",
 		"broadcasts",
 		"broadcast_lists",
 		"chat_rooms",
@@ -145,61 +141,6 @@ func getCreditBalance(t *testing.T, db *sqlx.DB, userID uuid.UUID) int {
 	err := db.Get(&balance, "SELECT balance FROM credits WHERE user_id = $1", userID)
 	require.NoError(t, err, "Failed to get credit balance")
 	return balance
-}
-
-// createTestTemplate creates a test template in the database
-func createTestTemplate(t *testing.T, db *sqlx.DB, adminID uuid.UUID, name string, lessons []*models.CreateTemplateLessonRequest) *models.LessonTemplate {
-	templateID := uuid.New()
-
-	_, err := db.Exec(`
-		INSERT INTO lesson_templates (id, admin_id, name, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5)
-	`, templateID, adminID, name, time.Now(), time.Now())
-	require.NoError(t, err, "Failed to create test template")
-
-	template := &models.LessonTemplate{
-		ID:        templateID,
-		AdminID:   adminID,
-		Name:      name,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	for _, lesson := range lessons {
-		lesson.ApplyDefaults()
-
-		entryID := uuid.New()
-		_, err = db.Exec(`
-			INSERT INTO template_lessons (id, template_id, day_of_week, start_time, end_time, teacher_id, lesson_type, max_students, color, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-		`, entryID, templateID, lesson.DayOfWeek, lesson.StartTime, *lesson.EndTime, lesson.TeacherID, *lesson.LessonType, *lesson.MaxStudents, *lesson.Color, time.Now(), time.Now())
-		require.NoError(t, err, "Failed to insert template lesson")
-
-		for _, studentID := range lesson.StudentIDs {
-			_, err = db.Exec(`
-				INSERT INTO template_lesson_students (id, template_lesson_id, student_id, created_at)
-				VALUES ($1, $2, $3, $4)
-			`, uuid.New(), entryID, studentID, time.Now())
-			require.NoError(t, err, "Failed to insert template student assignment")
-		}
-
-		entry := &models.TemplateLessonEntry{
-			ID:          entryID,
-			TemplateID:  templateID,
-			DayOfWeek:   lesson.DayOfWeek,
-			StartTime:   lesson.StartTime,
-			EndTime:     *lesson.EndTime,
-			TeacherID:   lesson.TeacherID,
-			LessonType:  *lesson.LessonType,
-			MaxStudents: *lesson.MaxStudents,
-			Color:       *lesson.Color,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-		}
-		template.Lessons = append(template.Lessons, entry)
-	}
-
-	return template
 }
 
 // getNextMonday returns the next Monday at 00:00
