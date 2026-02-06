@@ -13,7 +13,7 @@ import {
   detectModificationType,
   getModificationDetails,
 } from "../../utils/lessonModificationDetector.js";
-import * as lessonAPI from "../../api/lessons.js";
+import { createRecurringSeries } from "../../api/lessons.js";
 import * as bookingAPI from "../../api/bookings.js";
 import * as userAPI from "../../api/users.js";
 import * as creditAPI from "../../api/credits.js";
@@ -98,6 +98,10 @@ export const LessonEditModal = ({
   const [endTime, setEndTime] = useState("");
   const [maxStudents, setMaxStudents] = useState(1);
   const [creditsCost, setCreditsCost] = useState(1);
+
+  // Recurring lesson states
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringWeeks, setRecurringWeeks] = useState(4);
 
   // Form validation errors
   const [formErrors, setFormErrors] = useState({});
@@ -1046,6 +1050,25 @@ export const LessonEditModal = ({
   };
 
   /**
+   * Обработчик создания серии повторяющихся занятий
+   */
+  const handleCreateRecurringSeries = async () => {
+    if (!lesson?.id) return;
+    const confirmed = window.confirm(`Создать серию из ${recurringWeeks} повторяющихся занятий?`);
+    if (!confirmed) return;
+    try {
+      const result = await createRecurringSeries(lesson.id, recurringWeeks);
+      showNotification(`Создано ${result.data?.count || 0} занятий`, 'success');
+      await loadLessonData();
+      invalidateLessonData(queryClient);
+      onClose();
+      onLessonUpdated?.(lesson);
+    } catch (error) {
+      showNotification(error.response?.data?.message || error.message, 'error');
+    }
+  };
+
+  /**
    * Confirm bulk edit and apply to all subsequent lessons
    */
   const handleConfirmBulkEdit = async () => {
@@ -1129,6 +1152,9 @@ export const LessonEditModal = ({
   
   // Заморозка редактирования: прошедшее занятие для методиста ИЛИ чужое занятие для методиста
   const shouldFreezeInfoTab = (isPastLesson && isMethodologist) || (isMethodologist && !isOwnLesson);
+
+  // Скрыть recurring UI для занятий в серии
+  const showRecurringControls = !lesson?.recurring_group_id;
 
   /**
    * Получить заголовок модального окна с бейджами
@@ -1388,6 +1414,50 @@ export const LessonEditModal = ({
                         )}
                       </div>
                     </div>
+
+                    {showRecurringControls && (
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="recurring-label">
+                          <input
+                            type="checkbox"
+                            checked={isRecurring}
+                            onChange={(e) => setIsRecurring(e.target.checked)}
+                            disabled={shouldFreezeInfoTab}
+                          />
+                          <span>Повторять еженедельно</span>
+                        </label>
+                      </div>
+
+                      {isRecurring && (
+                        <>
+                          <div className="form-group">
+                            <label className="form-label">Количество недель</label>
+                            <select
+                              className="form-select"
+                              value={recurringWeeks}
+                              onChange={(e) => setRecurringWeeks(parseInt(e.target.value))}
+                              disabled={shouldFreezeInfoTab}
+                            >
+                              <option value={4}>4 недели</option>
+                              <option value={8}>8 недель</option>
+                              <option value={12}>12 недель</option>
+                            </select>
+                          </div>
+                          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                            <Button
+                              variant="secondary"
+                              onClick={handleCreateRecurringSeries}
+                              disabled={!isRecurring || recurringWeeks === 0 || shouldFreezeInfoTab}
+                              className="create-recurring-series-btn"
+                            >
+                              Создать серию ({recurringWeeks} недель)
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    )}
 
                     <div className="form-row">
                       <div className="form-group">

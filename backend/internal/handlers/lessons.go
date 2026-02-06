@@ -681,6 +681,47 @@ func (h *LessonHandler) SendReportToParents(w http.ResponseWriter, r *http.Reque
 		response.InternalError(w, "Failed to send report to parents")
 		return
 	}
+	response.Created(w, result)
+}
+
+// CreateRecurringSeriesFromLesson создаёт серию повторяющихся занятий на основе существующего
+func (h *LessonHandler) CreateRecurringSeriesFromLesson(w http.ResponseWriter, r *http.Request) {
+	lessonID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid lesson ID")
+		return
+	}
+
+	var req models.CreateRecurringSeriesRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid request body")
+		return
+	}
+
+	if req.RecurringWeeks < 4 || req.RecurringWeeks > 12 {
+		response.BadRequest(w, response.ErrCodeValidationFailed, "recurring_weeks must be between 4 and 12")
+		return
+	}
+
+	user, ok := middleware.GetUserFromContext(r.Context())
+	if !ok {
+		response.Unauthorized(w, "Authentication required")
+		return
+	}
+
+	result, err := h.lessonService.CreateRecurringSeriesFromLesson(r.Context(), lessonID, req.RecurringWeeks, user.ID)
+	if err != nil {
+		log.Error().Err(err).Str("lesson_id", lessonID.String()).Msg("Failed to create recurring series")
+		response.InternalError(w, "Failed to create recurring series")
+		return
+	}
+
+	response.Created(w, map[string]interface{}{
+		"recurring_group_id": result.RecurringGroupID,
+		"lessons":            result.Lessons,
+		"count":              len(result.Lessons),
+		"message":            fmt.Sprintf("Создано %d повторяющихся занятий", len(result.Lessons)),
+	})
 
 	response.OK(w, result)
 }

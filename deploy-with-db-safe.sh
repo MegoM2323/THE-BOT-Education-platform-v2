@@ -266,6 +266,12 @@ deploy_docker_safe() {
     # Copy entrypoint script
     scp "$PROJECT_DIR/backend/entrypoint.sh" "$REMOTE_HOST:$REMOTE_DIR/backend/"
 
+    # Copy migrations directory
+    log_info "Copying migrations..."
+    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend/internal/database"
+    ssh "$REMOTE_HOST" "rm -rf $REMOTE_DIR/backend/internal/database/migrations"
+    scp -r "$PROJECT_DIR/backend/internal/database/migrations" "$REMOTE_HOST:$REMOTE_DIR/backend/internal/database/"
+
     # Copy Dockerfile for building image on server
     scp "$PROJECT_DIR/backend/Dockerfile" "$REMOTE_HOST:$REMOTE_DIR/backend/"
 
@@ -369,7 +375,7 @@ echo "=== Pre-deployment checks ==="
 
 # Check current volume status
 echo "Current Docker volumes:"
-docker volume ls | grep postgres_data || echo "Note: postgres_data volume not yet created (will be on first start)"
+docker volume ls | grep postgres || echo "Note: postgres volume not yet created (will be on first start)"
 
 # Check pre-built binary exists
 if [ ! -f "$REMOTE_DIR/backend/bin/server" ]; then
@@ -432,12 +438,14 @@ $COMPOSE_CMD -f docker-compose.prod.yml ps
 # Check PostgreSQL volume
 echo ""
 echo "Checking database volume:"
-if docker volume inspect postgres_data > /dev/null 2>&1; then
-    echo "✓ postgres_data volume exists"
-    VOLUME_SIZE=$(docker volume inspect postgres_data | grep -A 10 "Mountpoint" | head -1)
+# Check for the actual volume name being used
+POSTGRES_VOLUME=$(docker volume ls | grep postgres | tail -1 | awk '{print $2}' || echo "")
+if [ -n "$POSTGRES_VOLUME" ]; then
+    echo "✓ postgres volume exists: $POSTGRES_VOLUME"
+    VOLUME_SIZE=$(docker volume inspect "$POSTGRES_VOLUME" 2>/dev/null | grep -A 10 "Mountpoint" | head -1)
     echo "  Volume info: $VOLUME_SIZE"
 else
-    echo "⚠ postgres_data volume missing - database will be reinitialized"
+    echo "⚠ No postgres volume found - database will be initialized"
 fi
 
 # Check health

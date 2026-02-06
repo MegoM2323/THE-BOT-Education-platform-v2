@@ -308,6 +308,28 @@ export const sendReportToParents = async (lessonId, options = {}) => {
   }
 };
 
+/**
+ * Создать серию повторяющихся занятий
+ * @param {string} lessonId - ID исходного занятия
+ * @param {number} weeks - Количество недель для повтора
+ * @param {Object} [options] - Опции запроса (включая signal для отмены)
+ * @returns {Promise<Object>} { count: number, lessons: [] }
+ */
+export const createRecurringSeries = async (lessonId, weeks, options = {}) => {
+  try {
+    return await apiClient.post(
+      `/lessons/${lessonId}/recurring`,
+      { recurring_weeks: weeks },
+      options,
+    );
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      console.error("Error creating recurring series:", error);
+    }
+    throw error;
+  }
+};
+
 export default {
   getLessons,
   getMyLessons,
@@ -319,4 +341,5 @@ export default {
   getAvailableSlots,
   getLessonStudents,
   sendReportToParents,
+  createRecurringSeries,
 };

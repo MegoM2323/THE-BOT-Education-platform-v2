@@ -222,6 +222,17 @@ type UpdateLessonRequest struct {
 	ApplyToFuture *bool      `json:"apply_to_future,omitempty"` // Optional: применить ко всем будущим занятиям серии
 }
 
+// CreateRecurringSeriesRequest запрос на создание серии повторяющихся занятий
+type CreateRecurringSeriesRequest struct {
+	RecurringWeeks int `json:"recurring_weeks" validate:"required,min=4,max=12"`
+}
+
+// RecurringSeriesResponse ответ на создание серии
+type RecurringSeriesResponse struct {
+	RecurringGroupID uuid.UUID              `json:"recurring_group_id"`
+	Lessons           []*LessonWithTeacher `json:"lessons"`
+}
+
 // ListLessonsFilter представляет фильтры для списка уроков
 type ListLessonsFilter struct {
 	TeacherID *uuid.UUID `json:"teacher_id,omitempty"`
@@ -277,6 +288,10 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 	if lesson.HomeworkText.Valid {
 		homeworkText = lesson.HomeworkText.String
 	}
+	reportText := ""
+	if lesson.ReportText.Valid {
+		reportText = lesson.ReportText.String
+	}
 	link := ""
 	if lesson.Link.Valid {
 		link = lesson.Link.String
@@ -284,6 +299,10 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 	deletedAt := (*time.Time)(nil)
 	if lesson.DeletedAt.Valid {
 		deletedAt = &lesson.DeletedAt.Time
+	}
+	recurringEndDate := (*time.Time)(nil)
+	if lesson.RecurringEndDate.Valid {
+		recurringEndDate = &lesson.RecurringEndDate.Time
 	}
 	templateAppID := ""
 	if lesson.TemplateApplicationID != nil {
@@ -295,16 +314,20 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 		return json.Marshal(&struct {
 			Subject               string     `json:"subject"`
 			HomeworkText          string     `json:"homework_text,omitempty"`
+			ReportText            string     `json:"report_text,omitempty"`
 			Link                  string     `json:"link,omitempty"`
 			DeletedAt             *time.Time `json:"deleted_at,omitempty"`
+			RecurringEndDate      *time.Time `json:"recurring_end_date,omitempty"`
 			TemplateApplicationID string     `json:"template_application_id,omitempty"`
 			TeacherName           string     `json:"teacher_name"`
 			*LessonAlias
 		}{
 			Subject:               subject,
 			HomeworkText:          homeworkText,
+			ReportText:            reportText,
 			Link:                  link,
 			DeletedAt:             deletedAt,
+			RecurringEndDate:      recurringEndDate,
 			TemplateApplicationID: templateAppID,
 			TeacherName:           *teacherName,
 			LessonAlias:           (*LessonAlias)(lesson),
@@ -315,15 +338,19 @@ func lessonMarshalHelper(lesson *Lesson, teacherName *string) ([]byte, error) {
 	return json.Marshal(&struct {
 		Subject               string     `json:"subject"`
 		HomeworkText          string     `json:"homework_text,omitempty"`
+		ReportText            string     `json:"report_text,omitempty"`
 		Link                  string     `json:"link,omitempty"`
 		DeletedAt             *time.Time `json:"deleted_at,omitempty"`
+		RecurringEndDate      *time.Time `json:"recurring_end_date,omitempty"`
 		TemplateApplicationID string     `json:"template_application_id,omitempty"`
 		*LessonAlias
 	}{
 		Subject:               subject,
 		HomeworkText:          homeworkText,
+		ReportText:            reportText,
 		Link:                  link,
 		DeletedAt:             deletedAt,
+		RecurringEndDate:      recurringEndDate,
 		TemplateApplicationID: templateAppID,
 		LessonAlias:           (*LessonAlias)(lesson),
 	})

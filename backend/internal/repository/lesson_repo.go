@@ -30,7 +30,9 @@ func (r *LessonRepository) Create(ctx context.Context, lesson *models.Lesson) er
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
 	`
 
-	lesson.ID = uuid.New()
+	if lesson.ID == uuid.Nil {
+		lesson.ID = uuid.New()
+	}
 	lesson.CurrentStudents = 0
 	lesson.CreatedAt = time.Now()
 	lesson.UpdatedAt = time.Now()
@@ -99,7 +101,9 @@ func (r *LessonRepository) createInTx(ctx context.Context, tx *sqlx.Tx, lesson *
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
 	`
 
-	lesson.ID = uuid.New()
+	if lesson.ID == uuid.Nil {
+		lesson.ID = uuid.New()
+	}
 	lesson.CurrentStudents = 0
 	lesson.CreatedAt = time.Now()
 	lesson.UpdatedAt = time.Now()
@@ -511,8 +515,9 @@ func (r *LessonRepository) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*mo
 	query := `
 		SELECT
 			l.id, l.teacher_id, l.start_time, l.end_time,
-			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
+			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 			l.applied_from_template, l.template_application_id,
+			l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 			l.created_at, l.updated_at, l.deleted_at,
 			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM lessons l

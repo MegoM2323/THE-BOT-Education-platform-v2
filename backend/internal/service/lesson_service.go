@@ -417,6 +417,62 @@ func (s *LessonService) CreateRecurringLessons(ctx context.Context, req *models.
 	return lessons, nil
 }
 
+// CreateRecurringSeriesFromLesson создаёт серию повторяющихся занятий на основе существующего
+func (s *LessonService) CreateRecurringSeriesFromLesson(ctx context.Context, lessonID uuid.UUID, weeks int, requestingUserID uuid.UUID) (*models.RecurringSeriesResponse, error) {
+	// Получить оригинальное занятие
+	lesson, err := s.lessonRepo.GetByID(ctx, lessonID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get lesson: %w", err)
+	}
+
+	// Создать новый recurring_group_id
+	groupID := uuid.New()
+
+	// Создать запрос на основе существующего занятия
+	var lessons []*models.LessonWithTeacher
+
+	for i := 1; i <= weeks; i++ {
+		// Создать копию занятия со смещением на i недель
+		newLesson := models.Lesson{}
+		newLesson.ID = uuid.New()
+		newLesson.TeacherID = lesson.TeacherID
+		newLesson.StartTime = lesson.StartTime.AddDate(0, 0, i*7)
+		newLesson.EndTime = lesson.EndTime.AddDate(0, 0, i*7)
+		newLesson.MaxStudents = lesson.MaxStudents
+		newLesson.CreditsCost = lesson.CreditsCost
+		newLesson.Color = lesson.Color
+		newLesson.Subject = lesson.Subject
+		newLesson.HomeworkText = lesson.HomeworkText
+		newLesson.ReportText = lesson.ReportText
+		newLesson.Link = lesson.Link
+		newLesson.IsRecurring = true
+		newLesson.RecurringGroupID = &groupID
+		newLesson.CreatedAt = time.Now()
+		newLesson.UpdatedAt = time.Now()
+
+		// Создать занятие через репозиторий
+		if err := s.lessonRepo.Create(ctx, &newLesson); err != nil {
+			return nil, fmt.Errorf("failed to create week %d lesson: %w", i, err)
+		}
+
+		// Получить созданное занятие с данными преподавателя
+		lessonsWithTeacher, err := s.lessonRepo.GetByIDs(ctx, []uuid.UUID{newLesson.ID})
+		if err != nil {
+			return nil, fmt.Errorf("failed to get created lesson: %w", err)
+		}
+		if len(lessonsWithTeacher) == 0 {
+			return nil, fmt.Errorf("created lesson not found")
+		}
+
+		lessons = append(lessons, lessonsWithTeacher[0])
+	}
+
+	return &models.RecurringSeriesResponse{
+		RecurringGroupID: groupID,
+		Lessons:           lessons,
+	}, nil
+}
+
 func (s *LessonService) createSingleLesson(ctx context.Context, req *models.CreateLessonRequest) ([]*models.Lesson, error) {
 	lesson, err := s.CreateLesson(ctx, req)
 	if err != nil {
