@@ -66,7 +66,7 @@ func (r *TemplateApplicationRepository) GetTemplateApplicationByID(ctx context.C
 			ta.id, ta.template_id, ta.applied_by_id, ta.week_start_date,
 			ta.applied_at, ta.status, ta.rolled_back_at,
 			lt.name as template_name,
-			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as applied_by_name
 		FROM template_applications ta
 		JOIN lesson_templates lt ON ta.template_id = lt.id
 		JOIN users u ON ta.applied_by_id = u.id
@@ -92,7 +92,7 @@ func (r *TemplateApplicationRepository) GetApplicationsByWeekStartDate(ctx conte
 			ta.id, ta.template_id, ta.applied_by_id, ta.week_start_date,
 			ta.applied_at, ta.status, ta.rolled_back_at,
 			lt.name as template_name,
-			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as applied_by_name
 		FROM template_applications ta
 		JOIN lesson_templates lt ON ta.template_id = lt.id
 		JOIN users u ON ta.applied_by_id = u.id
@@ -116,7 +116,7 @@ func (r *TemplateApplicationRepository) GetApplicationsByTemplate(ctx context.Co
 			ta.id, ta.template_id, ta.applied_by_id, ta.week_start_date,
 			ta.applied_at, ta.status, ta.rolled_back_at,
 			lt.name as template_name,
-			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as applied_by_name
 		FROM template_applications ta
 		JOIN lesson_templates lt ON ta.template_id = lt.id
 		JOIN users u ON ta.applied_by_id = u.id
@@ -140,7 +140,7 @@ func (r *TemplateApplicationRepository) GetActiveApplicationForWeek(ctx context.
 			ta.id, ta.template_id, ta.applied_by_id, ta.week_start_date,
 			ta.applied_at, ta.status, ta.rolled_back_at,
 			lt.name as template_name,
-			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as applied_by_name
 		FROM template_applications ta
 		JOIN lesson_templates lt ON ta.template_id = lt.id
 		JOIN users u ON ta.applied_by_id = u.id
@@ -198,7 +198,7 @@ func (r *TemplateApplicationRepository) GetApplicationHistory(ctx context.Contex
 			ta.id, ta.template_id, ta.applied_by_id, ta.week_start_date,
 			ta.applied_at, ta.status, ta.rolled_back_at,
 			lt.name as template_name,
-			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as applied_by_name
 		FROM template_applications ta
 		JOIN lesson_templates lt ON ta.template_id = lt.id
 		JOIN users u ON ta.applied_by_id = u.id
@@ -223,7 +223,7 @@ func (r *TemplateApplicationRepository) GetAllApplicationHistory(ctx context.Con
 			ta.id, ta.template_id, ta.applied_by_id, ta.week_start_date,
 			ta.applied_at, ta.status, ta.rolled_back_at,
 			lt.name as template_name,
-			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as applied_by_name
 		FROM template_applications ta
 		JOIN lesson_templates lt ON ta.template_id = lt.id
 		JOIN users u ON ta.applied_by_id = u.id
@@ -264,7 +264,7 @@ func (r *TemplateApplicationRepository) GetLessonsCreatedFromApplication(ctx con
 			l.id, l.teacher_id, l.start_time, l.end_time,
 			l.max_students, l.current_students, l.color, l.subject,
 			l.applied_from_template, l.template_application_id, l.created_at, l.updated_at, l.deleted_at,
-			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as teacher_name
 		FROM lessons l
 		JOIN users u ON l.teacher_id = u.id
 		WHERE l.template_application_id = $1 AND l.deleted_at IS NULL

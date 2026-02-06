@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"tutoring-platform/internal/models"
@@ -139,7 +140,7 @@ func (r *ChatRepository) ListRoomsByTeacher(ctx context.Context, teacherID uuid.
 			cr.id, cr.teacher_id, cr.student_id, cr.last_message_at,
 			cr.created_at, cr.updated_at, cr.deleted_at,
 			u.id AS participant_id,
-			CONCAT(u.first_name, ' ', u.last_name) AS participant_name,
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) AS participant_name,
 			u.role AS participant_role
 		FROM chat_rooms cr
 		JOIN users u ON u.id = cr.student_id
@@ -163,7 +164,7 @@ func (r *ChatRepository) ListRoomsByStudent(ctx context.Context, studentID uuid.
 			cr.id, cr.teacher_id, cr.student_id, cr.last_message_at,
 			cr.created_at, cr.updated_at, cr.deleted_at,
 			u.id AS participant_id,
-			CONCAT(u.first_name, ' ', u.last_name) AS participant_name,
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) AS participant_name,
 			u.role AS participant_role
 		FROM chat_rooms cr
 		JOIN users u ON u.id = cr.teacher_id
@@ -273,14 +274,14 @@ func (r *ChatRepository) GetMessagesByRoom(ctx context.Context, roomID uuid.UUID
 			m.id, m.room_id, m.sender_id, m.message_text, m.status,
 			m.moderation_completed_at, m.created_at, m.deleted_at,
 			CASE
-				WHEN u.first_name IS NOT NULL AND u.first_name != '' THEN
+				WHEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), '') != '' THEN
 					CASE u.role
-						WHEN 'methodologist' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Преподаватель)'
-						WHEN 'student' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Студент)'
-						WHEN 'admin' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Администратор)'
-						ELSE CONCAT(u.first_name, ' ', u.last_name)
+						WHEN 'methodologist' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
+						WHEN 'student' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Студент)'
+						WHEN 'admin' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Администратор)'
+						ELSE COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email)
 					END
-				ELSE 'Пользователь'
+				ELSE COALESCE(u.email, 'Пользователь')
 			END as sender_name
 		FROM messages m
 		LEFT JOIN users u ON m.sender_id = u.id
@@ -308,14 +309,14 @@ func (r *ChatRepository) GetPendingMessages(ctx context.Context) ([]*models.Mess
 			m.id, m.room_id, m.sender_id, m.message_text, m.status,
 			m.moderation_completed_at, m.created_at, m.deleted_at,
 			CASE
-				WHEN u.first_name IS NOT NULL AND u.first_name != '' THEN
+				WHEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), '') != '' THEN
 					CASE u.role
-						WHEN 'methodologist' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Преподаватель)'
-						WHEN 'student' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Студент)'
-						WHEN 'admin' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Администратор)'
-						ELSE CONCAT(u.first_name, ' ', u.last_name)
+						WHEN 'methodologist' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
+						WHEN 'student' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Студент)'
+						WHEN 'admin' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Администратор)'
+						ELSE COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email)
 					END
-				ELSE 'Пользователь'
+				ELSE COALESCE(u.email, 'Пользователь')
 			END as sender_name
 		FROM messages m
 		LEFT JOIN users u ON m.sender_id = u.id
@@ -364,14 +365,14 @@ func (r *ChatRepository) GetMessageByID(ctx context.Context, msgID uuid.UUID) (*
 			m.id, m.room_id, m.sender_id, m.message_text, m.status,
 			m.moderation_completed_at, m.created_at, m.deleted_at,
 			CASE
-				WHEN u.first_name IS NOT NULL AND u.first_name != '' THEN
+				WHEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), '') != '' THEN
 					CASE u.role
-						WHEN 'methodologist' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Преподаватель)'
-						WHEN 'student' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Студент)'
-						WHEN 'admin' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Администратор)'
-						ELSE CONCAT(u.first_name, ' ', u.last_name)
+						WHEN 'methodologist' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
+						WHEN 'student' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Студент)'
+						WHEN 'admin' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Администратор)'
+						ELSE COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email)
 					END
-				ELSE 'Пользователь'
+				ELSE COALESCE(u.email, 'Пользователь')
 			END as sender_name
 		FROM messages m
 		LEFT JOIN users u ON m.sender_id = u.id
@@ -590,6 +591,15 @@ type ChatRoomWithDetails struct {
 	ParticipantName string            `json:"participant_name,omitempty"`
 }
 
+// fullNameWithEmailFallback возвращает имя с fallback на email
+func fullNameWithEmailFallback(firstName, lastName, email string) string {
+	name := strings.TrimSpace(firstName + " " + lastName)
+	if name == "" {
+		return email
+	}
+	return name
+}
+
 // ListAllRooms возвращает все чаты с информацией о участниках для админ-панели
 func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetails, error) {
 	query := `
@@ -599,9 +609,11 @@ func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetail
 			cr.student_id,
 			t.first_name AS teacher_first_name,
 			t.last_name AS teacher_last_name,
+			t.email AS teacher_email,
 			t.role AS teacher_role,
 			s.first_name AS student_first_name,
 			s.last_name AS student_last_name,
+			s.email AS student_email,
 			s.role AS student_role,
 			COALESCE(mc.messages_count, 0) AS messages_count,
 			cr.last_message_at
@@ -619,17 +631,19 @@ func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetail
 	`
 
 	type roomRow struct {
-		ID                 uuid.UUID    `db:"id"`
-		TeacherID          uuid.UUID    `db:"teacher_id"`
-		StudentID          uuid.UUID    `db:"student_id"`
-		TeacherFirstName   string       `db:"teacher_first_name"`
-		TeacherLastName    string       `db:"teacher_last_name"`
-		TeacherRole        string       `db:"teacher_role"`
-		StudentFirstName   string       `db:"student_first_name"`
-		StudentLastName    string       `db:"student_last_name"`
-		StudentRole        string       `db:"student_role"`
-		MessagesCount      int          `db:"messages_count"`
-		LastMessageAt      sql.NullTime `db:"last_message_at"`
+		ID               uuid.UUID    `db:"id"`
+		TeacherID        uuid.UUID    `db:"teacher_id"`
+		StudentID        uuid.UUID    `db:"student_id"`
+		TeacherFirstName string       `db:"teacher_first_name"`
+		TeacherLastName  string       `db:"teacher_last_name"`
+		TeacherEmail     string       `db:"teacher_email"`
+		TeacherRole      string       `db:"teacher_role"`
+		StudentFirstName string       `db:"student_first_name"`
+		StudentLastName  string       `db:"student_last_name"`
+		StudentEmail     string       `db:"student_email"`
+		StudentRole      string       `db:"student_role"`
+		MessagesCount    int          `db:"messages_count"`
+		LastMessageAt    sql.NullTime `db:"last_message_at"`
 	}
 
 	var rows []roomRow
@@ -640,8 +654,8 @@ func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetail
 
 	result := make([]ChatRoomWithDetails, 0, len(rows))
 	for _, row := range rows {
-		teacherFullName := row.TeacherFirstName + " " + row.TeacherLastName
-		studentFullName := row.StudentFirstName + " " + row.StudentLastName
+		teacherFullName := fullNameWithEmailFallback(row.TeacherFirstName, row.TeacherLastName, row.TeacherEmail)
+		studentFullName := fullNameWithEmailFallback(row.StudentFirstName, row.StudentLastName, row.StudentEmail)
 		room := ChatRoomWithDetails{
 			ID:              row.ID,
 			MessagesCount:   row.MessagesCount,

@@ -80,7 +80,7 @@ func (r *LessonBroadcastRepo) GetBroadcast(ctx context.Context, broadcastID uuid
 			lb.failed_count,
 			lb.created_at,
 			lb.completed_at,
-			COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Unknown') as sender_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as sender_name
 		FROM lesson_broadcasts lb
 		LEFT JOIN users u ON lb.sender_id = u.id
 		WHERE lb.id = $1
@@ -118,7 +118,7 @@ func (r *LessonBroadcastRepo) ListBroadcastsByLesson(ctx context.Context, lesson
 			lb.failed_count,
 			lb.created_at,
 			lb.completed_at,
-			COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Unknown') as sender_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as sender_name
 		FROM lesson_broadcasts lb
 		LEFT JOIN users u ON lb.sender_id = u.id
 		WHERE lb.lesson_id = $1

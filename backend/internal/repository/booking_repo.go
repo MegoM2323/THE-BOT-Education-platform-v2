@@ -115,7 +115,7 @@ func (r *BookingRepository) GetWithDetails(ctx context.Context, id uuid.UUID) (*
 		SELECT
 			b.id, b.student_id, b.lesson_id, b.status, b.booked_at, b.cancelled_at, b.created_at, b.updated_at,
 			l.start_time, l.end_time, l.teacher_id, l.subject, l.homework_text,
-			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as teacher_name
 		FROM bookings b
 		JOIN lessons l ON b.lesson_id = l.id AND l.deleted_at IS NULL
 		JOIN users u ON l.teacher_id = u.id AND u.deleted_at IS NULL
@@ -140,8 +140,8 @@ func (r *BookingRepository) List(ctx context.Context, filter *models.ListBooking
 		SELECT
 			b.id, b.student_id, b.lesson_id, b.status, b.booked_at, b.cancelled_at, b.created_at, b.updated_at,
 			l.start_time, l.end_time, l.teacher_id, l.subject, l.homework_text,
-			CONCAT(u.first_name, ' ', u.last_name) as teacher_name,
-			CONCAT(s.first_name, ' ', s.last_name) as student_full_name,
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as teacher_name,
+			COALESCE(NULLIF(TRIM(CONCAT(s.first_name, ' ', s.last_name)), ''), s.email) as student_full_name,
 			s.email as student_email,
 			b.created_at as booking_created_at
 		FROM bookings b
@@ -247,8 +247,8 @@ func (r *BookingRepository) ListWithPagination(ctx context.Context, filter *mode
 		SELECT
 			b.id, b.student_id, b.lesson_id, b.status, b.booked_at, b.cancelled_at, b.created_at, b.updated_at,
 			l.start_time, l.end_time, l.teacher_id, l.subject, l.homework_text,
-			CONCAT(u.first_name, ' ', u.last_name) as teacher_name,
-			CONCAT(s.first_name, ' ', s.last_name) as student_full_name,
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as teacher_name,
+			COALESCE(NULLIF(TRIM(CONCAT(s.first_name, ' ', s.last_name)), ''), s.email) as student_full_name,
 			s.email as student_email,
 			b.created_at as booking_created_at
 		FROM bookings b
@@ -406,7 +406,7 @@ func (r *BookingRepository) GetBookingsWithLessons(ctx context.Context, studentI
 			l.id, l.teacher_id, l.start_time, l.end_time,
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text,
 			l.applied_from_template, l.template_application_id, l.created_at, l.updated_at, l.deleted_at,
-			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as teacher_name
 		FROM bookings b
 		INNER JOIN lessons l ON b.lesson_id = l.id
 		LEFT JOIN users u ON l.teacher_id = u.id

@@ -156,7 +156,7 @@ fi
 gzip -f "$BACKUP_FILE"
 
 # Keep only last 5 backups
-ls -t "$BACKUP_DIR"/db_backup_*.sql.gz 2>/dev/null | tail -n +6 | xargs -r rm
+ls -t "$BACKUP_DIR"/db_backup_*.sql.gz 2>/dev/null | tail -n +6 | while read -r f; do rm -f "$f"; done
 
 echo "OK: Backup created: $(du -h "$BACKUP_FILE_GZ" | cut -f1)"
 BACKUP_SCRIPT
@@ -230,6 +230,23 @@ check_rsync() {
 deploy_docker_safe() {
     log_step "Starting Docker deployment (with database preservation)..."
 
+    # Проверка существования файлов перед деплоем
+    if [ ! -f "$PROJECT_DIR/backend/bin/server" ]; then
+        log_error "backend/bin/server не существует. Выполните 'cd backend && go build ./cmd/server' сначала."
+        exit 1
+    fi
+
+    if [ ! -d "$PROJECT_DIR/frontend/dist" ]; then
+        log_error "frontend/dist не существует. Выполните 'cd frontend && npm run build' сначала."
+        exit 1
+    fi
+
+    # Проверка существования nginx.conf.prod
+    if [ ! -f "$PROJECT_DIR/frontend/nginx.conf.prod" ]; then
+        log_error "frontend/nginx.conf.prod не существует"
+        exit 1
+    fi
+
     # Stop containers first to release file locks on binary
     log_info "Stopping containers before file copy..."
     ssh "$REMOTE_HOST" "bash -c 'cd $REMOTE_DIR && docker-compose -f docker-compose.prod.yml down 2>/dev/null || true'"
@@ -265,7 +282,7 @@ deploy_docker_safe() {
         --exclude='node_modules' \
         "$PROJECT_DIR/frontend/src" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
     rsync -avz \
-        "$PROJECT_DIR/frontend/dist" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
+        "$PROJECT_DIR/frontend/dist" "$REMOTE_HOST:$REMOTE_DIR/frontend/dist"
     rsync -avz "$PROJECT_DIR/frontend/public" "$REMOTE_HOST:$REMOTE_DIR/frontend/" 2>/dev/null || true
 
     # Manage .env file - preserve existing values and update as needed
@@ -392,9 +409,18 @@ echo "=== Starting containers (NO BUILD) ==="
 echo "Starting containers with pre-built binary..."
 $COMPOSE_CMD -f docker-compose.prod.yml up -d
 
+# Проверка здоровья контейнеров
+sleep 5
+if ! $COMPOSE_CMD -f docker-compose.prod.yml ps | grep -q "Up"; then
+    echo "Ошибка: контейнеры не запустились"
+    echo "Container logs:"
+    $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30
+    exit 1
+fi
+
 # Wait for services
 echo "Waiting for services to start..."
-sleep 15
+sleep 10
 
 echo ""
 echo "=== Post-deployment verification ==="

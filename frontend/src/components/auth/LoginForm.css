@@ -1,3 +1,10 @@
+@import '../../styles/variables.css';
+
+/* Input with password toggle */
+.input-with-password-toggle {
+  padding-right: 44px !important;
+}
+
 /* Login Form Component */
 .login-form {
   display: flex;
@@ -106,6 +113,7 @@
   position: absolute;
   right: var(--spacing-sm);
   top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
@@ -122,6 +130,7 @@
   width: 36px;
   height: 36px;
   line-height: 1;
+  z-index: 10;
 }
 
 .toggle-password:hover {

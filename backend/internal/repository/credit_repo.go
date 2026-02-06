@@ -206,7 +206,7 @@ func (r *CreditRepository) GetTransactionHistory(ctx context.Context, filter *mo
 		SELECT
 			ct.id, ct.user_id, ct.amount, ct.operation_type, ct.reason,
 			ct.booking_id, ct.balance_before, ct.balance_after, ct.created_at,
-			u.email as user_email, CONCAT(u.first_name, ' ', u.last_name) as user_name,
+			u.email as user_email, COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as user_name,
 			COALESCE(p.email, '') as performed_by_email
 		FROM credit_transactions ct
 		JOIN users u ON ct.user_id = u.id AND u.deleted_at IS NULL
@@ -338,7 +338,7 @@ func (r *CreditRepository) GetAllStudentCredits(ctx context.Context) ([]map[stri
 		SELECT
 			u.id as user_id,
 			u.email,
-			CONCAT(u.first_name, ' ', u.last_name) as full_name,
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as full_name,
 			COALESCE(c.balance, 0) as balance
 		FROM users u
 		LEFT JOIN credits c ON u.id = c.user_id
@@ -391,7 +391,7 @@ func (r *CreditRepository) GetAllStudentCreditsWithPagination(ctx context.Contex
 		SELECT
 			u.id as user_id,
 			u.email,
-			CONCAT(u.first_name, ' ', u.last_name) as full_name,
+			COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) as full_name,
 			COALESCE(c.balance, 0) as balance
 		FROM users u
 		LEFT JOIN credits c ON u.id = c.user_id
