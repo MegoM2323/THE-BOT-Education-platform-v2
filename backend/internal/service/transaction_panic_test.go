@@ -82,8 +82,8 @@ func performTransactionWithPanic(ctx context.Context, pool *pgxpool.Pool, email 
 	}()
 
 	_, err = tx.Exec(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES (gen_random_uuid(), $1, 'hash', 'Panic Test', 'student', NOW(), NOW())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES (gen_random_uuid(), $1, 'hash', 'Panic', 'Test', 'student', NOW(), NOW())
 	`, email)
 	if err != nil {
 		return err
@@ -104,8 +104,8 @@ func performTransactionWithError(ctx context.Context, pool *pgxpool.Pool, email 
 	}()
 
 	_, err = tx.Exec(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES (gen_random_uuid(), $1, 'hash', 'Error Test', 'student', NOW(), NOW())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES (gen_random_uuid(), $1, 'hash', 'Error', 'Test', 'student', NOW(), NOW())
 	`, email)
 	if err != nil {
 		return err
@@ -126,8 +126,8 @@ func performSuccessfulTransaction(ctx context.Context, pool *pgxpool.Pool, email
 	}()
 
 	_, err = tx.Exec(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES (gen_random_uuid(), $1, 'hash', 'Success Test', 'student', NOW(), NOW())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES (gen_random_uuid(), $1, 'hash', 'Success', 'Test', 'student', NOW(), NOW())
 	`, email)
 	if err != nil {
 		return err

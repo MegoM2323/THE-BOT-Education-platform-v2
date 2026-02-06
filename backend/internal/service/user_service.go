@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"tutoring-platform/internal/models"
 	"tutoring-platform/internal/repository"
@@ -59,10 +60,25 @@ func (s *UserService) CreateUser(ctx context.Context, req *models.CreateUserRequ
 	}
 
 	// Создаем пользователя
+	firstName := req.FirstName
+	lastName := req.LastName
+
+	// Поддержка старого API: если FirstName/LastName не переданы, используем FullName
+	if firstName == "" && lastName == "" && req.FullName != "" {
+		parts := strings.SplitN(strings.TrimSpace(req.FullName), " ", 2)
+		if len(parts) > 0 {
+			firstName = parts[0]
+		}
+		if len(parts) > 1 {
+			lastName = parts[1]
+		}
+	}
+
 	user := &models.User{
 		Email:          req.Email,
 		PasswordHash:   passwordHash,
-		FullName:       req.FullName,
+		FirstName:      firstName,
+		LastName:       lastName,
 		Role:           req.Role,
 		PaymentEnabled: true, // По умолчанию оплата включена
 	}
@@ -115,8 +131,21 @@ func (s *UserService) UpdateUser(ctx context.Context, userID uuid.UUID, req *mod
 
 		updates["email"] = *req.Email
 	}
+	if req.FirstName != nil {
+		updates["first_name"] = *req.FirstName
+	}
+	if req.LastName != nil {
+		updates["last_name"] = *req.LastName
+	}
 	if req.FullName != nil {
-		updates["full_name"] = *req.FullName
+		// Для обратной совместимости: если передано FullName, разбиваем на части
+		parts := strings.SplitN(strings.TrimSpace(*req.FullName), " ", 2)
+		if len(parts) > 0 {
+			updates["first_name"] = parts[0]
+		}
+		if len(parts) > 1 {
+			updates["last_name"] = parts[1]
+		}
 	}
 	if req.Role != nil {
 		if *req.Role != models.RoleStudent &&
@@ -158,6 +187,10 @@ func (s *UserService) UpdateUser(ctx context.Context, userID uuid.UUID, req *mod
 		} else {
 			updates["parent_telegram_username"] = nil
 		}
+	}
+
+	if req.ParentChatID != nil {
+		updates["parent_chat_id"] = *req.ParentChatID
 	}
 
 	// Обработка изменения пароля (для админа)

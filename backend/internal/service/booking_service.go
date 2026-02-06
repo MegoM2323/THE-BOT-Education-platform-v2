@@ -650,10 +650,7 @@ func (s *BookingService) sendBookingNotification(ctx context.Context, bookingID,
 		return
 	}
 
-	studentName := student.FullName
-	if studentName == "" {
-		studentName = student.Email
-	}
+	studentName := student.GetFullName()
 
 	if err := s.telegramService.NotifyLessonBooking(ctx, lesson, studentName, []uuid.UUID{studentID}); err != nil {
 		log.Warn().

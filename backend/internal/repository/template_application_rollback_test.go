@@ -26,10 +26,10 @@ func TestGetApplicationByTemplateAndWeekTx_Success(t *testing.T) {
 
 	// Создаем пользователя (admin)
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
 		ON CONFLICT (id) DO NOTHING
-	`, appliedByID, "test-rollback-admin@example.com", "hash", "Test Admin", "admin")
+	`, appliedByID, "test-rollback-admin@example.com", "hash", "Test", "Admin", "admin")
 	require.NoError(t, err)
 
 	// Создаем template
@@ -80,8 +80,8 @@ func TestGetApplicationByTemplateAndWeekTx_ReplacedStatus(t *testing.T) {
 
 	// Создаем пользователя
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
 		ON CONFLICT (id) DO NOTHING
 	`, appliedByID, "test-replaced-admin@example.com", "hash", "Test Admin 2", "admin")
 	require.NoError(t, err)
@@ -141,8 +141,8 @@ func TestGetApplicationByTemplateAndWeekTx_RolledBackNotFound(t *testing.T) {
 
 	// Создаем пользователя
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
 		ON CONFLICT (id) DO NOTHING
 	`, appliedByID, "test-rolledback-admin@example.com", "hash", "Test Admin 3", "admin")
 	require.NoError(t, err)
@@ -192,8 +192,8 @@ func TestGetApplicationByTemplateAndWeekTx_WrongTemplateID(t *testing.T) {
 
 	// Создаем пользователя
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
 		ON CONFLICT (id) DO NOTHING
 	`, appliedByID, "test-wrong-template-admin@example.com", "hash", "Test Admin 4", "admin")
 	require.NoError(t, err)

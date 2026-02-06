@@ -417,7 +417,7 @@ func (s *TemplateService) getBookingsForLessonsInTx(
 			b.lesson_id,
 			b.status,
 			b.booked_at,
-			u.full_name as student_name,
+			CONCAT(u.first_name, ' ', u.last_name) as student_name,
 			l.start_time
 		FROM bookings b
 		JOIN lessons l ON b.lesson_id = l.id
@@ -660,7 +660,7 @@ func (s *TemplateService) validateCreditsSufficientAfterReplacementInTx(
 			SELECT
 				c.user_id,
 				c.balance,
-				u.full_name
+				CONCAT(u.first_name, ' ', u.last_name) as full_name
 			FROM credits c
 			JOIN users u ON c.user_id = u.id
 			WHERE c.user_id IN (SELECT student_id FROM affected_students)
@@ -768,7 +768,7 @@ func (s *TemplateService) validateCreditsSufficientForReplacement(
 			SELECT
 				c.user_id,
 				c.balance,
-				u.full_name
+				CONCAT(u.first_name, ' ', u.last_name) as full_name
 			FROM credits c
 			JOIN users u ON c.user_id = u.id
 			WHERE c.user_id IN (SELECT student_id FROM affected_students)
@@ -1414,7 +1414,7 @@ func (s *TemplateService) CreateTemplateLesson(ctx context.Context, adminID uuid
 	// Загружаем преподавателя для отображения имени
 	teacher, err := s.userRepo.GetByID(ctx, req.TeacherID)
 	if err == nil {
-		entry.TeacherName = teacher.FullName
+		entry.TeacherName = teacher.GetFullName()
 	}
 
 	// Загружаем студентов для возврата в ответе
@@ -1571,7 +1571,7 @@ func (s *TemplateService) UpdateTemplateLesson(ctx context.Context, adminID uuid
 	// Загружаем преподавателя для отображения имени
 	teacher, err := s.userRepo.GetByID(ctx, existingLesson.TeacherID)
 	if err == nil {
-		existingLesson.TeacherName = teacher.FullName
+		existingLesson.TeacherName = teacher.GetFullName()
 	}
 
 	// Загружаем студентов для возврата в ответе

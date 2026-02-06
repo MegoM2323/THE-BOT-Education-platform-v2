@@ -44,15 +44,16 @@ func createTestUserForBroadcast(t *testing.T, pool *pgxpool.Pool, role string) u
 	userID := uuid.New()
 
 	query := `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
 	_, err := pool.Exec(ctx, query,
 		userID,
 		"user_"+userID.String()+"@test.com",
 		"hashed_password",
-		"Test User",
+		"Test",
+		"User",
 		role,
 		time.Now(),
 		time.Now(),
@@ -236,16 +237,16 @@ func TestLessonBroadcastRepo_ListBroadcastsByLesson_WithSenderName(t *testing.T)
 
 	teacherID := uuid.New()
 	_, err := pool.Exec(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "teacher@test.com", "hash", "Иван Иванов", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "teacher@test.com", "hash", "Иван", "Иванов", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	adminID := uuid.New()
 	_, err = pool.Exec(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "admin@test.com", "hash", "Петр Петров", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "admin@test.com", "hash", "Петр", "Петров", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	lessonID := createTestLesson(t, pool, teacherID)

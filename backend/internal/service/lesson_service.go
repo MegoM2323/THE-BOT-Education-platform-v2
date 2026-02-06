@@ -158,7 +158,7 @@ func (s *LessonService) CreateLesson(ctx context.Context, req *models.CreateLess
 			for _, studentID := range req.StudentIDs {
 				student, err := s.userRepo.GetByID(ctx, studentID)
 				if err == nil {
-					studentNames = append(studentNames, student.FullName)
+					studentNames = append(studentNames, student.GetFullName())
 				} else {
 					studentNames = append(studentNames, "Студент")
 				}
@@ -526,7 +526,7 @@ func (s *LessonService) createLessonWithGroup(ctx context.Context, req *models.C
 			for _, studentID := range req.StudentIDs {
 				student, err := s.userRepo.GetByID(ctx, studentID)
 				if err == nil {
-					studentNames = append(studentNames, student.FullName)
+					studentNames = append(studentNames, student.GetFullName())
 				} else {
 					studentNames = append(studentNames, "Студент")
 				}

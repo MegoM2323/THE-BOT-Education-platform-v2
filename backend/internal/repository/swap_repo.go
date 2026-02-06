@@ -75,7 +75,7 @@ func (r *SwapRepository) GetWithDetails(ctx context.Context, id uuid.UUID) (*mod
 			ol.end_time as old_lesson_end_time,
 			nl.start_time as new_lesson_start_time,
 			nl.end_time as new_lesson_end_time,
-			u.full_name as student_name
+			CONCAT(u.first_name, ' ', u.last_name) as student_name
 		FROM swaps s
 		JOIN lessons ol ON s.old_lesson_id = ol.id
 		JOIN lessons nl ON s.new_lesson_id = nl.id
@@ -102,7 +102,7 @@ func (r *SwapRepository) List(ctx context.Context, filter *models.GetSwapHistory
 			ol.end_time as old_lesson_end_time,
 			nl.start_time as new_lesson_start_time,
 			nl.end_time as new_lesson_end_time,
-			u.full_name as student_name
+			CONCAT(u.first_name, ' ', u.last_name) as student_name
 		FROM swaps s
 		JOIN lessons ol ON s.old_lesson_id = ol.id
 		JOIN lessons nl ON s.new_lesson_id = nl.id

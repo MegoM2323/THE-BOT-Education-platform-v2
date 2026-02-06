@@ -25,7 +25,7 @@ type UserRepository interface {
 	ListWithPagination(ctx context.Context, roleFilter *models.UserRole, offset, limit int) ([]*models.User, int, error)
 	Exists(ctx context.Context, email string) (bool, error)
 	UpdateTelegramUsername(ctx context.Context, userID uuid.UUID, username string) error
-	GetParentChatIDsByStudentIDs(ctx context.Context, studentIDs []uuid.UUID) (map[uuid.UUID]int64, error)
+	// GetParentChatIDsByStudentIDs(ctx context.Context, studentIDs []uuid.UUID) (map[uuid.UUID]int64, error)
 }
 
 // UserRepo реализация UserRepository
@@ -41,8 +41,8 @@ func NewUserRepository(db *sqlx.DB) UserRepository {
 // Create создает нового пользователя
 func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
 	query := `
-		INSERT INTO users (id, email, password_hash, full_name, role, payment_enabled, telegram_username, parent_telegram_username, parent_chat_id, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, payment_enabled, telegram_username, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`
 
 	user.ID = uuid.New()
@@ -53,12 +53,11 @@ func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
 		user.ID,
 		user.Email,
 		user.PasswordHash,
-		user.FullName,
+		user.FirstName,
+		user.LastName,
 		user.Role,
 		user.PaymentEnabled,
 		user.TelegramUsername,
-		user.ParentTelegramUsername,
-		user.ParentChatID,
 		user.CreatedAt,
 		user.UpdatedAt,
 	)
@@ -190,7 +189,7 @@ func (r *UserRepo) ListWithPagination(ctx context.Context, role *models.UserRole
 }
 
 // Update обновляет пользователя
-// Поддерживаемые поля: email, full_name, role, telegram_username, payment_enabled
+// Поддерживаемые поля: email, first_name, last_name, role, telegram_username, payment_enabled
 func (r *UserRepo) Update(ctx context.Context, id uuid.UUID, updates map[string]interface{}) error {
 	if len(updates) == 0 {
 		return nil
@@ -199,7 +198,8 @@ func (r *UserRepo) Update(ctx context.Context, id uuid.UUID, updates map[string]
 	// Whitelist of allowed fields to prevent SQL injection
 	allowedFields := map[string]bool{
 		"email":                    true,
-		"full_name":                true,
+		"first_name":               true,
+		"last_name":                true,
 		"role":                     true,
 		"telegram_username":        true,
 		"parent_telegram_username": true,
@@ -475,34 +475,34 @@ func (r *UserRepo) UpdateTelegramUsername(ctx context.Context, userID uuid.UUID,
 	return nil
 }
 
-// GetParentChatIDsByStudentIDs получает parent_chat_id для списка студентов
-func (r *UserRepo) GetParentChatIDsByStudentIDs(ctx context.Context, studentIDs []uuid.UUID) (map[uuid.UUID]int64, error) {
-	query := `
-		SELECT id, parent_chat_id
-		FROM users
-		WHERE id = ANY($1)
-		  AND parent_chat_id IS NOT NULL
-		  AND deleted_at IS NULL
-	`
-	rows, err := r.db.QueryContext(ctx, query, studentIDs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to query parent chat IDs: %w", err)
-	}
-	defer rows.Close()
+// // GetParentChatIDsByStudentIDs получает parent_chat_id для списка студентов
+// func (r *UserRepo) GetParentChatIDsByStudentIDs(ctx context.Context, studentIDs []uuid.UUID) (map[uuid.UUID]int64, error) {
+// 	query := `
+// 		SELECT id, parent_chat_id
+// 		FROM users
+// 		WHERE id = ANY($1)
+// 		  AND parent_chat_id IS NOT NULL
+// 		  AND deleted_at IS NULL
+// 	`
+// 	rows, err := r.db.QueryContext(ctx, query, studentIDs)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to query parent chat IDs: %w", err)
+// 	}
+// 	defer rows.Close()
 
-	result := make(map[uuid.UUID]int64)
-	for rows.Next() {
-		var id uuid.UUID
-		var parentChatID sql.NullInt64
-		if err := rows.Scan(&id, &parentChatID); err != nil {
-			return nil, fmt.Errorf("failed to scan parent chat ID: %w", err)
-		}
-		if parentChatID.Valid {
-			result[id] = parentChatID.Int64
-		}
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating rows: %w", err)
-	}
-	return result, nil
-}
+// 	result := make(map[uuid.UUID]int64)
+// 	for rows.Next() {
+// 		var id uuid.UUID
+// 		var parentChatID sql.NullInt64
+// 		if err := rows.Scan(&id, &parentChatID); err != nil {
+// 			return nil, fmt.Errorf("failed to scan parent chat ID: %w", err)
+// 		}
+// 		if parentChatID.Valid {
+// 			result[id] = parentChatID.Int64
+// 		}
+// 	}
+// 	if err := rows.Err(); err != nil {
+// 		return nil, fmt.Errorf("error iterating rows: %w", err)
+// 	}
+// 	return result, nil
+// }

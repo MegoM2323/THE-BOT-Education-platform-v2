@@ -225,7 +225,7 @@ func TestGetCSRFTokenEndpoint(t *testing.T) {
 	sessionWithUser := &models.SessionWithUser{
 		Session:   *session,
 		UserEmail: user.Email,
-		UserName:  user.FullName,
+		UserName:  user.GetFullName(),
 		UserRole:  user.Role,
 	}
 
@@ -369,9 +369,10 @@ func TestChangePassword(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a mock user context
 			user := &models.User{
-				ID:       uuid.New(),
-				Email:    "test@example.com",
-				FullName: "Test User",
+				ID:        uuid.New(),
+				Email:     "test@example.com",
+				FirstName: "Test",
+				LastName:  "User",
 			}
 
 			// Create request body

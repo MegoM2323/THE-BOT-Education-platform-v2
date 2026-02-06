@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -145,7 +146,26 @@ func (h *LessonHandler) CreateLesson(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Создаем занятие
+	// Проверяем, нужно ли создать повторяющиеся занятия
+	if req.IsRecurring && req.RecurringWeeks != nil && *req.RecurringWeeks > 0 {
+		lessons, err := h.lessonService.CreateRecurringLessons(r.Context(), &req)
+		if err != nil {
+			response.BadRequest(w, response.ErrCodeValidationFailed, fmt.Sprintf("Failed to create recurring lessons: %s", err.Error()))
+			return
+		}
+		lessonResponses := make([]*models.LessonResponse, len(lessons))
+		for i, lesson := range lessons {
+			lessonResponses[i] = lesson.ToResponseWithoutTeacher()
+		}
+		response.Created(w, map[string]interface{}{
+			"message": fmt.Sprintf("Создано %d повторяющихся занятий", len(lessons)),
+			"lessons": lessonResponses,
+			"count":   len(lessons),
+		})
+		return
+	}
+
+	// Создаем обычное занятие
 	lesson, err := h.lessonService.CreateLesson(r.Context(), &req)
 	if err != nil {
 		h.handleLessonError(w, err)

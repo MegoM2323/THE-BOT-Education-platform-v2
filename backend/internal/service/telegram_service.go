@@ -801,55 +801,55 @@ func (s *TelegramService) SendLessonReportToParents(
 	reportText string,
 	bookings []models.BookingInfo,
 ) (*SendLessonReportResult, error) {
-	studentIDs := make([]uuid.UUID, len(bookings))
-	for i, b := range bookings {
-		studentIDs[i] = b.StudentID
-	}
+	// studentIDs := make([]uuid.UUID, len(bookings))
+	// for i, b := range bookings {
+	// 	studentIDs[i] = b.StudentID
+	// }
 
-	parentChatIDs, err := s.userRepo.GetParentChatIDsByStudentIDs(ctx, studentIDs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get parent chat IDs: %w", err)
-	}
+	// parentChatIDs, err := s.userRepo.GetParentChatIDsByStudentIDs(ctx, studentIDs)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to get parent chat IDs: %w", err)
+	// }
 
 	result := &SendLessonReportResult{
 		TotalStudents: len(bookings),
 	}
 
-	for _, booking := range bookings {
-		parentChatID, ok := parentChatIDs[booking.StudentID]
-		if !ok {
-			result.Failed++
-			result.Errors = append(result.Errors, SendLessonReportError{
-				StudentID:   booking.StudentID,
-				StudentName: booking.StudentName,
-				Error:       "Родитель не привязан к Telegram",
-			})
-			continue
-		}
+	// for _, booking := range bookings {
+	// 	parentChatID, ok := parentChatIDs[booking.StudentID]
+	// 	if !ok {
+	// 		result.Failed++
+	// 		result.Errors = append(result.Errors, SendLessonReportError{
+	// 			StudentID:   booking.StudentID,
+	// 			StudentName: booking.StudentName,
+	// 			Error:       "Родитель не привязан к Telegram",
+	// 		})
+	// 		continue
+	// 	}
 
-		subject := lesson.Subject.String
-		if subject == "" {
-			subject = "Занятие"
-		}
+	// 	subject := lesson.Subject.String
+	// 	if subject == "" {
+	// 		subject = "Занятие"
+	// 	}
 
-		message := fmt.Sprintf("📝 Отчет о занятии\n\n📚 Предмет: %s\n📅 Дата: %s\n👤 Ученик: %s\n\n---\n\n%s",
-			subject,
-			lesson.StartTime.Format("02.01.2006 15:04"),
-			booking.StudentName,
-			reportText,
-		)
+	// 	message := fmt.Sprintf("📝 Отчет о занятии\n\n📚 Предмет: %s\n📅 Дата: %s\n👤 Ученик: %s\n\n---\n\n%s",
+	// 		subject,
+	// 		lesson.StartTime.Format("02.01.2006 15:04"),
+	// 		booking.StudentName,
+	// 		reportText,
+	// 	)
 
-		if err := s.telegramClient.SendMessage(parentChatID, message); err != nil {
-			result.Failed++
-			result.Errors = append(result.Errors, SendLessonReportError{
-				StudentID:   booking.StudentID,
-				StudentName: booking.StudentName,
-				Error:       err.Error(),
-			})
-		} else {
-			result.Sent++
-		}
-	}
+	// 	if err := s.telegramClient.SendMessage(parentChatID, message); err != nil {
+	// 		result.Failed++
+	// 		result.Errors = append(result.Errors, SendLessonReportError{
+	// 			StudentID:   booking.StudentID,
+	// 			StudentName: booking.StudentName,
+	// 			Error:       err.Error(),
+	// 		})
+	// 	} else {
+	// 		result.Sent++
+	// 	}
+	// }
 
 	return result, nil
 }

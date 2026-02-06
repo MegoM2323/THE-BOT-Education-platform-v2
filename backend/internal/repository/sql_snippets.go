@@ -6,8 +6,9 @@ package repository
 const (
 	// UserSelectFields - поля таблицы users
 	UserSelectFields = `
-		id, email, password_hash, full_name, role, payment_enabled, telegram_username,
-		parent_telegram_username, parent_chat_id, created_at, updated_at, deleted_at
+		id, email, password_hash, first_name, last_name, role, payment_enabled, telegram_username,
+		parent_telegram_username, parent_chat_id,
+		created_at, updated_at, deleted_at
 	`
 
 	// LessonSelectFields - поля таблицы lessons

@@ -1,17 +1,23 @@
 server {
     listen 80;
-    server_name diploma-m.ru www.diploma-m.ru;
+    server_name the-bot.ru www.the-bot.ru;
+
+    # Health check endpoint for Docker
+    location /health-nginx {
+        return 200 "healthy\n";
+        access_log off;
+    }
 
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name diploma-m.ru www.diploma-m.ru;
+    server_name the-bot.ru www.the-bot.ru;
 
     # SSL certificates from Let's Encrypt (certbot)
-    ssl_certificate /etc/letsencrypt/live/diploma-m.ru/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/diploma-m.ru/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/the-bot.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/the-bot.ru/privkey.pem;
 
     # SSL configuration
     ssl_protocols TLSv1.2 TLSv1.3;

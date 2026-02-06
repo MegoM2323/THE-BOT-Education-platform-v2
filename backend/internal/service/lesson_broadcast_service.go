@@ -411,13 +411,13 @@ func (s *LessonBroadcastService) getEnrolledStudents(ctx context.Context, lesson
 	}
 
 	query := `
-		SELECT DISTINCT u.id, u.email, u.full_name, u.role, u.created_at, u.updated_at
+		SELECT DISTINCT u.id, u.email, u.first_name, u.last_name, u.role, u.created_at, u.updated_at
 		FROM users u
 		INNER JOIN bookings b ON u.id = b.student_id
 		WHERE b.lesson_id = $1
 		  AND b.status = 'active'
 		  AND u.deleted_at IS NULL
-		ORDER BY u.full_name
+		ORDER BY u.first_name, u.last_name
 	`
 
 	var students []*models.User

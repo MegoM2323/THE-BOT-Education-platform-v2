@@ -207,7 +207,7 @@ build_backend() {
     fi
 
     cd "$PROJECT_DIR/backend"
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/server ./cmd/server/main.go
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o bin/server ./cmd/server
 
     if [ ! -f "bin/server" ]; then
         log_error "Failed to build backend binary"
@@ -216,6 +216,14 @@ build_backend() {
 
     log_success "Backend binary built: $(ls -lh bin/server | awk '{print $5}')"
     cd "$PROJECT_DIR"
+}
+
+# Check rsync availability
+check_rsync() {
+    if ! command -v rsync &> /dev/null; then
+        log_error "rsync is not installed"
+        exit 1
+    fi
 }
 
 # Deploy with Docker (preserving database)
@@ -241,19 +249,22 @@ deploy_docker_safe() {
     # Copy entrypoint script
     scp "$PROJECT_DIR/backend/entrypoint.sh" "$REMOTE_HOST:$REMOTE_DIR/backend/"
 
+    # Copy Dockerfile for building image on server
+    scp "$PROJECT_DIR/backend/Dockerfile" "$REMOTE_HOST:$REMOTE_DIR/backend/"
+
     # Copy frontend files
     log_info "Copying frontend files..."
     scp "$PROJECT_DIR/frontend/Dockerfile" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
-    scp "$PROJECT_DIR/frontend/nginx.conf" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
+    scp "$PROJECT_DIR/frontend/nginx.conf.prod" "$REMOTE_HOST:$REMOTE_DIR/frontend/nginx.conf"
     scp "$PROJECT_DIR/frontend/package.json" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
     scp "$PROJECT_DIR/frontend/package-lock.json" "$REMOTE_HOST:$REMOTE_DIR/frontend/" 2>/dev/null || true
     scp "$PROJECT_DIR/frontend/vite.config.js" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
     scp "$PROJECT_DIR/frontend/index.html" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
 
-    rsync -avz --delete \
+    rsync -avz \
         --exclude='node_modules' \
         "$PROJECT_DIR/frontend/src" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
-    rsync -avz --delete \
+    rsync -avz \
         "$PROJECT_DIR/frontend/dist" "$REMOTE_HOST:$REMOTE_DIR/frontend/"
     rsync -avz "$PROJECT_DIR/frontend/public" "$REMOTE_HOST:$REMOTE_DIR/frontend/" 2>/dev/null || true
 
@@ -470,6 +481,7 @@ VERIFY_SCRIPT
 # Main flow
 main() {
     check_ssh
+    check_rsync
 
     if [ "$BACKUP_BEFORE_DEPLOY" = true ]; then
         backup_database

@@ -228,17 +228,18 @@ func TestGetAllWithUserInfo_NoN1Query(t *testing.T) {
 
 	// Проверяем, что можем присвоить User
 	testUser := &models.User{
-		ID:       testUserID,
-		Email:    "test@example.com",
-		FullName: "Test User",
-		Role:     models.RoleStudent,
+		ID:        testUserID,
+		Email:     "test@example.com",
+		FirstName: "Test",
+		LastName:  "User",
+		Role:      models.RoleStudent,
 	}
 	telegramUser.User = testUser
 
 	// Assert: проверяем, что структура правильная
 	assert.NotNil(t, telegramUser.User)
 	assert.Equal(t, testUserID, telegramUser.User.ID)
-	assert.Equal(t, "Test User", telegramUser.User.FullName)
+	assert.Equal(t, "Test User", telegramUser.User.GetFullName())
 }
 
 // TestGetAllWithUserInfo_SQLQuery проверяет корректность SQL запроса (LEFT JOIN)
@@ -258,7 +259,8 @@ func TestGetAllWithUserInfo_SQLQuery(t *testing.T) {
 			tu.updated_at,
 			u.id AS "user.id",
 			u.email AS "user.email",
-			u.full_name AS "user.full_name",
+			u.first_name AS "user.first_name",
+			u.last_name AS "user.last_name",
 			u.role AS "user.role",
 			u.payment_enabled AS "user.payment_enabled",
 			u.telegram_username AS "user.telegram_username",
@@ -293,7 +295,8 @@ func TestGetByRoleWithUserInfo_SQLQuery(t *testing.T) {
 			tu.updated_at,
 			u.id AS "user.id",
 			u.email AS "user.email",
-			u.full_name AS "user.full_name",
+			u.first_name AS "user.first_name",
+			u.last_name AS "user.last_name",
 			u.role AS "user.role",
 			u.payment_enabled AS "user.payment_enabled",
 			u.telegram_username AS "user.telegram_username",

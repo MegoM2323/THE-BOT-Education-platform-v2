@@ -49,11 +49,11 @@ func createTestUserByID(t *testing.T, db *sqlx.DB, userID uuid.UUID, email strin
 	uniqueEmail := fmt.Sprintf("%s-%s", userID.String()[:8], email)
 
 	query := `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
-	_, err := db.ExecContext(ctx, query, userID, uniqueEmail, "test_hash", "Test User", role, now, now)
+	_, err := db.ExecContext(ctx, query, userID, uniqueEmail, "test_hash", "Test", "User", role, now, now)
 	if err != nil {
 		t.Fatalf("Failed to create test user: %v", err)
 	}

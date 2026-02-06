@@ -270,9 +270,9 @@ func TestTemplateLessonCapacityOnUpdate_NoReduction(t *testing.T) {
 // Helper function to create test users
 func createTestUserSQLX(t *testing.T, db *sqlx.DB, id uuid.UUID, email, role string) {
 	_, err := db.Exec(`
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, id, email, "hash", "Test User", role, time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, id, email, "hash", "Test", "User", role, time.Now(), time.Now())
 	require.NoError(t, err, "Failed to create test user: %s", email)
 }
 

@@ -86,7 +86,7 @@ func (h *BroadcastHandler) GetLinkedUsers(w http.ResponseWriter, r *http.Request
 		responseUsers = append(responseUsers, UserWithTelegram{
 			ID:       tu.User.ID.String(),
 			Email:    tu.User.Email,
-			FullName: tu.User.FullName,
+			FullName: tu.User.GetFullName(),
 			Role:     string(tu.User.Role),
 			Telegram: &TelegramInfo{
 				Username:   tu.Username,

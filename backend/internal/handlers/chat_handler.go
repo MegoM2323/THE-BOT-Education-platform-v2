@@ -122,7 +122,7 @@ func (h *ChatHandler) GetOrCreateRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	room.ParticipantID = participant.ID
-	room.ParticipantName = participant.FullName
+	room.ParticipantName = participant.GetFullName()
 	room.ParticipantRole = string(participant.Role)
 
 	response.Success(w, http.StatusOK, room)

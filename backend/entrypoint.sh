@@ -153,14 +153,14 @@ apply_migrations() {
 
 # Start the backend
 start_backend() {
-    log_info "Starting tutoring-backend..."
+    log_info "Starting server..."
 
-    if [ ! -x "./tutoring-backend" ]; then
-        log_error "Backend binary not found or not executable: ./tutoring-backend"
+    if [ ! -x "./server" ]; then
+        log_error "Backend binary not found or not executable: ./server"
         exit 1
     fi
 
-    exec ./tutoring-backend
+    exec ./server
 }
 
 # Main function

@@ -104,7 +104,9 @@ func (s *PaymentSettingsService) ListStudentsPaymentStatus(ctx context.Context, 
 
 		status := &models.StudentPaymentStatus{
 			ID:             student.ID,
-			FullName:       student.FullName,
+			FirstName:      student.FirstName,
+			LastName:       student.LastName,
+			FullName:       student.GetFullName(),
 			Email:          student.Email,
 			PaymentEnabled: student.PaymentEnabled,
 			UpdatedAt:      student.UpdatedAt,

@@ -26,21 +26,21 @@ func TestTemplateOwnershipVerification(t *testing.T) {
 	teacherID := uuid.New()
 
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, creatorID, creatorID.String()[:8]+"-creator@example.com", "hash", "Creator Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, creatorID, creatorID.String()[:8]+"-creator@example.com", "hash", "Creator", "Admin", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, otherAdminID, otherAdminID.String()[:8]+"-other@example.com", "hash", "Other Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, otherAdminID, otherAdminID.String()[:8]+"-other@example.com", "hash", "Other", "Admin", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, teacherID.String()[:8]+"-teacher@example.com", "hash", "Test Teacher", "methodologist", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, teacherID.String()[:8]+"-teacher@example.com", "hash", "Test", "Teacher", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Cleanup
@@ -123,21 +123,21 @@ func TestTemplateLessonOwnershipVerification(t *testing.T) {
 	teacherID := uuid.New()
 
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, creatorID, creatorID.String()[:8]+"-creator@example.com", "hash", "Creator Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, creatorID, creatorID.String()[:8]+"-creator@example.com", "hash", "Creator", "Admin", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, otherAdminID, otherAdminID.String()[:8]+"-other@example.com", "hash", "Other Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, otherAdminID, otherAdminID.String()[:8]+"-other@example.com", "hash", "Other", "Admin", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, teacherID.String()[:8]+"-teacher@example.com", "hash", "Test Teacher", "methodologist", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, teacherID.String()[:8]+"-teacher@example.com", "hash", "Test", "Teacher", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Cleanup
@@ -290,15 +290,15 @@ func TestTemplateDeleteOwnershipVerification(t *testing.T) {
 	otherAdminID := uuid.New()
 
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, creatorID, creatorID.String()[:8]+"-creator@example.com", "hash", "Creator Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, creatorID, creatorID.String()[:8]+"-creator@example.com", "hash", "Creator", "Admin", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, otherAdminID, otherAdminID.String()[:8]+"-other@example.com", "hash", "Other Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, otherAdminID, otherAdminID.String()[:8]+"-other@example.com", "hash", "Other", "Admin", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Cleanup

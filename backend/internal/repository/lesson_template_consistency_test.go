@@ -23,9 +23,9 @@ func TestLessonCountConsistency(t *testing.T) {
 	// Create admin user
 	adminID := uuid.New()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "test.admin.consistency@example.com", "hash", "Test Admin Consistency", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "test.admin.consistency@example.com", "hash", "Test Admin", "Consistency", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Create template
@@ -39,9 +39,9 @@ func TestLessonCountConsistency(t *testing.T) {
 	// Create teacher
 	teacherID := uuid.New()
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "test.teacher.consistency@example.com", "hash", "Test Teacher Consistency", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "test.teacher.consistency@example.com", "hash", "Test Teacher", "Consistency", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	t.Run("GetTemplateWithLessons computes LessonCount from Lessons array", func(t *testing.T) {

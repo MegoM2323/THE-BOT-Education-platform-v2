@@ -56,7 +56,7 @@ func (m *MockSessionRepository) GetWithUser(ctx context.Context, sessionID uuid.
 			CreatedAt: time.Now(),
 		},
 		UserEmail: m.user.Email,
-		UserName:  m.user.FullName,
+		UserName:  m.user.GetFullName(),
 		UserRole:  m.user.Role,
 	}, nil
 }
@@ -141,7 +141,8 @@ func TestAuthenticateDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:        uuid.New(),
 				Email:     "deleted@test.com",
-				FullName:  "Deleted User",
+				FirstName: "Deleted",
+				LastName:  "User",
 				Role:      models.RoleStudent,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -159,7 +160,8 @@ func TestAuthenticateDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:        uuid.New(),
 				Email:     "active@test.com",
-				FullName:  "Active User",
+				FirstName: "Active",
+				LastName:  "User",
 				Role:      models.RoleStudent,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -198,7 +200,8 @@ func TestOptionalAuthenticateDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:        uuid.New(),
 				Email:     "deleted@test.com",
-				FullName:  "Deleted User",
+				FirstName: "Deleted",
+				LastName:  "User",
 				Role:      models.RoleStudent,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -214,7 +217,8 @@ func TestOptionalAuthenticateDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:        uuid.New(),
 				Email:     "active@test.com",
-				FullName:  "Active User",
+				FirstName: "Active",
+				LastName:  "User",
 				Role:      models.RoleStudent,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -295,7 +299,7 @@ func NewMockAuthService(user *models.User) *MockAuthService {
 			CreatedAt: time.Now(),
 		},
 		UserEmail: user.Email,
-		UserName:  user.FullName,
+		UserName:  user.GetFullName(),
 		UserRole:  user.Role,
 	}
 	return &MockAuthService{
@@ -337,7 +341,8 @@ func TestAuthMiddlewareDeletedUserRejection(t *testing.T) {
 			user: &models.User{
 				ID:        uuid.New(),
 				Email:     "deleted@test.com",
-				FullName:  "Deleted User",
+				FirstName: "Deleted",
+				LastName:  "User",
 				Role:      models.RoleStudent,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -354,7 +359,8 @@ func TestAuthMiddlewareDeletedUserRejection(t *testing.T) {
 			user: &models.User{
 				ID:        uuid.New(),
 				Email:     "active@test.com",
-				FullName:  "Active User",
+				FirstName: "Active",
+				LastName:  "User",
 				Role:      models.RoleStudent,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -387,7 +393,8 @@ func TestSessionRepositoryDeletedUserHandling(t *testing.T) {
 			user: &models.User{
 				ID:        uuid.New(),
 				Email:     "deleted@test.com",
-				FullName:  "Deleted User",
+				FirstName: "Deleted",
+				LastName:  "User",
 				Role:      models.RoleStudent,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -404,7 +411,8 @@ func TestSessionRepositoryDeletedUserHandling(t *testing.T) {
 			user: &models.User{
 				ID:        uuid.New(),
 				Email:     "active@test.com",
-				FullName:  "Active User",
+				FirstName: "Active",
+				LastName:  "User",
 				Role:      models.RoleStudent,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),

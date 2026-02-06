@@ -207,7 +207,7 @@ func (s *BulkEditService) AddStudentToAllSubsequent(ctx context.Context, adminID
 	// Create modification record for audit trail
 	changesJSON, err := json.Marshal(map[string]interface{}{
 		"student_id":   studentID.String(),
-		"student_name": student.FullName,
+		"student_name": student.GetFullName(),
 		"action":       "add",
 	})
 	if err != nil {
@@ -329,7 +329,7 @@ func (s *BulkEditService) RemoveStudentFromAllSubsequent(ctx context.Context, ad
 	// Create modification record
 	changesJSON, err := json.Marshal(map[string]interface{}{
 		"student_id":    studentID.String(),
-		"student_name":  student.FullName,
+		"student_name":  student.GetFullName(),
 		"action":        "remove",
 		"removed_count": removedCount,
 	})
@@ -410,7 +410,7 @@ func (s *BulkEditService) ChangeTeacherForAllSubsequent(ctx context.Context, adm
 	changesJSON, err := json.Marshal(map[string]interface{}{
 		"old_teacher_id":   oldTeacherID.String(),
 		"new_teacher_id":   newTeacherID.String(),
-		"new_teacher_name": newTeacher.FullName,
+		"new_teacher_name": newTeacher.GetFullName(),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal changes: %w", err)

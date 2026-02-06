@@ -205,7 +205,7 @@ func (r *LessonRepository) GetWithTeacher(ctx context.Context, id uuid.UUID) (*m
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
-			u.full_name as teacher_name
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM lessons l
 		JOIN users u ON l.teacher_id = u.id
 		WHERE l.id = $1 AND l.deleted_at IS NULL
@@ -231,7 +231,7 @@ func (r *LessonRepository) List(ctx context.Context, filter *models.ListLessonsF
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
-			u.full_name as teacher_name
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM lessons l
 		JOIN users u ON l.teacher_id = u.id
 		WHERE l.deleted_at IS NULL
@@ -290,8 +290,9 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 				l.id, l.teacher_id, l.start_time, l.end_time,
 				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 				l.applied_from_template, l.template_application_id,
+				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 				l.created_at, l.updated_at, l.deleted_at,
-				u.full_name as teacher_name
+				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 			FROM lessons l
 			JOIN users u ON l.teacher_id = u.id
 			WHERE l.deleted_at IS NULL
@@ -304,8 +305,9 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 				l.id, l.teacher_id, l.start_time, l.end_time,
 				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 				l.applied_from_template, l.template_application_id,
+				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 				l.created_at, l.updated_at, l.deleted_at,
-				u.full_name as teacher_name
+				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 			FROM lessons l
 			JOIN users u ON l.teacher_id = u.id
 			WHERE l.deleted_at IS NULL AND l.teacher_id = $1
@@ -322,8 +324,9 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 				l.id, l.teacher_id, l.start_time, l.end_time,
 				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 				l.applied_from_template, l.template_application_id,
+				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 				l.created_at, l.updated_at, l.deleted_at,
-				u.full_name as teacher_name
+				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 			FROM lessons l
 			JOIN users u ON l.teacher_id = u.id
 			LEFT JOIN bookings b ON l.id = b.lesson_id AND b.student_id = $1
@@ -343,8 +346,9 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 				l.id, l.teacher_id, l.start_time, l.end_time,
 				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
 				l.applied_from_template, l.template_application_id,
+				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
 				l.created_at, l.updated_at, l.deleted_at,
-				u.full_name as teacher_name
+				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 			FROM lessons l
 			JOIN users u ON l.teacher_id = u.id
 			WHERE l.deleted_at IS NULL
@@ -510,7 +514,7 @@ func (r *LessonRepository) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*mo
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
-			u.full_name as teacher_name
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM lessons l
 		JOIN users u ON l.teacher_id = u.id
 		WHERE l.id = ANY($1) AND l.deleted_at IS NULL
@@ -647,7 +651,7 @@ func (r *LessonRepository) GetLessonsByTemplateApplication(ctx context.Context, 
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
-			u.full_name as teacher_name
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM lessons l
 		JOIN users u ON l.teacher_id = u.id
 		WHERE l.template_application_id = $1 AND l.deleted_at IS NULL
@@ -993,7 +997,7 @@ func (r *LessonRepository) GetTeacherSchedule(ctx context.Context, teacherID uui
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
-			u.full_name as teacher_name,
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name,
 			COALESCE(
 				(SELECT COUNT(*) FROM bookings b WHERE b.lesson_id = l.id AND b.status = 'active'),
 				0
@@ -1024,7 +1028,7 @@ func (r *LessonRepository) GetTeacherSchedule(ctx context.Context, teacherID uui
 	// Для каждого занятия загрузим enrolled students (с полными данными)
 	for _, lesson := range lessons {
 		studentsQuery := `
-			SELECT u.id, u.full_name, u.email
+			SELECT u.id, u.first_name, u.last_name, u.email
 			FROM users u
 			INNER JOIN bookings b ON u.id = b.student_id
 			WHERE b.lesson_id = $1 AND b.status = 'active'
@@ -1046,11 +1050,11 @@ func (r *LessonRepository) GetTeacherSchedule(ctx context.Context, teacherID uui
 // GetLessonBookings получает информацию о студентах, записанных на занятие
 func (r *LessonRepository) GetLessonBookings(ctx context.Context, lessonID uuid.UUID) ([]models.BookingInfo, error) {
 	query := `
-		SELECT b.student_id, u.full_name
+		SELECT b.student_id, CONCAT(u.first_name, ' ', u.last_name) AS student_name
 		FROM bookings b
 		JOIN users u ON b.student_id = u.id
 		WHERE b.lesson_id = $1 AND b.status = 'active'
-		ORDER BY u.full_name
+		ORDER BY u.first_name, u.last_name
 	`
 
 	var bookings []models.BookingInfo
@@ -1077,17 +1081,17 @@ func (r *LessonRepository) GetLessonBookingsForLessons(ctx context.Context, less
 	}
 
 	query := `
-		SELECT b.lesson_id, b.student_id, u.full_name
+		SELECT b.lesson_id, b.student_id, CONCAT(u.first_name, ' ', u.last_name) AS student_name
 		FROM bookings b
 		JOIN users u ON b.student_id = u.id
 		WHERE b.lesson_id = ANY($1) AND b.status = 'active'
-		ORDER BY b.lesson_id, u.full_name
+		ORDER BY b.lesson_id, u.first_name, u.last_name
 	`
 
 	type bookingRow struct {
 		LessonID    uuid.UUID `db:"lesson_id"`
 		StudentID   uuid.UUID `db:"student_id"`
-		StudentName string    `db:"full_name"`
+		StudentName string    `db:"student_name"`
 	}
 
 	var rows []bookingRow
@@ -1116,7 +1120,7 @@ func (r *LessonRepository) GetAllTeachersSchedule(ctx context.Context, startDate
 			l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.link,
 			l.applied_from_template, l.template_application_id,
 			l.created_at, l.updated_at, l.deleted_at,
-			u.full_name as teacher_name,
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name,
 			COALESCE(
 				(SELECT COUNT(*) FROM bookings b WHERE b.lesson_id = l.id AND b.status = 'active'),
 				0
@@ -1146,7 +1150,7 @@ func (r *LessonRepository) GetAllTeachersSchedule(ctx context.Context, startDate
 	// Для каждого занятия загрузим enrolled students (с полными данными)
 	for _, lesson := range lessons {
 		studentsQuery := `
-			SELECT u.id, u.full_name, u.email
+			SELECT u.id, u.first_name, u.last_name, u.email
 			FROM users u
 			INNER JOIN bookings b ON u.id = b.student_id
 			WHERE b.lesson_id = $1 AND b.status = 'active'

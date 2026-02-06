@@ -29,9 +29,9 @@ func TestTemplateWithLessons(t *testing.T) {
 	// Create admin user
 	adminID := uuid.New()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "test.admin@example.com", "hash", "Test Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "test.admin@example.com", "hash", "Test", "Admin", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Create template
@@ -46,9 +46,9 @@ func TestTemplateWithLessons(t *testing.T) {
 	// Create a test teacher
 	teacherID := uuid.New()
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "test.teacher@example.com", "hash", "Test Teacher", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "test.teacher@example.com", "hash", "Test", "Teacher", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	t.Run("template starts empty", func(t *testing.T) {
@@ -103,17 +103,17 @@ func TestGetAllTemplatesWithLessonCount(t *testing.T) {
 	// Create admin user
 	adminID := uuid.New()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "test.admin.count@example.com", "hash", "Test Admin Count", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "test.admin.count@example.com", "hash", "Test Admin", "Count", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Create teacher
 	teacherID := uuid.New()
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "test.teacher.count@example.com", "hash", "Test Teacher Count", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "test.teacher.count@example.com", "hash", "Test Teacher", "Count", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Create first template (empty)
@@ -211,9 +211,9 @@ func TestWithTransactionRollback(t *testing.T) {
 	// Create admin user
 	adminID := uuid.New()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "test.admin.txn@example.com", "hash", "Test Admin Txn", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "test.admin.txn@example.com", "hash", "Test Admin", "Txn", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Create template
@@ -228,9 +228,9 @@ func TestWithTransactionRollback(t *testing.T) {
 	// Create a test teacher
 	teacherID := uuid.New()
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "test.teacher.txn@example.com", "hash", "Test Teacher Txn", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "test.teacher.txn@example.com", "hash", "Test Teacher", "Txn", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	t.Run("WithTransaction passes actual transaction to callback", func(t *testing.T) {

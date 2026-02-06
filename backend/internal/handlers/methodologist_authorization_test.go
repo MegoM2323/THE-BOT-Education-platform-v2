@@ -14,28 +14,32 @@ func TestMethodologistRoleCheck(t *testing.T) {
 	methodologist := &models.User{
 		ID:       uuid.New(),
 		Email:    "methodologist@test.com",
-		FullName: "Test Methodologist",
+		FirstName: "Test",
+		LastName:  "Methodologist",
 		Role:     models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
-		FullName: "Test Teacher",
+		FirstName: "Test",
+		LastName:  "Teacher",
 		Role:     models.RoleMethodologist,
 	}
 
 	student := &models.User{
 		ID:       uuid.New(),
 		Email:    "student@test.com",
-		FullName: "Test Student",
+		FirstName: "Test",
+		LastName:  "Student",
 		Role:     models.RoleStudent,
 	}
 
 	admin := &models.User{
 		ID:       uuid.New(),
 		Email:    "admin@test.com",
-		FullName: "Test Admin",
+		FirstName: "Test",
+		LastName:  "Admin",
 		Role:     models.RoleAdmin,
 	}
 
@@ -77,21 +81,24 @@ func TestMethodologistCanCreateLesson(t *testing.T) {
 	methodologist := &models.User{
 		ID:       uuid.New(),
 		Email:    "methodologist@test.com",
-		FullName: "Test Methodologist",
+		FirstName: "Test",
+		LastName:  "Methodologist",
 		Role:     models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
-		FullName: "Test Teacher",
+		FirstName: "Test",
+		LastName:  "Teacher",
 		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
 		ID:       uuid.New(),
 		Email:    "admin@test.com",
-		FullName: "Test Admin",
+		FirstName: "Test",
+		LastName:  "Admin",
 		Role:     models.RoleAdmin,
 	}
 
@@ -111,28 +118,32 @@ func TestMethodologistCanUpdateLesson(t *testing.T) {
 	methodologist := &models.User{
 		ID:       uuid.New(),
 		Email:    "methodologist@test.com",
-		FullName: "Test Methodologist",
+		FirstName: "Test",
+		LastName:  "Methodologist",
 		Role:     models.RoleMethodologist,
 	}
 
 	teacher1 := &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher1@test.com",
-		FullName: "Test Teacher 1",
+		FirstName: "Test Teacher",
+		LastName:  "1",
 		Role:     models.RoleMethodologist,
 	}
 
 	_ = &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher2@test.com",
-		FullName: "Test Teacher 2",
+		FirstName: "Test Teacher",
+		LastName:  "2",
 		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
 		ID:       uuid.New(),
 		Email:    "admin@test.com",
-		FullName: "Test Admin",
+		FirstName: "Test",
+		LastName:  "Admin",
 		Role:     models.RoleAdmin,
 	}
 
@@ -161,21 +172,24 @@ func TestMethodologistCanDeleteLesson(t *testing.T) {
 	methodologist := &models.User{
 		ID:       uuid.New(),
 		Email:    "methodologist@test.com",
-		FullName: "Test Methodologist",
+		FirstName: "Test",
+		LastName:  "Methodologist",
 		Role:     models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
-		FullName: "Test Teacher",
+		FirstName: "Test",
+		LastName:  "Teacher",
 		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
 		ID:       uuid.New(),
 		Email:    "admin@test.com",
-		FullName: "Test Admin",
+		FirstName: "Test",
+		LastName:  "Admin",
 		Role:     models.RoleAdmin,
 	}
 
@@ -196,21 +210,24 @@ func TestMethodologistCanBulkEdit(t *testing.T) {
 	methodologist := &models.User{
 		ID:       uuid.New(),
 		Email:    "methodologist@test.com",
-		FullName: "Test Methodologist",
+		FirstName: "Test",
+		LastName:  "Methodologist",
 		Role:     models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
-		FullName: "Test Teacher",
+		FirstName: "Test",
+		LastName:  "Teacher",
 		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
 		ID:       uuid.New(),
 		Email:    "admin@test.com",
-		FullName: "Test Admin",
+		FirstName: "Test",
+		LastName:  "Admin",
 		Role:     models.RoleAdmin,
 	}
 
@@ -231,21 +248,24 @@ func TestMethodologistCanEditPastLesson(t *testing.T) {
 	methodologist := &models.User{
 		ID:       uuid.New(),
 		Email:    "methodologist@test.com",
-		FullName: "Test Methodologist",
+		FirstName: "Test",
+		LastName:  "Methodologist",
 		Role:     models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
-		FullName: "Test Teacher",
+		FirstName: "Test",
+		LastName:  "Teacher",
 		Role:     models.RoleMethodologist,
 	}
 
 	admin := &models.User{
 		ID:       uuid.New(),
 		Email:    "admin@test.com",
-		FullName: "Test Admin",
+		FirstName: "Test",
+		LastName:  "Admin",
 		Role:     models.RoleAdmin,
 	}
 
@@ -270,7 +290,8 @@ func TestTeacherHomeworkOnlyPermission(t *testing.T) {
 	teacher := &models.User{
 		ID:       uuid.New(),
 		Email:    "teacher@test.com",
-		FullName: "Test Teacher",
+		FirstName: "Test",
+		LastName:  "Teacher",
 		Role:     models.RoleMethodologist,
 	}
 

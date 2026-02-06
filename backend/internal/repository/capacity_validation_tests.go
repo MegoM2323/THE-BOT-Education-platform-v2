@@ -27,15 +27,15 @@ func TestAddStudentToTemplateLessonEntry_BelowCapacity_Success(t *testing.T) {
 	adminID := uuid.New()
 	teacherID := uuid.New()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "admin.capacity@example.com", "hash", "Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "admin.capacity@example.com", "hash", "Admin", "", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "teacher.capacity@example.com", "hash", "Teacher", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "teacher.capacity@example.com", "hash", "Teacher", "", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	templateRepo := NewLessonTemplateRepository(db)
@@ -68,15 +68,15 @@ func TestAddStudentToTemplateLessonEntry_BelowCapacity_Success(t *testing.T) {
 	student2ID := uuid.New()
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, student1ID, "student1.capacity@example.com", "hash", "Student 1", "student", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, student1ID, "student1.capacity@example.com", "hash", "Student", "1", "student", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, student2ID, "student2.capacity@example.com", "hash", "Student 2", "student", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, student2ID, "student2.capacity@example.com", "hash", "Student", "2", "student", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	// Add both students - should succeed
@@ -109,15 +109,15 @@ func TestAddStudentToTemplateLessonEntry_AtCapacity_CannotAdd(t *testing.T) {
 	adminID := uuid.New()
 	teacherID := uuid.New()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "admin.atcap@example.com", "hash", "Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "admin.atcap@example.com", "hash", "Admin", "", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "teacher.atcap@example.com", "hash", "Teacher", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "teacher.atcap@example.com", "hash", "Teacher", "", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	templateRepo := NewLessonTemplateRepository(db)
@@ -150,9 +150,9 @@ func TestAddStudentToTemplateLessonEntry_AtCapacity_CannotAdd(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		students[i] = uuid.New()
 		_, err = db.ExecContext(ctx, `
-			INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
-		`, students[i], "student"+string(rune('0'+i))+".atcap@example.com", "hash", "Student "+string(rune('0'+i)), "student", time.Now(), time.Now())
+			INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		`, students[i], "student"+string(rune('0'+i))+".atcap@example.com", "hash", "Student", string(rune('0'+i)), "student", time.Now(), time.Now())
 		require.NoError(t, err)
 	}
 
@@ -192,21 +192,21 @@ func TestAddStudentToTemplateLessonEntry_DuplicateHandling(t *testing.T) {
 	studentID := uuid.New()
 
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "admin.dup@example.com", "hash", "Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "admin.dup@example.com", "hash", "Admin", "", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "teacher.dup@example.com", "hash", "Teacher", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "teacher.dup@example.com", "hash", "Teacher", "", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, studentID, "student.dup@example.com", "hash", "Student", "student", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, studentID, "student.dup@example.com", "hash", "Student", "", "student", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	templateRepo := NewLessonTemplateRepository(db)
@@ -264,15 +264,15 @@ func TestAddStudentToTemplateLessonEntry_MultipleStudentsSequential(t *testing.T
 	adminID := uuid.New()
 	teacherID := uuid.New()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, adminID, "admin.seq@example.com", "hash", "Admin", "admin", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, adminID, "admin.seq@example.com", "hash", "Admin", "", "admin", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	_, err = db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, teacherID, "teacher.seq@example.com", "hash", "Teacher", "teacher", time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, teacherID, "teacher.seq@example.com", "hash", "Teacher", "", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	templateRepo := NewLessonTemplateRepository(db)
@@ -305,9 +305,9 @@ func TestAddStudentToTemplateLessonEntry_MultipleStudentsSequential(t *testing.T
 	for i := 0; i < 3; i++ {
 		students[i] = uuid.New()
 		_, err = db.ExecContext(ctx, `
-			INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
-		`, students[i], "student"+string(rune('1'+i))+".seq@example.com", "hash", "Student "+string(rune('1'+i)), "student", time.Now(), time.Now())
+			INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		`, students[i], "student"+string(rune('1'+i))+".seq@example.com", "hash", "Student", string(rune('1'+i)), "student", time.Now(), time.Now())
 		require.NoError(t, err)
 	}
 

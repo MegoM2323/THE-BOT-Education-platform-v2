@@ -101,7 +101,7 @@ func (h *AdminTelegramHandler) ListUsersWithTelegram(w http.ResponseWriter, r *h
 		userWithTg := UserWithTelegram{
 			ID:             u.ID,
 			Email:          u.Email,
-			FullName:       u.FullName,
+			FullName:       u.GetFullName(),
 			Role:           string(u.Role),
 			CreatedAt:      u.CreatedAt.Format("2006-01-02 15:04:05"),
 			TelegramLinked: false,
@@ -286,7 +286,7 @@ func (h *AdminTelegramHandler) SetUserTelegram(w http.ResponseWriter, r *http.Re
 		"telegram_username": req.TelegramUsername,
 		"telegram_id":       req.TelegramID,
 		"chat_id":           req.ChatID,
-		"full_name":         targetUser.FullName,
+		"full_name":         targetUser.GetFullName(),
 		"email":             targetUser.Email,
 	})
 }
@@ -412,7 +412,7 @@ func (h *AdminTelegramHandler) GetUserTelegramInfo(w http.ResponseWriter, r *htt
 		"user": map[string]interface{}{
 			"id":        targetUser.ID.String(),
 			"email":     targetUser.Email,
-			"full_name": targetUser.FullName,
+			"full_name": targetUser.GetFullName(),
 			"role":      string(targetUser.Role),
 		},
 		"telegram": map[string]interface{}{

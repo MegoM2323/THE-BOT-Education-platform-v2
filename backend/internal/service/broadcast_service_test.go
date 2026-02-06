@@ -328,7 +328,8 @@ func TestBroadcastService_CreateBroadcastList_Success(t *testing.T) {
 		mockUserRepo.On("GetByID", ctx, userID).Return(&models.User{
 			ID:       userID,
 			Email:    "user@example.com",
-			FullName: "Test User",
+			FirstName: "Test",
+		LastName: "User",
 			Role:     models.RoleStudent,
 		}, nil)
 
@@ -453,7 +454,8 @@ func TestBroadcastService_CreateBroadcastList_UserNotLinked(t *testing.T) {
 	mockUserRepo.On("GetByID", ctx, userID).Return(&models.User{
 		ID:       userID,
 		Email:    "user@example.com",
-		FullName: "Test User",
+		FirstName: "Test",
+		LastName: "User",
 		Role:     models.RoleStudent,
 	}, nil)
 

@@ -69,7 +69,7 @@ func (r *LessonModificationRepository) GetModificationsByLesson(ctx context.Cont
 		SELECT
 			lm.id, lm.original_lesson_id, lm.modification_type, lm.applied_by_id,
 			lm.applied_at, lm.affected_lessons_count, lm.changes_json, lm.notes,
-			u.full_name as applied_by_name
+			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
 		FROM lesson_modifications lm
 		JOIN users u ON lm.applied_by_id = u.id
 		WHERE lm.original_lesson_id = $1
@@ -91,7 +91,7 @@ func (r *LessonModificationRepository) GetModificationsByType(ctx context.Contex
 		SELECT
 			lm.id, lm.original_lesson_id, lm.modification_type, lm.applied_by_id,
 			lm.applied_at, lm.affected_lessons_count, lm.changes_json, lm.notes,
-			u.full_name as applied_by_name
+			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
 		FROM lesson_modifications lm
 		JOIN users u ON lm.applied_by_id = u.id
 		WHERE lm.modification_type = $1
@@ -113,7 +113,7 @@ func (r *LessonModificationRepository) GetRecentModifications(ctx context.Contex
 		SELECT
 			lm.id, lm.original_lesson_id, lm.modification_type, lm.applied_by_id,
 			lm.applied_at, lm.affected_lessons_count, lm.changes_json, lm.notes,
-			u.full_name as applied_by_name
+			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
 		FROM lesson_modifications lm
 		JOIN users u ON lm.applied_by_id = u.id
 		ORDER BY lm.applied_at DESC
@@ -135,7 +135,7 @@ func (r *LessonModificationRepository) GetModificationByID(ctx context.Context, 
 		SELECT
 			lm.id, lm.original_lesson_id, lm.modification_type, lm.applied_by_id,
 			lm.applied_at, lm.affected_lessons_count, lm.changes_json, lm.notes,
-			u.full_name as applied_by_name
+			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
 		FROM lesson_modifications lm
 		JOIN users u ON lm.applied_by_id = u.id
 		WHERE lm.id = $1
@@ -159,7 +159,7 @@ func (r *LessonModificationRepository) GetModificationsByDateRange(ctx context.C
 		SELECT
 			lm.id, lm.original_lesson_id, lm.modification_type, lm.applied_by_id,
 			lm.applied_at, lm.affected_lessons_count, lm.changes_json, lm.notes,
-			u.full_name as applied_by_name
+			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
 		FROM lesson_modifications lm
 		JOIN users u ON lm.applied_by_id = u.id
 		WHERE lm.applied_at >= $1 AND lm.applied_at <= $2
@@ -181,7 +181,7 @@ func (r *LessonModificationRepository) GetModificationsByAdmin(ctx context.Conte
 		SELECT
 			lm.id, lm.original_lesson_id, lm.modification_type, lm.applied_by_id,
 			lm.applied_at, lm.affected_lessons_count, lm.changes_json, lm.notes,
-			u.full_name as applied_by_name
+			CONCAT(u.first_name, ' ', u.last_name) as applied_by_name
 		FROM lesson_modifications lm
 		JOIN users u ON lm.applied_by_id = u.id
 		WHERE lm.applied_by_id = $1

@@ -139,7 +139,7 @@ func (r *ChatRepository) ListRoomsByTeacher(ctx context.Context, teacherID uuid.
 			cr.id, cr.teacher_id, cr.student_id, cr.last_message_at,
 			cr.created_at, cr.updated_at, cr.deleted_at,
 			u.id AS participant_id,
-			u.full_name AS participant_name,
+			CONCAT(u.first_name, ' ', u.last_name) AS participant_name,
 			u.role AS participant_role
 		FROM chat_rooms cr
 		JOIN users u ON u.id = cr.student_id
@@ -163,7 +163,7 @@ func (r *ChatRepository) ListRoomsByStudent(ctx context.Context, studentID uuid.
 			cr.id, cr.teacher_id, cr.student_id, cr.last_message_at,
 			cr.created_at, cr.updated_at, cr.deleted_at,
 			u.id AS participant_id,
-			u.full_name AS participant_name,
+			CONCAT(u.first_name, ' ', u.last_name) AS participant_name,
 			u.role AS participant_role
 		FROM chat_rooms cr
 		JOIN users u ON u.id = cr.teacher_id
@@ -273,12 +273,12 @@ func (r *ChatRepository) GetMessagesByRoom(ctx context.Context, roomID uuid.UUID
 			m.id, m.room_id, m.sender_id, m.message_text, m.status,
 			m.moderation_completed_at, m.created_at, m.deleted_at,
 			CASE
-				WHEN u.full_name IS NOT NULL AND u.full_name != '' THEN
+				WHEN u.first_name IS NOT NULL AND u.first_name != '' THEN
 					CASE u.role
-						WHEN 'methodologist' THEN u.full_name || ' (Преподаватель)'
-						WHEN 'student' THEN u.full_name || ' (Студент)'
-						WHEN 'admin' THEN u.full_name || ' (Администратор)'
-						ELSE u.full_name
+						WHEN 'methodologist' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Преподаватель)'
+						WHEN 'student' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Студент)'
+						WHEN 'admin' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Администратор)'
+						ELSE CONCAT(u.first_name, ' ', u.last_name)
 					END
 				ELSE 'Пользователь'
 			END as sender_name
@@ -304,10 +304,23 @@ func (r *ChatRepository) GetMessagesByRoom(ctx context.Context, roomID uuid.UUID
 // Используется для обработки очереди модерации
 func (r *ChatRepository) GetPendingMessages(ctx context.Context) ([]*models.Message, error) {
 	query := `
-		SELECT ` + MessageSelectFields + `
-		FROM messages
-		WHERE status = $1 AND deleted_at IS NULL
-		ORDER BY created_at ASC
+		SELECT
+			m.id, m.room_id, m.sender_id, m.message_text, m.status,
+			m.moderation_completed_at, m.created_at, m.deleted_at,
+			CASE
+				WHEN u.first_name IS NOT NULL AND u.first_name != '' THEN
+					CASE u.role
+						WHEN 'methodologist' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Преподаватель)'
+						WHEN 'student' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Студент)'
+						WHEN 'admin' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Администратор)'
+						ELSE CONCAT(u.first_name, ' ', u.last_name)
+					END
+				ELSE 'Пользователь'
+			END as sender_name
+		FROM messages m
+		LEFT JOIN users u ON m.sender_id = u.id
+		WHERE m.status = $1 AND m.deleted_at IS NULL
+		ORDER BY m.created_at ASC
 		LIMIT 100
 	`
 
@@ -347,9 +360,22 @@ func (r *ChatRepository) SoftDeleteMessage(ctx context.Context, msgID uuid.UUID)
 // GetMessageByID получает сообщение по ID
 func (r *ChatRepository) GetMessageByID(ctx context.Context, msgID uuid.UUID) (*models.Message, error) {
 	query := `
-		SELECT ` + MessageSelectFields + `
-		FROM messages
-		WHERE id = $1 AND deleted_at IS NULL
+		SELECT
+			m.id, m.room_id, m.sender_id, m.message_text, m.status,
+			m.moderation_completed_at, m.created_at, m.deleted_at,
+			CASE
+				WHEN u.first_name IS NOT NULL AND u.first_name != '' THEN
+					CASE u.role
+						WHEN 'methodologist' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Преподаватель)'
+						WHEN 'student' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Студент)'
+						WHEN 'admin' THEN CONCAT(u.first_name, ' ', u.last_name) || ' (Администратор)'
+						ELSE CONCAT(u.first_name, ' ', u.last_name)
+					END
+				ELSE 'Пользователь'
+			END as sender_name
+		FROM messages m
+		LEFT JOIN users u ON m.sender_id = u.id
+		WHERE m.id = $1 AND m.deleted_at IS NULL
 	`
 
 	var msg models.Message
@@ -362,6 +388,7 @@ func (r *ChatRepository) GetMessageByID(ctx context.Context, msgID uuid.UUID) (*
 		&msg.ModerationCompletedAt,
 		&msg.CreatedAt,
 		&msg.DeletedAt,
+		&msg.SenderName,
 	)
 
 	if err == sql.ErrNoRows {
@@ -543,9 +570,15 @@ func (r *ChatRepository) MarkAdminNotified(ctx context.Context, messageID uuid.U
 
 // ChatParticipant представляет участника чата
 type ChatParticipant struct {
-	ID       uuid.UUID `db:"id" json:"id"`
-	FullName string    `db:"full_name" json:"full_name"`
-	Role     string    `db:"role" json:"role"`
+	ID        uuid.UUID `db:"id" json:"id"`
+	FirstName string    `db:"first_name" json:"first_name"`
+	LastName  string    `db:"last_name" json:"last_name"`
+	Role      string    `db:"role" json:"role"`
+}
+
+// GetFullName возвращает полное имя участника
+func (cp *ChatParticipant) GetFullName() string {
+	return cp.FirstName + " " + cp.LastName
 }
 
 // ChatRoomWithDetails представляет комнату чата с расширенной информацией для админов
@@ -564,9 +597,11 @@ func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetail
 			cr.id,
 			cr.teacher_id,
 			cr.student_id,
-			t.full_name AS teacher_name,
+			t.first_name AS teacher_first_name,
+			t.last_name AS teacher_last_name,
 			t.role AS teacher_role,
-			s.full_name AS student_name,
+			s.first_name AS student_first_name,
+			s.last_name AS student_last_name,
 			s.role AS student_role,
 			COALESCE(mc.messages_count, 0) AS messages_count,
 			cr.last_message_at
@@ -584,15 +619,17 @@ func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetail
 	`
 
 	type roomRow struct {
-		ID            uuid.UUID    `db:"id"`
-		TeacherID     uuid.UUID    `db:"teacher_id"`
-		StudentID     uuid.UUID    `db:"student_id"`
-		TeacherName   string       `db:"teacher_name"`
-		TeacherRole   string       `db:"teacher_role"`
-		StudentName   string       `db:"student_name"`
-		StudentRole   string       `db:"student_role"`
-		MessagesCount int          `db:"messages_count"`
-		LastMessageAt sql.NullTime `db:"last_message_at"`
+		ID                 uuid.UUID    `db:"id"`
+		TeacherID          uuid.UUID    `db:"teacher_id"`
+		StudentID          uuid.UUID    `db:"student_id"`
+		TeacherFirstName   string       `db:"teacher_first_name"`
+		TeacherLastName    string       `db:"teacher_last_name"`
+		TeacherRole        string       `db:"teacher_role"`
+		StudentFirstName   string       `db:"student_first_name"`
+		StudentLastName    string       `db:"student_last_name"`
+		StudentRole        string       `db:"student_role"`
+		MessagesCount      int          `db:"messages_count"`
+		LastMessageAt      sql.NullTime `db:"last_message_at"`
 	}
 
 	var rows []roomRow
@@ -603,20 +640,24 @@ func (r *ChatRepository) ListAllRooms(ctx context.Context) ([]ChatRoomWithDetail
 
 	result := make([]ChatRoomWithDetails, 0, len(rows))
 	for _, row := range rows {
+		teacherFullName := row.TeacherFirstName + " " + row.TeacherLastName
+		studentFullName := row.StudentFirstName + " " + row.StudentLastName
 		room := ChatRoomWithDetails{
 			ID:              row.ID,
 			MessagesCount:   row.MessagesCount,
-			ParticipantName: row.TeacherName + " ↔ " + row.StudentName,
+			ParticipantName: teacherFullName + " ↔ " + studentFullName,
 			Participants: []ChatParticipant{
 				{
-					ID:       row.TeacherID,
-					FullName: row.TeacherName,
-					Role:     row.TeacherRole,
+					ID:        row.TeacherID,
+					FirstName: row.TeacherFirstName,
+					LastName:  row.TeacherLastName,
+					Role:      row.TeacherRole,
 				},
 				{
-					ID:       row.StudentID,
-					FullName: row.StudentName,
-					Role:     row.StudentRole,
+					ID:        row.StudentID,
+					FirstName: row.StudentFirstName,
+					LastName:  row.StudentLastName,
+					Role:      row.StudentRole,
 				},
 			},
 		}

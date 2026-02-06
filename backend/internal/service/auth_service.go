@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"tutoring-platform/internal/models"
@@ -351,9 +352,24 @@ func (s *AuthService) Register(ctx context.Context, req *models.RegisterRequest)
 	}
 
 	// Создаем нового пользователя со статусом студента
+	firstName := req.FirstName
+	lastName := req.LastName
+
+	// Поддержка старого API: если FirstName/LastName не переданы, используем FullName
+	if firstName == "" && lastName == "" && req.FullName != "" {
+		parts := strings.SplitN(strings.TrimSpace(req.FullName), " ", 2)
+		if len(parts) > 0 {
+			firstName = parts[0]
+		}
+		if len(parts) > 1 {
+			lastName = parts[1]
+		}
+	}
+
 	user := &models.User{
 		Email:          req.Email,
-		FullName:       req.FullName,
+		FirstName:      firstName,
+		LastName:       lastName,
 		PasswordHash:   hashedPassword,
 		Role:           models.RoleStudent,
 		PaymentEnabled: true, // По умолчанию оплата включена
@@ -383,7 +399,8 @@ func (s *AuthService) RegisterViaTelegram(ctx context.Context, req *models.Regis
 	// Создаем пользователя со статусом студента
 	user := &models.User{
 		Email:          email,
-		FullName:       req.TelegramUsername, // Используем Telegram username как имя
+		FirstName:      req.TelegramUsername, // Используем Telegram username как имя
+		LastName:       "",
 		Role:           models.RoleStudent,
 		PaymentEnabled: true, // По умолчанию оплата включена
 	}

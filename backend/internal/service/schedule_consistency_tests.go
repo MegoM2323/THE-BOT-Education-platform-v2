@@ -261,9 +261,9 @@ func cleanupServiceTestDB(t *testing.T, db *sqlx.DB) {
 func createTestServiceUser(t *testing.T, db *sqlx.DB, ctx context.Context, email string, role models.UserRole) *models.User {
 	userID := uuid.New()
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-	`, userID, email, "hash", "Test User", string(role), time.Now(), time.Now())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, userID, email, "hash", "Test", "User", string(role), time.Now(), time.Now())
 	require.NoError(t, err)
 
 	user := &models.User{

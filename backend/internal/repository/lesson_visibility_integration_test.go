@@ -245,22 +245,24 @@ func createTestUserVisibility(t *testing.T, db *sqlx.DB, ctx context.Context, em
 		ID:           userID,
 		Email:        uniqueEmail,
 		PasswordHash: "hash",
-		FullName:     "Test User",
+		FirstName:    "Test",
+		LastName:     "User",
 		Role:         role,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
 
 	query := `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
 	_, err := db.ExecContext(ctx, query,
 		user.ID,
 		user.Email,
 		user.PasswordHash,
-		user.FullName,
+		user.FirstName,
+		user.LastName,
 		user.Role,
 		user.CreatedAt,
 		user.UpdatedAt,

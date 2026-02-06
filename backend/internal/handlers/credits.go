@@ -75,14 +75,14 @@ func (h *CreditHandler) GetMyCredits(w http.ResponseWriter, r *http.Request) {
 				balances = append(balances, UserBalance{
 					UserID:   u.ID,
 					Email:    u.Email,
-					FullName: u.FullName,
+					FullName: u.GetFullName(),
 					Balance:  0,
 				})
 			} else {
 				balances = append(balances, UserBalance{
 					UserID:   u.ID,
 					Email:    u.Email,
-					FullName: u.FullName,
+					FullName: u.GetFullName(),
 					Balance:  credit.Balance,
 				})
 			}
@@ -454,7 +454,7 @@ func (h *CreditHandler) GetUserCredits(w http.ResponseWriter, r *http.Request) {
 			"user_id":   userID,
 			"balance":   0,
 			"email":     targetUser.Email,
-			"full_name": targetUser.FullName,
+			"full_name": targetUser.GetFullName(),
 		})
 		return
 	}
@@ -463,7 +463,7 @@ func (h *CreditHandler) GetUserCredits(w http.ResponseWriter, r *http.Request) {
 		"user_id":   credit.UserID,
 		"balance":   credit.Balance,
 		"email":     targetUser.Email,
-		"full_name": targetUser.FullName,
+		"full_name": targetUser.GetFullName(),
 	})
 }
 

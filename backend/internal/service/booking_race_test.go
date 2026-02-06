@@ -51,11 +51,11 @@ func TestBookingRaceCondition(t *testing.T) {
 	teacherID := uuid.New()
 	teacherEmail := "teacher_race_" + teacherID.String()[:8] + "@test.com"
 	teacherSQL := `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 	_, err := db.ExecContext(ctx, teacherSQL,
-		teacherID, teacherEmail, "hash", "Teacher Race", "methodologist",
+		teacherID, teacherEmail, "hash", "Teacher", "Race", "methodologist",
 		time.Now(), time.Now(),
 	)
 	require.NoError(t, err, "Failed to create teacher")
@@ -75,10 +75,10 @@ func TestBookingRaceCondition(t *testing.T) {
 
 	for _, s := range students {
 		_, err := db.ExecContext(ctx, `
-			INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			ON CONFLICT (id) DO NOTHING
-		`, s.id, s.email, "hash", "Student Race", "student", time.Now(), time.Now())
+		`, s.id, s.email, "hash", "Student", "Race", "student", time.Now(), time.Now())
 		require.NoError(t, err, "Failed to create student")
 		defer db.ExecContext(ctx, "DELETE FROM users WHERE id = $1", s.id)
 
@@ -211,8 +211,8 @@ func TestBookingRaceConditionMultipleSpots(t *testing.T) {
 	teacherID := uuid.New()
 	teacherEmail := "teacher_multi_" + teacherID.String()[:8] + "@test.com"
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`, teacherID, teacherEmail, "hash", "Teacher Multi", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 	defer db.ExecContext(ctx, "DELETE FROM users WHERE id = $1", teacherID)
@@ -225,10 +225,10 @@ func TestBookingRaceConditionMultipleSpots(t *testing.T) {
 
 		email := "student_multi_" + studentID.String()[:8] + "@test.com"
 		_, err := db.ExecContext(ctx, `
-			INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			ON CONFLICT (id) DO NOTHING
-		`, studentID, email, "hash", "Student Multi", "student", time.Now(), time.Now())
+		`, studentID, email, "hash", "Student", "Multi", "student", time.Now(), time.Now())
 		require.NoError(t, err)
 		defer db.ExecContext(ctx, "DELETE FROM users WHERE id = $1", studentID)
 
@@ -340,8 +340,8 @@ func TestBookingNoRaceWithAvailableSpots(t *testing.T) {
 	teacherID := uuid.New()
 	teacherEmail := "teacher_available_" + teacherID.String()[:8] + "@test.com"
 	_, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`, teacherID, teacherEmail, "hash", "Teacher Available", "methodologist", time.Now(), time.Now())
 	require.NoError(t, err)
 	defer db.ExecContext(ctx, "DELETE FROM users WHERE id = $1", teacherID)
@@ -354,10 +354,10 @@ func TestBookingNoRaceWithAvailableSpots(t *testing.T) {
 
 		email := "student_avail_" + studentID.String()[:8] + "@test.com"
 		_, err := db.ExecContext(ctx, `
-			INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 			ON CONFLICT (id) DO NOTHING
-		`, studentID, email, "hash", "Student Avail", "student", time.Now(), time.Now())
+		`, studentID, email, "hash", "Student", "Avail", "student", time.Now(), time.Now())
 		require.NoError(t, err)
 		defer db.ExecContext(ctx, "DELETE FROM users WHERE id = $1", studentID)
 

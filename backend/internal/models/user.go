@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"tutoring-platform/pkg/sanitize"
@@ -24,29 +25,42 @@ type User struct {
 	ID                     uuid.UUID      `db:"id" json:"id"`
 	Email                  string         `db:"email" json:"email"`
 	PasswordHash           string         `db:"password_hash" json:"-"` // Никогда не показывать хеш пароля в JSON
-	FullName               string         `db:"full_name" json:"full_name"`
+	FirstName              string         `db:"first_name" json:"first_name"`
+	LastName               string         `db:"last_name" json:"last_name"`
 	Role                   UserRole       `db:"role" json:"role"`
 	PaymentEnabled         bool           `db:"payment_enabled" json:"payment_enabled"`
 	TelegramUsername       sql.NullString `db:"telegram_username" json:"telegram_username,omitempty"` // Telegram username
-	TelegramLinked         bool           `db:"-" json:"telegram_linked,omitempty"`                   // Вычисляемое поле, не хранится в БД
 	ParentTelegramUsername sql.NullString `db:"parent_telegram_username" json:"parent_telegram_username,omitempty"`
-	ParentChatID           sql.NullInt64  `db:"parent_chat_id" json:"parent_chat_id,omitempty"`
+	ParentChatID           sql.NullInt64  `db:"parent_chat_id" json:"-"`
+	TelegramLinked         bool           `db:"-" json:"telegram_linked,omitempty"` // Вычисляемое поле, не хранится в БД
 	CreatedAt              time.Time      `db:"created_at" json:"created_at"`
 	UpdatedAt              time.Time      `db:"updated_at" json:"updated_at"`
 	DeletedAt              sql.NullTime   `db:"deleted_at" json:"deleted_at,omitempty"`
 }
 
+// GetFullName возвращает полное имя пользователя
+func (u *User) GetFullName() string {
+	if u.FirstName == "" && u.LastName == "" {
+		return u.Email
+	}
+	return strings.TrimSpace(u.FirstName + " " + u.LastName)
+}
+
 // CreateUserRequest представляет запрос на создание нового пользователя
 type CreateUserRequest struct {
-	Email    string   `json:"email"`
-	Password string   `json:"password"`
-	FullName string   `json:"full_name"`
-	Role     UserRole `json:"role"`
+	Email     string   `json:"email"`
+	Password  string   `json:"password"`
+	FirstName string   `json:"first_name"`
+	LastName  string   `json:"last_name"`
+	FullName  string   `json:"full_name"`
+	Role      UserRole `json:"role"`
 }
 
 // UpdateUserRequest представляет запрос на обновление пользователя
 type UpdateUserRequest struct {
 	Email                  *string   `json:"email,omitempty"`
+	FirstName              *string   `json:"first_name,omitempty"`
+	LastName               *string   `json:"last_name,omitempty"`
 	FullName               *string   `json:"full_name,omitempty"`
 	Role                   *UserRole `json:"role,omitempty"`
 	PaymentEnabled         *bool     `json:"payment_enabled,omitempty"`
@@ -64,9 +78,11 @@ type ChangePasswordRequest struct {
 
 // RegisterRequest представляет запрос на регистрацию нового пользователя
 type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	FullName string `json:"full_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	FullName  string `json:"full_name"`
 }
 
 // RegisterViaTelegramRequest представляет запрос на регистрацию через Telegram
@@ -80,7 +96,9 @@ func (u *User) MarshalJSON() ([]byte, error) {
 	data := map[string]interface{}{
 		"id":              u.ID,
 		"email":           u.Email,
-		"full_name":       u.FullName,
+		"first_name":      u.FirstName,
+		"last_name":       u.LastName,
+		"full_name":       u.GetFullName(),
 		"role":            u.Role,
 		"payment_enabled": u.PaymentEnabled,
 		"created_at":      u.CreatedAt,
@@ -96,11 +114,6 @@ func (u *User) MarshalJSON() ([]byte, error) {
 	// Handle ParentTelegramUsername - convert sql.NullString to string or null
 	if u.ParentTelegramUsername.Valid && u.ParentTelegramUsername.String != "" {
 		data["parent_telegram_username"] = u.ParentTelegramUsername.String
-	}
-
-	// Handle ParentChatID - convert sql.NullInt64 to int64 or null
-	if u.ParentChatID.Valid {
-		data["parent_chat_id"] = u.ParentChatID.Int64
 	}
 
 	// Handle DeletedAt - convert sql.NullTime to ISO8601 string or omit if null
@@ -141,6 +154,8 @@ func (u *User) CanBeAssignedAsTeacher() bool {
 func (r *CreateUserRequest) Validate() error {
 	// Санитизация входных данных
 	r.Email = sanitize.Email(r.Email)
+	r.FirstName = sanitize.Name(r.FirstName)
+	r.LastName = sanitize.Name(r.LastName)
 	r.FullName = sanitize.Name(r.FullName)
 
 	// Валидация email
@@ -160,11 +175,14 @@ func (r *CreateUserRequest) Validate() error {
 		return ErrPasswordTooShort
 	}
 
-	// Валидация имени
-	if r.FullName == "" {
+	// Валидация имени (поддерживаем и старый FullName, и новые FirstName/LastName)
+	if r.FirstName == "" && r.LastName == "" && r.FullName == "" {
 		return ErrInvalidFullName
 	}
-	if len(r.FullName) < 2 {
+	if r.FirstName != "" && len(r.FirstName) < 2 {
+		return ErrInvalidFullName
+	}
+	if r.FullName != "" && len(r.FullName) < 2 {
 		return ErrInvalidFullName
 	}
 
@@ -225,6 +243,14 @@ func (r *UpdateUserRequest) Sanitize() {
 		email := sanitize.Email(*r.Email)
 		r.Email = &email
 	}
+	if r.FirstName != nil {
+		firstName := sanitize.Name(*r.FirstName)
+		r.FirstName = &firstName
+	}
+	if r.LastName != nil {
+		lastName := sanitize.Name(*r.LastName)
+		r.LastName = &lastName
+	}
 	if r.FullName != nil {
 		fullName := sanitize.Name(*r.FullName)
 		r.FullName = &fullName
@@ -266,6 +292,8 @@ func isValidTelegramUsername(username string) bool {
 // StudentPaymentStatus представляет статус платежей студента для админа
 type StudentPaymentStatus struct {
 	ID             uuid.UUID `json:"id"`
+	FirstName      string    `json:"first_name"`
+	LastName       string    `json:"last_name"`
 	FullName       string    `json:"full_name"`
 	Email          string    `json:"email"`
 	PaymentEnabled bool      `json:"payment_enabled"`

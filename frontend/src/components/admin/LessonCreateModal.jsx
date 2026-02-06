@@ -51,6 +51,10 @@ export const LessonCreateModal = ({
   const [studentCredits, setStudentCredits] = useState({});
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
 
+  // Состояния для повторяющихся занятий
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringWeeks, setRecurringWeeks] = useState(4);
+
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -71,6 +75,8 @@ export const LessonCreateModal = ({
     });
     setErrors({});
     setSelectedStudentIds([]);
+    setIsRecurring(false);
+    setRecurringWeeks(4);
   };
 
   // Загрузка данных при открытии modal
@@ -340,16 +346,25 @@ export const LessonCreateModal = ({
         requestData.link = formData.link.trim();
       }
 
+      // Добавить параметры повторяющихся занятий
+      if (isRecurring) {
+        requestData.is_recurring = true;
+        requestData.recurring_weeks = recurringWeeks;
+      }
+
       // Добавить выбранных студентов
       if (selectedStudentIds.length > 0) {
         requestData.student_ids = selectedStudentIds;
       }
 
-      await lessonAPI.createLesson(requestData);
+      const result = await lessonAPI.createLesson(requestData);
 
       invalidateLessonData(queryClient);
 
-      showNotification('Занятие успешно создано', 'success');
+      const successMessage = isRecurring && result?.count
+        ? `Создано ${result.count} повторяющихся занятий`
+        : 'Занятие успешно создано';
+      showNotification(successMessage, 'success');
       resetForm();
       onLessonCreated?.();
       onClose();
@@ -467,6 +482,36 @@ export const LessonCreateModal = ({
                   />
                   {errors.end_time && <span className="form-error">{errors.end_time}</span>}
                 </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label recurring-label">
+                    <input
+                      type="checkbox"
+                      checked={isRecurring}
+                      onChange={(e) => setIsRecurring(e.target.checked)}
+                      disabled={creating}
+                    />
+                    <span>Повторять еженедельно</span>
+                  </label>
+                </div>
+
+                {isRecurring && (
+                  <div className="form-group">
+                    <label className="form-label">Количество недель</label>
+                    <select
+                      className="form-select"
+                      value={recurringWeeks}
+                      onChange={(e) => setRecurringWeeks(parseInt(e.target.value))}
+                      disabled={creating}
+                    >
+                      <option value={4}>4 недели</option>
+                      <option value={8}>8 недель</option>
+                      <option value={12}>12 недель</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="form-row">

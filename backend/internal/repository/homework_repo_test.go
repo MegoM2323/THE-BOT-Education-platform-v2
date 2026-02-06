@@ -39,11 +39,11 @@ func createHomeworkTestUser(t *testing.T, db *sqlx.DB, role string) uuid.UUID {
 	userID := uuid.New()
 	email := "test-" + userID.String() + "@example.com" // Уникальный email
 	query := `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
 	`
 
-	_, err := db.Exec(query, userID, email, "hash", "Test User", role)
+	_, err := db.Exec(query, userID, email, "hash", "Test", "User", role)
 	require.NoError(t, err, "Failed to create test user")
 
 	return userID

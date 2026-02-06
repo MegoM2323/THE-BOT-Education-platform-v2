@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -62,26 +63,40 @@ func createTestUser(t *testing.T, db *sqlx.DB, email, fullName, role string) *mo
 	passwordHash, err := hash.HashPassword("TestPass123!")
 	require.NoError(t, err, "Failed to hash password")
 
+	firstName := ""
+	lastName := ""
+	if fullName != "" {
+		parts := strings.SplitN(strings.TrimSpace(fullName), " ", 2)
+		if len(parts) > 0 {
+			firstName = parts[0]
+		}
+		if len(parts) > 1 {
+			lastName = parts[1]
+		}
+	}
+
 	user := &models.User{
 		ID:           userID,
 		Email:        uniqueEmail,
 		PasswordHash: passwordHash,
-		FullName:     fullName,
+		FirstName:    firstName,
+		LastName:     lastName,
 		Role:         models.UserRole(role),
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
 
 	query := `
-		INSERT INTO users (id, email, password_hash, full_name, role, payment_enabled, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, payment_enabled, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
 
 	_, err = db.ExecContext(ctx, query,
 		user.ID,
 		user.Email,
 		user.PasswordHash,
-		user.FullName,
+		user.FirstName,
+		user.LastName,
 		user.Role,
 		false,
 		user.CreatedAt,

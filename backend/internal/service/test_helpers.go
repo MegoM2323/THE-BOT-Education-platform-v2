@@ -1,6 +1,7 @@
 package service
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -84,11 +85,24 @@ func cleanupAllTables(t *testing.T, db *sqlx.DB) {
 
 // createTestUser creates a test user in the database
 func createTestUser(t *testing.T, db *sqlx.DB, email, fullName, role string) *models.User {
+	firstName := ""
+	lastName := ""
+	if fullName != "" {
+		parts := strings.SplitN(strings.TrimSpace(fullName), " ", 2)
+		if len(parts) > 0 {
+			firstName = parts[0]
+		}
+		if len(parts) > 1 {
+			lastName = parts[1]
+		}
+	}
+
 	user := &models.User{
 		ID:             uuid.New(),
 		Email:          email,
 		PasswordHash:   "hashed_password",
-		FullName:       fullName,
+		FirstName:      firstName,
+		LastName:       lastName,
 		Role:           models.UserRole(role),
 		PaymentEnabled: true,
 		CreatedAt:      time.Now(),
@@ -96,9 +110,9 @@ func createTestUser(t *testing.T, db *sqlx.DB, email, fullName, role string) *mo
 	}
 
 	_, err := db.Exec(`
-		INSERT INTO users (id, email, password_hash, full_name, role, payment_enabled, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	`, user.ID, user.Email, user.PasswordHash, user.FullName, user.Role, user.PaymentEnabled, user.CreatedAt, user.UpdatedAt)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, payment_enabled, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`, user.ID, user.Email, user.PasswordHash, user.FirstName, user.LastName, user.Role, user.PaymentEnabled, user.CreatedAt, user.UpdatedAt)
 	require.NoError(t, err, "Failed to create test user")
 
 	// Примечание: кредиты для студентов создаются автоматически триггером create_credits_on_student_insert

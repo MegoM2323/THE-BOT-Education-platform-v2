@@ -45,26 +45,42 @@ func createChatTestUser(t *testing.T, pool *pgxpool.Pool, role models.UserRole, 
 	userID := uuid.New()
 	uniqueEmail := fmt.Sprintf("%s-%s", userID.String()[:8], email)
 
+	// Split fullName into first and last name
+	firstName := fullName
+	lastName := ""
+	if idx := len(fullName) / 2; idx > 0 {
+		parts := []rune(fullName)
+		for i, r := range parts {
+			if r == ' ' {
+				firstName = string(parts[:i])
+				lastName = string(parts[i+1:])
+				break
+			}
+		}
+	}
+
 	user := &models.User{
 		ID:           userID,
 		Email:        uniqueEmail,
 		PasswordHash: "test-hash",
-		FullName:     fullName,
+		FirstName:    firstName,
+		LastName:     lastName,
 		Role:         role,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
 
 	query := `
-		INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
 	_, err := pool.Exec(ctx, query,
 		user.ID,
 		user.Email,
 		user.PasswordHash,
-		user.FullName,
+		user.FirstName,
+		user.LastName,
 		user.Role,
 		user.CreatedAt,
 		user.UpdatedAt,
@@ -145,7 +161,7 @@ func TestListRoomsByTeacher_WithParticipantInfo(t *testing.T) {
 	for _, room := range rooms {
 		if room.ID == room1.ID {
 			assert.Equal(t, student1.ID, room.ParticipantID, "Should see student1 as participant")
-			assert.Equal(t, student1.FullName, room.ParticipantName, "Should have student1 name")
+			assert.Equal(t, student1.GetFullName(), room.ParticipantName, "Should have student1 name")
 			assert.Equal(t, string(models.RoleStudent), room.ParticipantRole, "Should have student role")
 			found = true
 			break
@@ -158,7 +174,7 @@ func TestListRoomsByTeacher_WithParticipantInfo(t *testing.T) {
 	for _, room := range rooms {
 		if room.ID == room2.ID {
 			assert.Equal(t, student2.ID, room.ParticipantID, "Should see student2 as participant")
-			assert.Equal(t, student2.FullName, room.ParticipantName, "Should have student2 name")
+			assert.Equal(t, student2.GetFullName(), room.ParticipantName, "Should have student2 name")
 			assert.Equal(t, string(models.RoleStudent), room.ParticipantRole, "Should have student role")
 			found = true
 			break
@@ -283,7 +299,7 @@ func TestListRoomsByStudent_WithParticipantInfo(t *testing.T) {
 	for _, room := range rooms {
 		if room.ID == room1.ID {
 			assert.Equal(t, teacher1.ID, room.ParticipantID, "Should see teacher1 as participant")
-			assert.Equal(t, teacher1.FullName, room.ParticipantName, "Should have teacher1 name")
+			assert.Equal(t, teacher1.GetFullName(), room.ParticipantName, "Should have teacher1 name")
 			assert.Equal(t, string(models.RoleMethodologist), room.ParticipantRole, "Should have teacher role")
 			found = true
 			break
@@ -296,7 +312,7 @@ func TestListRoomsByStudent_WithParticipantInfo(t *testing.T) {
 	for _, room := range rooms {
 		if room.ID == room2.ID {
 			assert.Equal(t, teacher2.ID, room.ParticipantID, "Should see teacher2 as participant")
-			assert.Equal(t, teacher2.FullName, room.ParticipantName, "Should have teacher2 name")
+			assert.Equal(t, teacher2.GetFullName(), room.ParticipantName, "Should have teacher2 name")
 			assert.Equal(t, string(models.RoleMethodologist), room.ParticipantRole, "Should have teacher role")
 			found = true
 			break
@@ -411,7 +427,7 @@ func TestChatRepository_JoinQueryCorrectness(t *testing.T) {
 
 	// Verify user data is populated
 	assert.NotEmpty(t, returnedRoom.ParticipantName)
-	assert.Equal(t, student.FullName, returnedRoom.ParticipantName)
+	assert.Equal(t, student.GetFullName(), returnedRoom.ParticipantName)
 
 	t.Log("✓ JOIN query correctly links chat_rooms and users tables")
 }
@@ -454,7 +470,7 @@ func TestChatRepository_MultipleRoomsWithSameTeacher(t *testing.T) {
 		found := false
 		for i := 0; i < 3; i++ {
 			if room.ParticipantID == students[i].ID {
-				assert.Equal(t, students[i].FullName, room.ParticipantName)
+				assert.Equal(t, students[i].GetFullName(), room.ParticipantName)
 				assert.Equal(t, string(models.RoleStudent), room.ParticipantRole)
 				found = true
 				break

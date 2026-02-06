@@ -501,11 +501,23 @@ func createRollbackTestUser(t *testing.T, db *sqlx.DB, email, fullName, role str
 	// Добавляем UUID к email для уникальности между тестами
 	uniqueEmail := email + "." + uuid.New().String()[:8]
 
+	// Split fullName into first and last name
+	firstName := fullName
+	lastName := ""
+	for i, r := range fullName {
+		if r == ' ' {
+			firstName = fullName[:i]
+			lastName = fullName[i+1:]
+			break
+		}
+	}
+
 	user := &models.User{
 		ID:             uuid.New(),
 		Email:          uniqueEmail,
 		PasswordHash:   "hashed_password",
-		FullName:       fullName,
+		FirstName:      firstName,
+		LastName:       lastName,
 		Role:           models.UserRole(role),
 		PaymentEnabled: true,
 		CreatedAt:      time.Now(),
@@ -513,9 +525,9 @@ func createRollbackTestUser(t *testing.T, db *sqlx.DB, email, fullName, role str
 	}
 
 	_, err := db.Exec(`
-		INSERT INTO users (id, email, password_hash, full_name, role, payment_enabled, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	`, user.ID, user.Email, user.PasswordHash, user.FullName, user.Role, user.PaymentEnabled, user.CreatedAt, user.UpdatedAt)
+		INSERT INTO users (id, email, password_hash, first_name, last_name, role, payment_enabled, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`, user.ID, user.Email, user.PasswordHash, user.FirstName, user.LastName, user.Role, user.PaymentEnabled, user.CreatedAt, user.UpdatedAt)
 	require.NoError(t, err)
 
 	// Примечание: кредиты для студентов создаются автоматически триггером

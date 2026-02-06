@@ -18,6 +18,7 @@ type ChatService struct {
 	userRepo          chatServiceUserRepository
 	moderationService *ModerationService
 	sseManager        *sse.ConnectionManagerUUID
+	telegramService   *TelegramService
 }
 
 // chatServiceRepository - интерфейс для dependency injection в тестах
@@ -60,6 +61,11 @@ func NewChatService(
 // SetSSEManager устанавливает SSE менеджер для broadcast сообщений
 func (s *ChatService) SetSSEManager(manager *sse.ConnectionManagerUUID) {
 	s.sseManager = manager
+}
+
+// SetTelegramService устанавливает Telegram сервис для уведомлений
+func (s *ChatService) SetTelegramService(service *TelegramService) {
+	s.telegramService = service
 }
 
 // ==================== Chat Room Methods ====================
@@ -178,6 +184,12 @@ func (s *ChatService) SendMessage(ctx context.Context, senderID uuid.UUID, req *
 		return nil, repository.ErrUnauthorized
 	}
 
+	// Получаем информацию об отправителе для уведомления
+	sender, err := s.userRepo.GetByID(ctx, senderID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get sender: %w", err)
+	}
+
 	// Создаем сообщение со статусом delivered (временно без модерации)
 	message := &models.Message{
 		RoomID:      req.RoomID,
@@ -203,6 +215,20 @@ func (s *ChatService) SendMessage(ctx context.Context, senderID uuid.UUID, req *
 			Data: event.Data,
 		}
 		s.sseManager.SendToChat(req.RoomID, sseEvent, senderID)
+	}
+
+	// Отправляем уведомление в Telegram получателю
+	if s.telegramService != nil {
+		var recipientID uuid.UUID
+		if room.StudentID == senderID {
+			recipientID = room.TeacherID
+		} else {
+			recipientID = room.StudentID
+		}
+
+		senderName := sender.GetFullName()
+		notificationText := fmt.Sprintf("💬 Новое сообщение от %s:\n\n%s", senderName, req.MessageText)
+		go s.telegramService.SendUserNotification(ctx, recipientID, notificationText)
 	}
 
 	// Модерация временно отключена - все сообщения доставляются напрямую

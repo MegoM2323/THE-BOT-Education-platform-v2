@@ -135,7 +135,7 @@ func (r *LessonTemplateRepository) GetTemplateWithLessons(ctx context.Context, i
 			tl.end_time::text as end_time,
 			tl.teacher_id, tl.lesson_type, tl.max_students, tl.credits_cost, tl.color, tl.subject, tl.description,
 			tl.created_at, tl.updated_at,
-			u.full_name as teacher_name
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM template_lessons tl
 		JOIN users u ON tl.teacher_id = u.id
 		WHERE tl.template_id = $1
@@ -171,11 +171,11 @@ func (r *LessonTemplateRepository) GetTemplateWithLessons(ctx context.Context, i
 		studentsQuery := `
 			SELECT
 				tls.id, tls.template_lesson_id, tls.student_id, tls.created_at,
-				u.full_name as student_name
+				CONCAT(u.first_name, ' ', u.last_name) as student_name
 			FROM template_lesson_students tls
 			JOIN users u ON tls.student_id = u.id
 			WHERE tls.template_lesson_id = $1
-			ORDER BY u.full_name
+			ORDER BY u.first_name, u.last_name
 		`
 
 		var students []*models.TemplateLessonStudent
@@ -346,7 +346,7 @@ func (r *TemplateLessonRepository) GetTemplateLessonByID(ctx context.Context, id
 			tl.end_time::text as end_time,
 			tl.teacher_id, tl.lesson_type, tl.max_students, tl.credits_cost, tl.color, tl.subject, tl.description,
 			tl.created_at, tl.updated_at,
-			u.full_name as teacher_name
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM template_lessons tl
 		JOIN users u ON tl.teacher_id = u.id
 		WHERE tl.id = $1
@@ -373,7 +373,7 @@ func (r *TemplateLessonRepository) GetTemplateLessonsByTemplateID(ctx context.Co
 			tl.end_time::text as end_time,
 			tl.teacher_id, tl.lesson_type, tl.max_students, tl.credits_cost, tl.color, tl.subject, tl.description,
 			tl.created_at, tl.updated_at,
-			u.full_name as teacher_name
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM template_lessons tl
 		JOIN users u ON tl.teacher_id = u.id
 		WHERE tl.template_id = $1
@@ -398,7 +398,7 @@ func (r *TemplateLessonRepository) GetTemplateLessonsByDayOfWeek(ctx context.Con
 			tl.end_time::text as end_time,
 			tl.teacher_id, tl.lesson_type, tl.max_students, tl.credits_cost, tl.color, tl.subject, tl.description,
 			tl.created_at, tl.updated_at,
-			u.full_name as teacher_name
+			CONCAT(u.first_name, ' ', u.last_name) as teacher_name
 		FROM template_lessons tl
 		JOIN users u ON tl.teacher_id = u.id
 		WHERE tl.template_id = $1 AND tl.day_of_week = $2
@@ -587,11 +587,11 @@ func (r *TemplateLessonRepository) GetStudentsForTemplateLessonEntry(ctx context
 	query := `
 		SELECT
 			tls.id, tls.template_lesson_id, tls.student_id, tls.created_at,
-			u.full_name as student_name
+			CONCAT(u.first_name, ' ', u.last_name) as student_name
 		FROM template_lesson_students tls
 		JOIN users u ON tls.student_id = u.id
 		WHERE tls.template_lesson_id = $1
-		ORDER BY u.full_name
+		ORDER BY u.first_name, u.last_name
 	`
 
 	var students []*models.TemplateLessonStudent
