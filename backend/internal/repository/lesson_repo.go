@@ -547,6 +547,22 @@ func (r *LessonRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
+// DeleteByRecurringGroupID выполняет мягкое удаление всех занятий с указанным recurring_group_id
+func (r *LessonRepository) DeleteByRecurringGroupID(ctx context.Context, recurringGroupID uuid.UUID) (int64, error) {
+	query := `UPDATE lessons SET deleted_at = NOW(), updated_at = NOW() WHERE recurring_group_id = $1 AND deleted_at IS NULL`
+	result, err := r.db.ExecContext(ctx, query, recurringGroupID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete recurring series: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	return rows, nil
+}
+
 // HardDelete выполняет полное удаление занятия из базы данных
 func (r *LessonRepository) HardDelete(ctx context.Context, id uuid.UUID, force bool) error {
 	if !force {

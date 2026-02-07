@@ -345,6 +345,11 @@ func (s *LessonService) DeleteLesson(ctx context.Context, lessonID uuid.UUID) er
 	return s.lessonRepo.Delete(ctx, lessonID)
 }
 
+// DeleteRecurringSeries удаляет все занятия в серии по recurring_group_id
+func (s *LessonService) DeleteRecurringSeries(ctx context.Context, recurringGroupID uuid.UUID) (int64, error) {
+	return s.lessonRepo.DeleteByRecurringGroupID(ctx, recurringGroupID)
+}
+
 // ListLessons получает список уроков с фильтрами
 func (s *LessonService) ListLessons(ctx context.Context, filter *models.ListLessonsFilter) ([]*models.LessonWithTeacher, error) {
 	return s.lessonRepo.List(ctx, filter)
@@ -385,7 +390,7 @@ func (s *LessonService) CreateRecurringLessons(ctx context.Context, req *models.
 		return s.createSingleLesson(ctx, req)
 	}
 
-	endDate := req.StartTime.AddDate(0, config.DefaultRecurringSemesterMonths, 0)
+	endDate := req.StartTime.AddDate(0, config.DefaultRecurringMonths, 0)
 	if req.RecurringEndDate != nil {
 		endDate = *req.RecurringEndDate
 	}
@@ -420,7 +425,7 @@ func (s *LessonService) CreateRecurringSeriesFromLesson(ctx context.Context, les
 	}
 
 	// Автоматически вычисляем количество недель до конца семестра
-	semesterEndDate := lesson.StartTime.AddDate(0, config.DefaultRecurringSemesterMonths, 0)
+	semesterEndDate := lesson.StartTime.AddDate(0, config.DefaultRecurringMonths, 0)
 	weeks := int(semesterEndDate.Sub(lesson.StartTime).Hours() / (24 * 7))
 
 	if weeks < 1 {

@@ -360,7 +360,38 @@ func (h *LessonHandler) DeleteLesson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Удаляем занятие (мягкое удаление)
+	// Проверяем query параметр delete_series
+	deleteSeries := r.URL.Query().Get("delete_series") == "true"
+
+	if deleteSeries {
+		// Сначала получаем занятие, чтобы узнать recurring_group_id
+		lesson, err := h.lessonService.GetLesson(r.Context(), lessonID)
+		if err != nil {
+			h.handleLessonError(w, err)
+			return
+		}
+
+		// Проверяем, что это повторяющееся занятие
+		if lesson.RecurringGroupID == nil {
+			response.BadRequest(w, response.ErrCodeInvalidInput, "Lesson is not part of a recurring series")
+			return
+		}
+
+		// Удаляем всю серию
+		deletedCount, err := h.lessonService.DeleteRecurringSeries(r.Context(), *lesson.RecurringGroupID)
+		if err != nil {
+			h.handleLessonError(w, err)
+			return
+		}
+
+		response.OK(w, map[string]interface{}{
+			"message":       "Recurring series deleted successfully",
+			"deleted_count": deletedCount,
+		})
+		return
+	}
+
+	// Удаляем одно занятие (мягкое удаление)
 	if err := h.lessonService.DeleteLesson(r.Context(), lessonID); err != nil {
 		h.handleLessonError(w, err)
 		return

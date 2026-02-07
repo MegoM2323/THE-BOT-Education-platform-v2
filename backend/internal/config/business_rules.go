@@ -47,5 +47,7 @@ func LoadBusinessRules() BusinessRules {
 
 // Recurring lessons rules
 const (
-	DefaultRecurringSemesterMonths = 4 // Длительность семестра по умолчанию (4 месяца)
+	// DefaultRecurringMonths - длительность повторяющихся занятий (24 месяца = 2 года)
+	// Это обеспечивает автоматическое продолжение серии надолго вперёд
+	DefaultRecurringMonths = 24
 )

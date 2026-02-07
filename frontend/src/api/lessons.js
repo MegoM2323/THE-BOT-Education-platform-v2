@@ -238,12 +238,16 @@ export const updateLesson = async (lessonId, updates, options = {}) => {
 /**
  * Удалить занятие (только администратор)
  * @param {number} lessonId - ID занятия
+ * @param {boolean} [deleteSeries=false] - Удалить всю серию повторяющихся занятий
  * @param {Object} [options] - Опции запроса (включая signal для отмены)
  * @returns {Promise<void>}
  */
-export const deleteLesson = async (lessonId, options = {}) => {
+export const deleteLesson = async (lessonId, deleteSeries = false, options = {}) => {
   try {
-    return await apiClient.delete(`/lessons/${lessonId}`, options);
+    const url = deleteSeries
+      ? `/lessons/${lessonId}?delete_series=true`
+      : `/lessons/${lessonId}`;
+    return await apiClient.delete(url, options);
   } catch (error) {
     if (error.name !== "AbortError") {
       console.error("Error deleting lesson:", error);

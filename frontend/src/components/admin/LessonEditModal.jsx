@@ -970,10 +970,24 @@ export const LessonEditModal = ({
     try {
       setDeletingLesson(true);
 
-      // Удалить занятие (backend автоматически вернёт кредиты всем студентам)
-      await lessonAPI.deleteLesson(lesson.id);
+      // Если занятие из серии (есть recurring_group_id) - спросить что удалять
+      let deleteSeries = false;
+      if (lesson?.recurring_group_id) {
+        const choice = window.confirm(
+          "Это занятие является частью серии повторяющихся занятий.\n\n" +
+          "Нажмите ОК чтобы удалить ВСЮ СЕРИЮ (все будущие занятия)\n" +
+          "Нажмите Отмена чтобы удалить только ЭТО занятие"
+        );
+        deleteSeries = choice;
+      }
 
-      showNotification("Занятие успешно удалено", "success");
+      // Удалить занятие (backend автоматически вернёт кредиты всем студентам)
+      await lessonAPI.deleteLesson(lesson.id, deleteSeries);
+
+      const message = deleteSeries
+        ? "Серия занятий успешно удалена"
+        : "Занятие успешно удалено";
+      showNotification(message, "success");
       setShowDeleteConfirm(false);
       onClose();
       onLessonUpdated?.(null);
@@ -1423,7 +1437,7 @@ export const LessonEditModal = ({
                                 // Автоматически создать серию при включении галочки (как в Google Calendar)
                                 if (checked && lesson?.id) {
                                   const confirmed = window.confirm(
-                                    `Создать серию повторяющихся занятий до конца семестра (4 месяца)?`
+                                    `Создать серию повторяющихся занятий на 2 года вперёд?`
                                   );
                                   if (confirmed) {
                                     try {
