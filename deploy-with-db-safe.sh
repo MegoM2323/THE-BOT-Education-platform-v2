@@ -188,7 +188,11 @@ build_frontend() {
     fi
 
     cd "$PROJECT_DIR/frontend"
-    npm ci --legacy-peer-deps
+
+    if [ ! -d "node_modules" ]; then
+        npm install --legacy-peer-deps
+    fi
+
     npm run build
 
     if [ ! -d "dist" ]; then
