@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /build/se
 # Stage 2: Runtime
 FROM alpine:3.19
 
-RUN apk add --no-cache ca-certificates tzdata postgresql-client
+RUN apk add --no-cache ca-certificates tzdata postgresql-client bash
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
@@ -25,9 +25,9 @@ COPY --from=builder /build/server /app/server
 COPY --from=builder /build/internal/database/migrations /app/migrations
 COPY entrypoint.sh /app/entrypoint.sh
 
-RUN mkdir -p /app/uploads && \
+RUN mkdir -p /app/uploads /app/migrations && \
     chown -R appuser:appgroup /app && \
-    chmod -R u+rwX /app && \
+    chmod -R u+rwX,go+rX /app && \
     chmod +x /app/entrypoint.sh /app/server
 
 USER appuser
@@ -35,3 +35,6 @@ USER appuser
 EXPOSE 8080
 
 ENTRYPOINT ["/app/entrypoint.sh"]
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget -q --spider http://localhost:8080/health || exit 1

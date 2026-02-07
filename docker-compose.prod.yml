@@ -21,15 +21,9 @@ services:
 
   backend:
     image: postgres:15-alpine
-    entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
     container_name: tutoring-backend
     restart: unless-stopped
-    working_dir: /app
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    extra_hosts:
-      - "api.telegram.org:149.154.166.110"
+    command: ["/app/entrypoint.sh"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,11 +46,13 @@ services:
       TELEGRAM_PROXY: ${TELEGRAM_PROXY:-}
       YOOKASSA_SHOP_ID: ${YOOKASSA_SHOP_ID:-}
       YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY:-}
+      MIGRATIONS_DIR: /app/migrations
     volumes:
-      - backend_uploads:/app/uploads
       - ./backend/bin/server:/app/server:ro
       - ./backend/entrypoint.sh:/app/entrypoint.sh:ro
       - ./backend/internal/database/migrations:/app/migrations:ro
+      - backend_uploads:/app/uploads
+    working_dir: /app
     expose:
       - "8080"
     networks:
@@ -73,14 +69,8 @@ services:
       - "443:443"
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      # nginx.conf is actually nginx.conf.prod copied during deployment
       - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./frontend/dist:/usr/share/nginx/html:ro
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health-nginx"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
     networks:
       - tutoring-network
 
