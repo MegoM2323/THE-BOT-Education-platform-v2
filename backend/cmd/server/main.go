@@ -93,6 +93,20 @@ func main() {
 
 	log.Info().Str("env", cfg.Server.Env).Str("port", cfg.Server.Port).Str("config", cfg.String()).Msg("Starting Tutoring Platform API Server")
 
+	// Log session configuration at startup (security audit)
+	log.Info().
+		Int("session_secret_length", len(cfg.Session.Secret)).
+		Str("production_domain", cfg.Server.ProductionDomain).
+		Str("session_same_site", cfg.Session.SameSite).
+		Bool("session_secure", cfg.Session.Secure).
+		Str("cookie_domain", func() string {
+			if cfg.IsProduction() && cfg.Server.ProductionDomain != "" {
+				return cfg.Server.ProductionDomain
+			}
+			return "localhost"
+		}()).
+		Msg("Session configuration")
+
 	// Connect to database
 	db, err := database.New(&cfg.Database)
 	if err != nil {

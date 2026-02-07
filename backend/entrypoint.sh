@@ -151,6 +151,68 @@ apply_migrations() {
     return 0
 }
 
+# Validate environment variables before starting
+validate_environment() {
+    log_info "Validating environment variables..."
+
+    local validation_failed=0
+
+    # Check SESSION_SECRET is set and not empty
+    if [ -z "$SESSION_SECRET" ]; then
+        log_error "SESSION_SECRET is not set or empty"
+        log_error "Generate with: openssl rand -base64 48"
+        validation_failed=1
+    fi
+
+    # Check ENV variable
+    ENV="${ENV:-development}"
+
+    # In production, check PRODUCTION_DOMAIN
+    if [ "$ENV" = "production" ]; then
+        if [ -z "$PRODUCTION_DOMAIN" ]; then
+            log_error "PRODUCTION_DOMAIN is required in production mode"
+            log_error "Set PRODUCTION_DOMAIN to your domain (e.g., example.com)"
+            validation_failed=1
+        fi
+
+        # In production, DB_PASSWORD must not be empty
+        if [ -z "$DB_PASSWORD" ]; then
+            log_error "DB_PASSWORD must not be empty in production"
+            log_error "Empty password allows unauthorized database access"
+            validation_failed=1
+        fi
+    fi
+
+    # Check DB_PASSWORD is set (warning for development, error for production)
+    if [ -z "$DB_PASSWORD" ] && [ "$ENV" != "production" ]; then
+        log_warning "DB_PASSWORD is not set (acceptable in development with peer auth)"
+    fi
+
+    # Check DB_HOST is accessible
+    if [ -z "$DB_HOST" ]; then
+        log_error "DB_HOST is not set"
+        validation_failed=1
+    else
+        log_info "Checking DB_HOST accessibility: ${DB_HOST}:${DB_PORT}"
+
+        # Try to resolve hostname
+        if ! getent hosts "$DB_HOST" >/dev/null 2>&1; then
+            log_error "DB_HOST '$DB_HOST' cannot be resolved"
+            log_error "Ensure database host is accessible from this container"
+            validation_failed=1
+        else
+            log_success "DB_HOST '$DB_HOST' is resolvable"
+        fi
+    fi
+
+    if [ "$validation_failed" -eq 1 ]; then
+        log_error "Environment validation failed. Fix the errors above and restart."
+        exit 1
+    fi
+
+    log_success "Environment validation passed"
+}
+
 # Start the backend
 start_backend() {
     log_info "Starting server..."
@@ -167,6 +229,9 @@ start_backend() {
 main() {
     log_info "=== Tutoring Platform Backend Entrypoint ==="
     log_info "Database: ${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
+    # Validate environment variables first
+    validate_environment
 
     if ! wait_for_postgres; then
         log_error "Failed to connect to PostgreSQL"
