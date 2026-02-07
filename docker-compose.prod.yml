@@ -81,5 +81,5 @@ networks:
 volumes:
   postgres_data:
     external: true
-    name: the_bot_v3_postgres_data
+    name: the_bot_platform_postgres_data
   backend_uploads:
