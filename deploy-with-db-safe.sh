@@ -216,6 +216,14 @@ deploy_docker_safe() {
     log_info "Creating directory structure on server..."
     ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend"
 
+    log_info "Fetching existing .env from server (before stopping containers)..."
+    if ssh "$REMOTE_HOST" "[[ -f $REMOTE_DIR/.env ]]" 2>/dev/null; then
+        scp "$REMOTE_HOST:$REMOTE_DIR/.env" /tmp/existing.env 2>/dev/null || true
+        log_info "Existing .env copied to /tmp/existing.env"
+    else
+        log_info "No existing .env found on server"
+    fi
+
     log_info "Stopping containers before deployment..."
     ssh "$REMOTE_HOST" bash -s << 'STOP_SCRIPT'
 set -euo pipefail
@@ -258,11 +266,6 @@ STOP_SCRIPT
     git checkout "$PROJECT_DIR/frontend/nginx.conf" 2>/dev/null || true
 
     log_info "Managing .env configuration..."
-    if ssh "$REMOTE_HOST" "[[ -f $REMOTE_DIR/.env ]]" 2>/dev/null; then
-        log_info "Fetching existing .env from server..."
-        scp "$REMOTE_HOST:$REMOTE_DIR/.env" /tmp/existing.env 2>/dev/null || true
-    fi
-
     if [[ -f "$PROJECT_DIR/backend/.env" ]]; then
         if [[ -f /tmp/existing.env ]]; then
             BASE_ENV="/tmp/existing.env"
