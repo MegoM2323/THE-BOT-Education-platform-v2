@@ -32,22 +32,23 @@ RETRY_INTERVAL="${RETRY_INTERVAL:-2}"
 
 # Wait for PostgreSQL to be ready
 wait_for_postgres() {
-    log_info "Waiting for PostgreSQL at ${DB_HOST}:${DB_PORT}..."
+    log_info "Waiting for PostgreSQL at $DB_HOST:$DB_PORT..."
 
-    retries=0
-    while [ "$retries" -lt "$MAX_RETRIES" ]; do
-        if PGPASSWORD="$DB_PASSWORD" pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q 2>/dev/null; then
-            log_success "PostgreSQL is ready"
+    local count=0
+    while [ $count -lt 30 ]; do
+        count=$((count + 1))
+        log_info "Waiting for PostgreSQL... (attempt $count/30)"
+
+        if nc -z "$DB_HOST" "$DB_PORT" 2>/dev/null; then
+            log_success "PostgreSQL is ready!"
             return 0
         fi
 
-        retries=$((retries + 1))
-        log_info "Waiting for PostgreSQL... (attempt $retries/$MAX_RETRIES)"
-        sleep "$RETRY_INTERVAL"
+        sleep 2
     done
 
-    log_error "PostgreSQL is not available after $MAX_RETRIES attempts"
-    return 1
+    log_error "PostgreSQL did not become ready in time"
+    exit 1
 }
 
 # Apply database migrations
