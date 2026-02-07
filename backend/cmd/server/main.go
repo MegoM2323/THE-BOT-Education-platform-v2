@@ -457,7 +457,7 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 	creditHandler := handlers.NewCreditHandler(creditService, userService)
 	swapHandler := handlers.NewSwapHandler(swapService)
 	trialRequestHandler := handlers.NewTrialRequestHandler(trialRequestService)
-	methodologistHandler := handlers.NewMethodologistHandler(lessonService, bookingService, lessonBroadcastService, lessonRepo)
+	teacherHandler := handlers.NewTeacherHandler(lessonService, bookingService, lessonBroadcastService, lessonRepo)
 	chatUploadDir := "./uploads/chat"
 	if err := os.MkdirAll(chatUploadDir, 0755); err != nil {
 		log.Error().Err(err).Msg("Failed to create chat upload directory")
@@ -583,9 +583,9 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 				// GET single subject endpoint (accessible to authenticated users)
 				r.Get("/{id}", subjectsHandler.GetSubject)
 
-				// Admin or Methodologist routes for subject management
+				// Admin or Teacher routes for subject management
 				r.Group(func(r chi.Router) {
-					r.Use(middleware.RequireAdminOrMethodologist)
+					r.Use(middleware.RequireAdminOrTeacher)
 					// State-changing endpoints с CSRF protection
 					r.With(middleware.CSRFMiddleware(csrfStore)).Post("/", subjectsHandler.CreateSubject)
 					r.With(middleware.CSRFMiddleware(csrfStore)).Put("/{id}", subjectsHandler.UpdateSubject)
@@ -593,13 +593,13 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 				})
 			})
 
-			// Methodologist subject routes
+			// Teacher subject routes
 			r.Get("/my-subjects", subjectsHandler.GetMySubjects)
 			r.Route("/teachers/{id}/subjects", func(r chi.Router) {
 				r.Get("/", subjectsHandler.GetTeacherSubjects)
-				// Admin or Methodologist routes for assigning subjects to teachers
+				// Admin or Teacher routes for assigning subjects to teachers
 				r.Group(func(r chi.Router) {
-					r.Use(middleware.RequireAdminOrMethodologist)
+					r.Use(middleware.RequireAdminOrTeacher)
 					r.With(middleware.CSRFMiddleware(csrfStore)).Post("/", subjectsHandler.AssignSubjectToTeacher)
 					r.With(middleware.CSRFMiddleware(csrfStore)).Delete("/{subjectId}", subjectsHandler.RemoveSubjectFromTeacher)
 				})
@@ -638,9 +638,9 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 					r.Get("/{broadcast_id}/files/{file_id}/download", lessonBroadcastHandler.DownloadBroadcastFile)
 				})
 
-				// Admin or Methodologist lesson endpoints с CSRF protection
+				// Admin or Teacher lesson endpoints с CSRF protection
 				r.Group(func(r chi.Router) {
-					r.Use(middleware.RequireAdminOrMethodologist)
+					r.Use(middleware.RequireAdminOrTeacher)
 					r.Use(middleware.CSRFMiddleware(csrfStore))
 					r.Post("/", lessonHandler.CreateLesson)
 					r.Delete("/{id}", lessonHandler.DeleteLesson)
@@ -669,9 +669,9 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 				r.Get("/", creditHandler.GetMyCredits)
 				r.Get("/balance", creditHandler.GetBalance) // Optimized endpoint for sidebar polling
 				r.Get("/history", creditHandler.GetMyHistory)
-				// Admin and methodologist routes (GET only - CSRF не нужен)
+				// Admin and teacher routes (GET only - CSRF не нужен)
 				r.Group(func(r chi.Router) {
-					r.Use(middleware.RequireAdminOrMethodologist)
+					r.Use(middleware.RequireAdminOrTeacher)
 					r.Get("/all", creditHandler.GetAllCredits)
 					r.Get("/user/{id}", creditHandler.GetUserCredits)
 				})
@@ -692,9 +692,9 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 				})
 			}
 
-			// Trial requests - GET list (admin or methodologist)
+			// Trial requests - GET list (admin or teacher)
 			r.Group(func(r chi.Router) {
-				r.Use(middleware.RequireAdminOrMethodologist)
+				r.Use(middleware.RequireAdminOrTeacher)
 				r.Get("/trial-requests", trialRequestHandler.GetTrialRequests)
 			})
 
@@ -709,10 +709,10 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 				})
 			}
 
-			// Telegram broadcast routes - admin and methodologist (always available, even without Telegram)
+			// Telegram broadcast routes - admin and teacher (always available, even without Telegram)
 			// List management (CRUD) works without bot, but sending requires bot configured
 			r.Group(func(r chi.Router) {
-				r.Use(middleware.RequireAdminOrMethodologist)
+				r.Use(middleware.RequireAdminOrTeacher)
 
 				// Telegram users management (GET only)
 				r.Get("/admin/telegram/users", broadcastHandler.GetLinkedUsers)
@@ -765,15 +765,15 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 				r.Get("/admin/chats", chatHandler.ListAllChats)
 			})
 
-			// Methodologist routes (methodologist-only endpoints)
+			// Teacher routes (teacher-only endpoints)
 			r.Route("/teacher", func(r chi.Router) {
-				r.Use(middleware.RequireMethodologist)
+				r.Use(middleware.RequireTeacher)
 
-				// Methodologist schedule - calendar view with lessons and enrolled students (GET only)
-				r.Get("/schedule", methodologistHandler.GetMethodologistSchedule)
+				// Teacher schedule - calendar view with lessons and enrolled students (GET only)
+				r.Get("/schedule", teacherHandler.GetTeacherSchedule)
 
 				// Lesson broadcasts - send message to all students in a lesson (CSRF protected)
-				r.With(middleware.CSRFMiddleware(csrfStore)).Post("/lessons/{id}/broadcast", methodologistHandler.SendLessonBroadcast)
+				r.With(middleware.CSRFMiddleware(csrfStore)).Post("/lessons/{id}/broadcast", teacherHandler.SendLessonBroadcast)
 			})
 
 		})

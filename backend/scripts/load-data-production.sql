@@ -15,9 +15,9 @@ CASCADE;
 -- Password: password123 (bcrypt hash)
 INSERT INTO users (id, email, password_hash, full_name, role, created_at, updated_at) VALUES
 ('00000000-0000-0000-0000-000000000001', 'admin@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Администратор THE BOT', 'admin', NOW(), NOW()),
-('10000000-0000-0000-0000-000000000001', 'method1@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Иван Петров', 'methodologist', NOW(), NOW()),
-('10000000-0000-0000-0000-000000000002', 'method2@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Мария Сидорова', 'methodologist', NOW(), NOW()),
-('10000000-0000-0000-0000-000000000003', 'method3@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Александр Морозов', 'methodologist', NOW(), NOW()),
+('10000000-0000-0000-0000-000000000001', 'method1@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Иван Петров', 'teacher', NOW(), NOW()),
+('10000000-0000-0000-0000-000000000002', 'method2@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Мария Сидорова', 'teacher', NOW(), NOW()),
+('10000000-0000-0000-0000-000000000003', 'method3@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Александр Морозов', 'teacher', NOW(), NOW()),
 ('20000000-0000-0000-0000-000000000001', 'student1@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Дмитрий Смирнов', 'student', NOW(), NOW()),
 ('20000000-0000-0000-0000-000000000002', 'student2@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Елена Волкова', 'student', NOW(), NOW()),
 ('20000000-0000-0000-0000-000000000003', 'student3@thebot.ru', '$2a$10$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Павел Морозов', 'student', NOW(), NOW()),

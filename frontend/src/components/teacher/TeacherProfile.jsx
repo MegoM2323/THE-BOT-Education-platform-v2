@@ -2,13 +2,13 @@ import { useAuth } from '../../hooks/useAuth.js';
 import TelegramInlineRow from '../common/TelegramInlineRow.jsx';
 import ChangePasswordForm from '../common/ChangePasswordForm.jsx';
 import Spinner from '../common/Spinner.jsx';
-import './MethodologistProfile.css';
+import './TeacherProfile.css';
 
-export const MethodologistProfile = () => {
+export const TeacherProfile = () => {
   const { user, loading: userLoading } = useAuth();
 
   return (
-    <div className="MethodologistProfile methodologist-profile">
+    <div className="TeacherProfile teacher-profile">
       <div className="profile-header">
         <h2 className="profile-title">Мой профиль</h2>
       </div>
@@ -53,4 +53,4 @@ export const MethodologistProfile = () => {
   );
 };
 
-export default MethodologistProfile;
+export default TeacherProfile;

@@ -108,10 +108,11 @@ func TestHomeworkAccess_StudentCanViewHomeworkWhenBooked(t *testing.T) {
 
 	// Создаем студента
 	student := &models.User{
-		ID:       studentID,
-		Email:    "student@example.com",
-		FullName: "Студент Иванов",
-		Role:     models.RoleStudent,
+		ID:        studentID,
+		Email:     "student@example.com",
+		FirstName: "Студент",
+		LastName:  "Иванов",
+		Role:      models.RoleStudent,
 	}
 
 	// Создаем индивидуальный урок
@@ -184,10 +185,11 @@ func TestHomeworkAccess_StudentCannotViewHomeworkWhenNotBooked(t *testing.T) {
 
 	// Создаем студента
 	student := &models.User{
-		ID:       studentID,
-		Email:    "student@example.com",
-		FullName: "Студент Иванов",
-		Role:     models.RoleStudent,
+		ID:        studentID,
+		Email:     "student@example.com",
+		FirstName: "Студент",
+		LastName:  "Иванов",
+		Role:      models.RoleStudent,
 	}
 
 	// Создаем индивидуальный урок
@@ -236,10 +238,11 @@ func TestHomeworkAccess_StudentCanViewGroupLessonHomework(t *testing.T) {
 
 	// Создаем студента
 	student := &models.User{
-		ID:       studentID,
-		Email:    "student@example.com",
-		FullName: "Студент Иванов",
-		Role:     models.RoleStudent,
+		ID:        studentID,
+		Email:     "student@example.com",
+		FirstName: "Студент",
+		LastName:  "Иванов",
+		Role:      models.RoleStudent,
 	}
 
 	// Создаем ГРУППОВОЙ урок
@@ -307,10 +310,11 @@ func TestHomeworkAccess_AdminCanViewAll(t *testing.T) {
 
 	// Создаем админа
 	admin := &models.User{
-		ID:       adminID,
-		Email:    "admin@example.com",
-		FullName: "Админ",
-		Role:     models.RoleAdmin,
+		ID:        adminID,
+		Email:     "admin@example.com",
+		FirstName: "Админ",
+		LastName:  "Админов",
+		Role:      models.RoleAdmin,
 	}
 
 	// Создаем индивидуальный урок

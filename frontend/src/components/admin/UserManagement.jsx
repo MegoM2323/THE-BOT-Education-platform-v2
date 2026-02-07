@@ -129,7 +129,7 @@ export const UserManagement = () => {
         throw new Error('Пароль должен содержать минимум 8 символов');
       }
 
-      if (!['student', 'methodologist', 'admin'].includes(formData.role)) {
+      if (!['student', 'teacher', 'admin'].includes(formData.role)) {
         throw new Error('Выберите валидную роль');
       }
 
@@ -243,7 +243,7 @@ export const UserManagement = () => {
   const getRoleLabel = (role) => {
     const labels = {
       student: 'Студент',
-      methodologist: 'Учитель',
+      teacher: 'Учитель',
       admin: 'Администратор',
     };
     return labels[role] || role;
@@ -268,7 +268,7 @@ export const UserManagement = () => {
           >
             <option value="">Все</option>
             <option value="student">Студенты</option>
-            <option value="methodologist">Учителя</option>
+            <option value="teacher">Учителя</option>
             <option value="admin">Администраторы</option>
           </select>
         </div>
@@ -302,7 +302,7 @@ export const UserManagement = () => {
         >
           <option value="">Все</option>
           <option value="student">Студенты</option>
-          <option value="methodologist">Учителя</option>
+          <option value="teacher">Учителя</option>
           <option value="admin">Администраторы</option>
         </select>
       </div>
@@ -409,7 +409,7 @@ export const UserManagement = () => {
               data-testid="role-select"
             >
               <option value="student">Студент</option>
-              <option value="methodologist">Учитель</option>
+              <option value="teacher">Учитель</option>
               <option value="admin">Администратор</option>
             </select>
             {editingUser && currentUser && currentUser.id === editingUser.id && currentUser.role === 'admin' && (

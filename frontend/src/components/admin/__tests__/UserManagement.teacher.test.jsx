@@ -64,9 +64,9 @@ describe('UserManagement - Методист роль', () => {
     const mockUsers = [
       {
         id: '1',
-        email: 'methodologist@test.com',
-        full_name: 'Test Methodologist',
-        role: 'methodologist',
+        email: 'teacher@test.com',
+        full_name: 'Test Teacher',
+        role: 'teacher',
       },
       {
         id: '2',
@@ -82,7 +82,7 @@ describe('UserManagement - Методист роль', () => {
 
     // Ждем загрузки данных
     await waitFor(() => {
-      expect(screen.getByText('Test Methodologist')).toBeInTheDocument();
+      expect(screen.getByText('Test Teacher')).toBeInTheDocument();
     });
 
     // Проверяем что getRoleLabel правильно отображает роль
@@ -144,10 +144,10 @@ describe('UserManagement - Методист роль', () => {
 
     // Выбираем роль "Методист"
     const roleSelect = screen.getByTestId('role-select');
-    await userEvent.selectOptions(roleSelect, 'methodologist');
+    await userEvent.selectOptions(roleSelect, 'teacher');
 
     // Проверяем что значение установлено
-    expect(roleSelect.value).toBe('methodologist');
+    expect(roleSelect.value).toBe('teacher');
   });
 
   it('создание пользователя с ролью методист должно работать', async () => {
@@ -162,9 +162,9 @@ describe('UserManagement - Методист роль', () => {
     usersAPI.getUsersAll.mockResolvedValue(mockUsers);
     usersAPI.createUser.mockResolvedValue({
       id: '3',
-      email: 'newmethodologist@test.com',
-      full_name: 'New Methodologist',
-      role: 'methodologist',
+      email: 'newteacher@test.com',
+      full_name: 'New Teacher',
+      role: 'teacher',
     });
 
     renderWithProviders(<UserManagement />);
@@ -183,10 +183,10 @@ describe('UserManagement - Методист роль', () => {
     const passwordInput = screen.getByTestId('password-input');
     const roleSelect = screen.getByTestId('role-select');
 
-    await userEvent.type(emailInput, 'newmethodologist@test.com');
-    await userEvent.type(fullNameInput, 'New Methodologist');
+    await userEvent.type(emailInput, 'newteacher@test.com');
+    await userEvent.type(fullNameInput, 'New Teacher');
     await userEvent.type(passwordInput, 'password123');
-    await userEvent.selectOptions(roleSelect, 'methodologist');
+    await userEvent.selectOptions(roleSelect, 'teacher');
 
     // Отправляем форму
     const submitButton = screen.getByText('Создать');
@@ -195,10 +195,10 @@ describe('UserManagement - Методист роль', () => {
     // Проверяем что API вызвался с правильными данными
     await waitFor(() => {
       expect(usersAPI.createUser).toHaveBeenCalledWith({
-        email: 'newmethodologist@test.com',
-        full_name: 'New Methodologist',
+        email: 'newteacher@test.com',
+        full_name: 'New Teacher',
         password: 'password123',
-        role: 'methodologist',
+        role: 'teacher',
       });
     });
   });
@@ -218,7 +218,7 @@ describe('UserManagement - Методист роль', () => {
       id: '2',
       email: 'student@test.com',
       full_name: 'Test Student',
-      role: 'methodologist',
+      role: 'teacher',
     });
 
     renderWithProviders(<UserManagement />);
@@ -234,7 +234,7 @@ describe('UserManagement - Методист роль', () => {
 
     // Изменяем роль на методист
     const roleSelect = screen.getByTestId('role-select');
-    await userEvent.selectOptions(roleSelect, 'methodologist');
+    await userEvent.selectOptions(roleSelect, 'teacher');
 
     // Сохраняем изменения
     const saveButton = screen.getByText('Сохранить');
@@ -245,7 +245,7 @@ describe('UserManagement - Методист роль', () => {
       expect(usersAPI.updateUser).toHaveBeenCalledWith(
         '2',
         expect.objectContaining({
-          role: 'methodologist',
+          role: 'teacher',
         })
       );
     });
@@ -255,15 +255,15 @@ describe('UserManagement - Методист роль', () => {
     const mockUsers = [
       {
         id: '1',
-        email: 'methodologist1@test.com',
-        full_name: 'First Methodologist',
-        role: 'methodologist',
+        email: 'teacher1@test.com',
+        full_name: 'First Teacher',
+        role: 'teacher',
       },
       {
         id: '2',
-        email: 'methodologist2@test.com',
-        full_name: 'Second Methodologist',
-        role: 'methodologist',
+        email: 'teacher2@test.com',
+        full_name: 'Second Teacher',
+        role: 'teacher',
       },
       {
         id: '3',
@@ -279,22 +279,22 @@ describe('UserManagement - Методист роль', () => {
 
     // Ждем загрузки данных
     await waitFor(() => {
-      expect(screen.getByText('First Methodologist')).toBeInTheDocument();
-      expect(screen.getByText('Second Methodologist')).toBeInTheDocument();
+      expect(screen.getByText('First Teacher')).toBeInTheDocument();
+      expect(screen.getByText('Second Teacher')).toBeInTheDocument();
     });
 
     // Проверяем что оба методиста отображаются с правильной ролью
-    const methodologistLabels = screen.getAllByText('Методист');
-    expect(methodologistLabels).toHaveLength(2);
+    const teacherLabels = screen.getAllByText('Методист');
+    expect(teacherLabels).toHaveLength(2);
   });
 
-  it('getRoleLabel должен корректно возвращать "Методист" для роли methodologist', async () => {
+  it('getRoleLabel должен корректно возвращать "Методист" для роли teacher', async () => {
     const mockUsers = [
       {
         id: '1',
-        email: 'methodologist@test.com',
-        full_name: 'Test Methodologist',
-        role: 'methodologist',
+        email: 'teacher@test.com',
+        full_name: 'Test Teacher',
+        role: 'teacher',
       },
     ];
 
@@ -303,8 +303,8 @@ describe('UserManagement - Методист роль', () => {
     renderWithProviders(<UserManagement />);
 
     await waitFor(() => {
-      const methodologistLabel = screen.getByText('Методист');
-      expect(methodologistLabel).toBeInTheDocument();
+      const teacherLabel = screen.getByText('Методист');
+      expect(teacherLabel).toBeInTheDocument();
     });
   });
 });

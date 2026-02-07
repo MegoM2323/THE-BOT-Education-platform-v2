@@ -149,7 +149,7 @@ func (s *UserService) UpdateUser(ctx context.Context, userID uuid.UUID, req *mod
 	}
 	if req.Role != nil {
 		if *req.Role != models.RoleStudent &&
-			*req.Role != models.RoleMethodologist &&
+			*req.Role != models.RoleTeacher &&
 			*req.Role != models.RoleAdmin {
 			return nil, models.ErrInvalidRole
 		}
@@ -318,4 +318,10 @@ func (s *UserService) ListUsers(ctx context.Context, role *models.UserRole) ([]*
 // ListUsersWithPagination получает список пользователей с пагинацией
 func (s *UserService) ListUsersWithPagination(ctx context.Context, role *models.UserRole, offset, limit int) ([]*models.User, int, error) {
 	return s.userRepo.ListWithPagination(ctx, role, offset, limit)
+}
+
+// GetAllUsersWithTelegramInfo получает всех пользователей с информацией о Telegram в одном запросе
+// Оптимизированный метод, который избегает N+1 проблемы
+func (s *UserService) GetAllUsersWithTelegramInfo(ctx context.Context) ([]map[string]interface{}, error) {
+	return s.userRepo.GetAllUsersWithTelegramInfo(ctx)
 }

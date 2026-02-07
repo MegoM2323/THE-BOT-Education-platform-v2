@@ -17,19 +17,19 @@ func TestCreateLessonWithColor(t *testing.T) {
 	req := &models.CreateLessonRequest{
 		TeacherID: uuid.New(),
 		StartTime: time.Now().Add(48 * time.Hour),
-		Color:     &color,
+		Color: color,
 		Subject:   &subject,
 	}
 
 	// Apply defaults to set color if not provided
 	req.ApplyDefaults()
 
-	if req.Color == nil {
+	if req.Color != "" {
 		t.Fatal("Color should not be nil after ApplyDefaults")
 	}
 
-	if *req.Color != color {
-		t.Errorf("Expected color %s, got %s", color, *req.Color)
+	if req.Color != color {
+		t.Errorf("Expected color %s, got %s", color, req.Color)
 	}
 }
 
@@ -44,13 +44,13 @@ func TestCreateLessonWithDefaultColor(t *testing.T) {
 	// Apply defaults
 	req.ApplyDefaults()
 
-	if req.Color == nil {
+	if req.Color != "" {
 		t.Fatal("Color should be set to default after ApplyDefaults")
 	}
 
 	expectedDefault := "#3B82F6"
-	if *req.Color != expectedDefault {
-		t.Errorf("Expected default color %s, got %s", expectedDefault, *req.Color)
+	if req.Color != expectedDefault {
+		t.Errorf("Expected default color %s, got %s", expectedDefault, req.Color)
 	}
 }
 
@@ -62,12 +62,12 @@ func TestUpdateLessonColor(t *testing.T) {
 		Color: &newColor,
 	}
 
-	if req.Color == nil {
+	if *req.Color != "" {
 		t.Fatal("Color should not be nil")
 	}
 
 	if *req.Color != newColor {
-		t.Errorf("Expected color %s, got %s", newColor, *req.Color)
+		t.Errorf("Expected color %s, got %s", newColor, req.Color)
 	}
 }
 
@@ -121,7 +121,7 @@ func TestInvalidColorFormat(t *testing.T) {
 		req := &models.CreateLessonRequest{
 			TeacherID: uuid.New(),
 			StartTime: time.Now().Add(48 * time.Hour),
-			Color:     &color,
+			Color: color,
 		}
 
 		// Apply defaults first

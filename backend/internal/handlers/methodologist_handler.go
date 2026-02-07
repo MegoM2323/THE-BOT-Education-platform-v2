@@ -18,8 +18,8 @@ import (
 	"tutoring-platform/pkg/response"
 )
 
-// MethodologistHandler обрабатывает эндпоинты для методистов
-type MethodologistHandler struct {
+// TeacherHandler обрабатывает эндпоинты для методистов
+type TeacherHandler struct {
 	lessonService          *service.LessonService
 	bookingService         *service.BookingService
 	lessonBroadcastService *service.LessonBroadcastService
@@ -27,14 +27,14 @@ type MethodologistHandler struct {
 	timeValidator          *validator.TimeValidator
 }
 
-// NewMethodologistHandler создает новый MethodologistHandler
-func NewMethodologistHandler(
+// NewTeacherHandler создает новый TeacherHandler
+func NewTeacherHandler(
 	lessonService *service.LessonService,
 	bookingService *service.BookingService,
 	lessonBroadcastService *service.LessonBroadcastService,
 	lessonRepo *repository.LessonRepository,
-) *MethodologistHandler {
-	return &MethodologistHandler{
+) *TeacherHandler {
+	return &TeacherHandler{
 		lessonService:          lessonService,
 		bookingService:         bookingService,
 		lessonBroadcastService: lessonBroadcastService,
@@ -43,9 +43,9 @@ func NewMethodologistHandler(
 	}
 }
 
-// SendLessonBroadcast обрабатывает POST /api/v1/methodologist/lessons/:id/broadcast
+// SendLessonBroadcast обрабатывает POST /api/v1/teacher/lessons/:id/broadcast
 // Отправляет рассылку всем студентам занятия через Telegram
-func (h *MethodologistHandler) SendLessonBroadcast(w http.ResponseWriter, r *http.Request) {
+func (h *TeacherHandler) SendLessonBroadcast(w http.ResponseWriter, r *http.Request) {
 	// Получаем текущего пользователя (методист) из контекста
 	user, ok := middleware.GetUserFromContext(r.Context())
 	if !ok {
@@ -60,8 +60,8 @@ func (h *MethodologistHandler) SendLessonBroadcast(w http.ResponseWriter, r *htt
 	}
 
 	// Проверяем что пользователь - методист или админ
-	if !user.IsMethodologist() && !user.IsAdmin() {
-		response.Forbidden(w, "Only methodologists and admins can send lesson broadcasts")
+	if !user.IsTeacher() && !user.IsAdmin() {
+		response.Forbidden(w, "Only teachers and admins can send lesson broadcasts")
 		return
 	}
 
@@ -100,7 +100,7 @@ func (h *MethodologistHandler) SendLessonBroadcast(w http.ResponseWriter, r *htt
 
 	// Валидация сообщения
 	if err := req.Validate(); err != nil {
-		h.handleMethodologistBroadcastError(w, err)
+		h.handleTeacherBroadcastError(w, err)
 		return
 	}
 
@@ -115,7 +115,7 @@ func (h *MethodologistHandler) SendLessonBroadcast(w http.ResponseWriter, r *htt
 	)
 	if err != nil {
 		log.Printf("[ERROR] Failed to create lesson broadcast for lesson %s: %v\n", lessonID, err)
-		h.handleMethodologistBroadcastError(w, err)
+		h.handleTeacherBroadcastError(w, err)
 		return
 	}
 
@@ -129,8 +129,8 @@ func (h *MethodologistHandler) SendLessonBroadcast(w http.ResponseWriter, r *htt
 	})
 }
 
-// handleMethodologistBroadcastError обрабатывает ошибки рассылки методиста
-func (h *MethodologistHandler) handleMethodologistBroadcastError(w http.ResponseWriter, err error) {
+// handleTeacherBroadcastError обрабатывает ошибки рассылки методиста
+func (h *TeacherHandler) handleTeacherBroadcastError(w http.ResponseWriter, err error) {
 	// Проверяем ошибки lesson broadcast service
 	if errors.Is(err, service.ErrInvalidMessage) {
 		response.BadRequest(w, response.ErrCodeValidationFailed, "Broadcast message must be between 1 and 4096 characters")
@@ -166,18 +166,18 @@ func (h *MethodologistHandler) handleMethodologistBroadcastError(w http.Response
 	}
 
 	// Неизвестная ошибка
-	log.Printf("[ERROR] Unhandled methodologist broadcast error: %v\n", err)
+	log.Printf("[ERROR] Unhandled teacher broadcast error: %v\n", err)
 	response.InternalError(w, "An error occurred processing your request")
 }
 
-// ptrMethodologistBookingStatus вспомогательная функция для создания указателя на BookingStatus
-func ptrMethodologistBookingStatus(status models.BookingStatus) *models.BookingStatus {
+// ptrTeacherBookingStatus вспомогательная функция для создания указателя на BookingStatus
+func ptrTeacherBookingStatus(status models.BookingStatus) *models.BookingStatus {
 	return &status
 }
 
-// GetMethodologistSchedule обрабатывает GET /api/v1/methodologist/schedule
+// GetTeacherSchedule обрабатывает GET /api/v1/teacher/schedule
 // Возвращает расписание методиста в формате календаря с дополнительной информацией
-func (h *MethodologistHandler) GetMethodologistSchedule(w http.ResponseWriter, r *http.Request) {
+func (h *TeacherHandler) GetTeacherSchedule(w http.ResponseWriter, r *http.Request) {
 	user, ok := middleware.GetUserFromContext(r.Context())
 	if !ok {
 		response.Unauthorized(w, "Authentication required")
@@ -191,8 +191,8 @@ func (h *MethodologistHandler) GetMethodologistSchedule(w http.ResponseWriter, r
 	}
 
 	// Проверяем что пользователь - методист или админ
-	if !user.IsMethodologist() && !user.IsAdmin() {
-		response.Forbidden(w, "Only methodologists and admins can access methodologist schedule")
+	if !user.IsTeacher() && !user.IsAdmin() {
+		response.Forbidden(w, "Only teachers and admins can access teacher schedule")
 		return
 	}
 
@@ -266,25 +266,25 @@ func (h *MethodologistHandler) GetMethodologistSchedule(w http.ResponseWriter, r
 
 	if user.IsAdmin() {
 		// Админ может запросить расписание любого методиста через query param
-		methodologistIDParam := r.URL.Query().Get("methodologist_id")
-		if methodologistIDParam != "" {
-			methodologistID, err := uuid.Parse(methodologistIDParam)
+		teacherIDParam := r.URL.Query().Get("teacher_id")
+		if teacherIDParam != "" {
+			teacherID, err := uuid.Parse(teacherIDParam)
 			if err != nil {
-				response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid methodologist_id format")
+				response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid teacher_id format")
 				return
 			}
 			// Получаем расписание конкретного методиста
-			lessons, err = h.lessonRepo.GetTeacherSchedule(r.Context(), methodologistID, startDate, endDate)
+			lessons, err = h.lessonRepo.GetTeacherSchedule(r.Context(), teacherID, startDate, endDate)
 			if err != nil {
-				log.Printf("[ERROR] Failed to get methodologist schedule for methodologist %s: %v\n", methodologistID, err)
-				response.InternalError(w, "Failed to retrieve methodologist schedule")
+				log.Printf("[ERROR] Failed to get teacher schedule for teacher %s: %v\n", teacherID, err)
+				response.InternalError(w, "Failed to retrieve teacher schedule")
 				return
 			}
 		} else {
-			// Админ без methodologist_id получает расписание ВСЕХ методистов
+			// Админ без teacher_id получает расписание ВСЕХ методистов
 			lessons, err = h.lessonRepo.GetAllTeachersSchedule(r.Context(), startDate, endDate)
 			if err != nil {
-				log.Printf("[ERROR] Failed to get all methodologists schedule: %v\n", err)
+				log.Printf("[ERROR] Failed to get all teachers schedule: %v\n", err)
 				response.InternalError(w, "Failed to retrieve schedule")
 				return
 			}
@@ -293,8 +293,8 @@ func (h *MethodologistHandler) GetMethodologistSchedule(w http.ResponseWriter, r
 		// Методист видит только свои занятия
 		lessons, err = h.lessonRepo.GetTeacherSchedule(r.Context(), user.ID, startDate, endDate)
 		if err != nil {
-			log.Printf("[ERROR] Failed to get methodologist schedule for methodologist %s: %v\n", user.ID, err)
-			response.InternalError(w, "Failed to retrieve methodologist schedule")
+			log.Printf("[ERROR] Failed to get teacher schedule for teacher %s: %v\n", user.ID, err)
+			response.InternalError(w, "Failed to retrieve teacher schedule")
 			return
 		}
 	}

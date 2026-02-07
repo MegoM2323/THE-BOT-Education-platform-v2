@@ -332,20 +332,6 @@ func (r *LessonRepository) GetVisibleLessons(ctx context.Context, userID uuid.UU
 		args = append(args, userID)
 		argIndex++
 
-	case "methodologist":
-		// Methodologist sees all lessons (like admin, for template management)
-		query = `
-			SELECT DISTINCT
-				l.id, l.teacher_id, l.start_time, l.end_time,
-				l.max_students, l.current_students, l.credits_cost, l.color, l.subject, l.homework_text, l.report_text, l.link,
-				l.is_recurring, l.recurring_group_id, l.recurring_end_date,
-				l.created_at, l.updated_at, l.deleted_at,
-				CONCAT(u.first_name, ' ', u.last_name) as teacher_name
-			FROM lessons l
-			JOIN users u ON l.teacher_id = u.id
-			WHERE l.deleted_at IS NULL
-		`
-
 	default:
 		return nil, fmt.Errorf("invalid user role: %s", userRole)
 	}

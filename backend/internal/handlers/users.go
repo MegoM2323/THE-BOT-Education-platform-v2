@@ -35,7 +35,7 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        role  query  string  false  "Filter by role (student, methodologist, admin)"
+// @Param        role  query  string  false  "Filter by role (student, teacher, admin)"
 // @Param        page  query  int  false  "Page number (default: 1)"
 // @Param        per_page  query  int  false  "Items per page (default: 20, max: 100)"
 // @Success      200  {object}  response.SuccessResponse{data=map[string]interface{}}
@@ -54,21 +54,21 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	roleStr := r.URL.Query().Get("role")
 	if roleStr != "" {
 		role := models.UserRole(roleStr)
-		if role == models.RoleStudent || role == models.RoleAdmin || role == models.RoleMethodologist {
+		if role == models.RoleStudent || role == models.RoleAdmin || role == models.RoleTeacher {
 			roleFilter = &role
 		}
 	}
 
 	// Админы и методисты могут получить полный список без фильтров
-	if !user.IsAdmin() && !user.IsMethodologist() {
+	if !user.IsAdmin() && !user.IsTeacher() {
 		// Не-админы и не-методисты должны указать role
 		if roleFilter == nil {
-			response.Forbidden(w, "Admin or methodologist access required for unfiltered user list")
+			response.Forbidden(w, "Admin or teacher access required for unfiltered user list")
 			return
 		}
 		// Разрешаем только запросы на студентов или методистов
-		if *roleFilter != models.RoleStudent && *roleFilter != models.RoleMethodologist {
-			response.Forbidden(w, "Only role=student or role=methodologist allowed for non-admin users")
+		if *roleFilter != models.RoleStudent && *roleFilter != models.RoleTeacher {
+			response.Forbidden(w, "Only role=student or role=teacher allowed for non-admin users")
 			return
 		}
 	}
@@ -316,7 +316,7 @@ func (h *UserHandler) handleUserError(w http.ResponseWriter, err error) {
 		return
 	}
 	if errors.Is(err, models.ErrInvalidRole) {
-		response.BadRequest(w, response.ErrCodeValidationFailed, "Invalid role specified. Must be one of: student, methodologist, admin")
+		response.BadRequest(w, response.ErrCodeValidationFailed, "Invalid role specified. Must be one of: student, teacher, admin")
 		return
 	}
 	if errors.Is(err, models.ErrInvalidTelegramHandle) {

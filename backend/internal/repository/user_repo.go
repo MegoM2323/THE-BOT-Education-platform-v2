@@ -25,6 +25,7 @@ type UserRepository interface {
 	ListWithPagination(ctx context.Context, roleFilter *models.UserRole, offset, limit int) ([]*models.User, int, error)
 	Exists(ctx context.Context, email string) (bool, error)
 	UpdateTelegramUsername(ctx context.Context, userID uuid.UUID, username string) error
+	GetAllUsersWithTelegramInfo(ctx context.Context) ([]map[string]interface{}, error)
 	// GetParentChatIDsByStudentIDs(ctx context.Context, studentIDs []uuid.UUID) (map[uuid.UUID]int64, error)
 }
 
@@ -336,7 +337,7 @@ func (r *UserRepo) Delete(ctx context.Context, id uuid.UUID) error {
 		return fmt.Errorf("failed to get user role: %w", err)
 	}
 
-	if user.Role == models.RoleMethodologist {
+	if user.Role == models.RoleTeacher {
 		var hasActiveLessons bool
 		err := tx.QueryRowContext(ctx,
 			`SELECT EXISTS(SELECT 1 FROM lessons WHERE teacher_id = $1 AND deleted_at IS NULL)`, id).Scan(&hasActiveLessons)
@@ -473,6 +474,82 @@ func (r *UserRepo) UpdateTelegramUsername(ctx context.Context, userID uuid.UUID,
 	}
 
 	return nil
+}
+
+// GetAllUsersWithTelegramInfo получает всех пользователей с информацией о Telegram в одном запросе
+// Использует LEFT JOIN для эффективной загрузки данных без N+1 проблемы
+func (r *UserRepo) GetAllUsersWithTelegramInfo(ctx context.Context) ([]map[string]interface{}, error) {
+	query := `
+		SELECT
+			u.id,
+			u.email,
+			CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+			u.role,
+			u.created_at,
+			COALESCE(tu.telegram_id, 0) AS telegram_id,
+			COALESCE(tu.chat_id, 0) AS chat_id,
+			COALESCE(tu.username, '') AS telegram_username,
+			COALESCE(tu.subscribed, false) AS subscribed,
+			tu.created_at AS linked_at
+		FROM users u
+		LEFT JOIN telegram_users tu ON u.id = tu.user_id
+		WHERE u.deleted_at IS NULL
+		ORDER BY u.created_at DESC
+	`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users with telegram info: %w", err)
+	}
+	defer rows.Close()
+
+	var results []map[string]interface{}
+	for rows.Next() {
+		var (
+			id               string
+			email            string
+			fullName         string
+			role             string
+			createdAt        time.Time
+			telegramID       int64
+			chatID           int64
+			telegramUsername string
+			subscribed       bool
+			linkedAt         sql.NullTime
+		)
+
+		if err := rows.Scan(&id, &email, &fullName, &role, &createdAt, &telegramID, &chatID, &telegramUsername, &subscribed, &linkedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		telegramLinked := telegramID > 0
+		result := map[string]interface{}{
+			"id":              id,
+			"email":           email,
+			"full_name":       fullName,
+			"role":            role,
+			"created_at":      createdAt.Format("2006-01-02 15:04:05"),
+			"telegram_linked": telegramLinked,
+		}
+
+		if telegramLinked {
+			result["telegram_username"] = telegramUsername
+			result["telegram_id"] = telegramID
+			result["chat_id"] = chatID
+			result["subscribed"] = subscribed
+			if linkedAt.Valid {
+				result["linked_at"] = linkedAt.Time.Format("2006-01-02 15:04:05")
+			}
+		}
+
+		results = append(results, result)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return results, nil
 }
 
 // // GetParentChatIDsByStudentIDs получает parent_chat_id для списка студентов

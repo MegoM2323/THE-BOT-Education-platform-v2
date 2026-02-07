@@ -89,7 +89,7 @@ func TestChangePasswordInvalidOldPassword(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "Change Password Test",
+		FirstName: "Change Password Test", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)
@@ -144,7 +144,7 @@ func TestChangePasswordWeakPassword(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "Weak Password Test",
+		FirstName: "Weak Password Test", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)
@@ -198,7 +198,7 @@ func TestChangePasswordSameAsOld(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "Same Password Test",
+		FirstName: "Same Password Test", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)
@@ -253,7 +253,7 @@ func TestChangePasswordSuccess(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "Success Password Test",
+		FirstName: "Success Password Test", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)
@@ -335,7 +335,7 @@ func TestChangePasswordMissingOldPassword(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "Missing Old Password Test",
+		FirstName: "Missing Old Password Test", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)
@@ -388,7 +388,7 @@ func TestChangePasswordMissingNewPassword(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "Missing New Password Test",
+		FirstName: "Missing New Password Test", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)
@@ -441,7 +441,7 @@ func TestChangePasswordInvalidJSON(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "Invalid JSON Test",
+		FirstName: "Invalid JSON Test", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)

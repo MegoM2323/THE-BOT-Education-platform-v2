@@ -84,7 +84,7 @@ func (s *HomeworkService) CreateHomework(ctx context.Context, userID uuid.UUID, 
 	}
 
 	// Проверка прав: admin, методист или teacher этого урока
-	if !user.IsAdmin() && !user.IsMethodologist() && lesson.TeacherID != userID {
+	if !user.IsAdmin() && !user.IsTeacher() && lesson.TeacherID != userID {
 		return nil, repository.ErrUnauthorized
 	}
 
@@ -160,7 +160,7 @@ func (s *HomeworkService) GetHomeworkByLesson(ctx context.Context, userID uuid.U
 		// Admin видит все ДЗ всех уроков
 		hasAccess = true
 
-	case models.RoleMethodologist:
+	case models.RoleTeacher:
 		// Методист видит все ДЗ всех уроков (как админ)
 		hasAccess = true
 
@@ -215,13 +215,13 @@ func (s *HomeworkService) DeleteHomework(ctx context.Context, userID uuid.UUID, 
 		return fmt.Errorf("failed to get lesson: %w", err)
 	}
 
-	// Проверка прав: admin, методист, creator файла, или teacher урока
+	// Проверка прав: admin, teacher, creator файла, или teacher урока
 	isAdmin := user.IsAdmin()
-	isMethodologist := user.IsMethodologist()
+	isTeacher := user.IsTeacher()
 	isCreator := homework.CreatedBy == userID
-	isTeacher := lesson.TeacherID == userID
+	isLessonTeacher := lesson.TeacherID == userID
 
-	if !isAdmin && !isMethodologist && !isCreator && !isTeacher {
+	if !isAdmin && !isTeacher && !isCreator && !isLessonTeacher {
 		return repository.ErrUnauthorized
 	}
 
@@ -293,13 +293,13 @@ func (s *HomeworkService) UpdateHomework(ctx context.Context, userID uuid.UUID, 
 		return fmt.Errorf("failed to get lesson: %w", err)
 	}
 
-	// Проверка прав: admin, методист, creator файла, или teacher урока
+	// Проверка прав: admin, teacher, creator файла, или teacher урока
 	isAdmin := user.IsAdmin()
-	isMethodologist := user.IsMethodologist()
+	isTeacher := user.IsTeacher()
 	isCreator := homework.CreatedBy == userID
-	isTeacher := lesson.TeacherID == userID
+	isLessonTeacher := lesson.TeacherID == userID
 
-	if !isAdmin && !isMethodologist && !isCreator && !isTeacher {
+	if !isAdmin && !isTeacher && !isCreator && !isLessonTeacher {
 		return repository.ErrUnauthorized
 	}
 

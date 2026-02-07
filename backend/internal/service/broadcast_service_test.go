@@ -162,6 +162,14 @@ func (m *MockUserRepository) List(ctx context.Context, role *models.UserRole) ([
 	return args.Get(0).([]*models.User), args.Error(1)
 }
 
+func (m *MockUserRepository) GetAllUsersWithTelegramInfo(ctx context.Context) ([]map[string]interface{}, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]map[string]interface{}), args.Error(1)
+}
+
 func (m *MockUserRepository) ListWithPagination(ctx context.Context, role *models.UserRole, offset, limit int) ([]*models.User, int, error) {
 	args := m.Called(ctx, role, offset, limit)
 	if args.Get(0) == nil {

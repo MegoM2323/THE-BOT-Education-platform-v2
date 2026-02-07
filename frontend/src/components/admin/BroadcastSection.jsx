@@ -41,7 +41,7 @@ export const BroadcastSection = ({ lessonId, lesson, readOnly = false }) => {
   const sendMutation = useSendLessonBroadcast();
 
   // Проверка прав доступа (блокируется в readOnly режиме)
-  const canSend = !readOnly && (user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'methodologist');
+  const canSend = !readOnly && (user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'teacher');
 
   /**
    * Обработка выбора файлов

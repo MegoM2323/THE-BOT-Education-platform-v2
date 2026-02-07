@@ -9,23 +9,16 @@ import (
 	"tutoring-platform/internal/models"
 )
 
-// TestMethodologistRoleCheck проверяет что роль методиста правильно определяется
-func TestMethodologistRoleCheck(t *testing.T) {
-	methodologist := &models.User{
-		ID:        uuid.New(),
-		Email:     "methodologist@test.com",
-		FirstName: "Test",
-		LastName:  "Methodologist",
-		Role:      models.RoleMethodologist,
-	}
-
+// TestTeacherRoleCheck проверяет что роль методиста правильно определяется
+func TestTeacherRoleCheck(t *testing.T) {
 	teacher := &models.User{
 		ID:        uuid.New(),
 		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:      models.RoleMethodologist,
+		Role:      models.RoleTeacher,
 	}
+
 
 	student := &models.User{
 		ID:        uuid.New(),
@@ -43,32 +36,32 @@ func TestMethodologistRoleCheck(t *testing.T) {
 		Role:      models.RoleAdmin,
 	}
 
-	t.Run("Methodologist_IsMethodologist", func(t *testing.T) {
-		assert.True(t, methodologist.IsMethodologist(), "Методист должен иметь IsMethodologist() == true")
+	t.Run("Teacher_IsTeacher", func(t *testing.T) {
+		assert.True(t, teacher.IsTeacher(), "Методист должен иметь IsTeacher() == true")
 	})
 
-	t.Run("Methodologist_NotAdmin", func(t *testing.T) {
-		assert.False(t, methodologist.IsAdmin(), "Методист не должен быть админом")
+	t.Run("Teacher_NotAdmin", func(t *testing.T) {
+		assert.False(t, teacher.IsAdmin(), "Методист не должен быть админом")
 	})
 
-	t.Run("Methodologist_NotTeacher", func(t *testing.T) {
-		assert.False(t, methodologist.IsMethodologist(), "Методист не должен быть учителем")
+	t.Run("Teacher_NotTeacher", func(t *testing.T) {
+		assert.False(t, teacher.IsTeacher(), "Методист не должен быть учителем")
 	})
 
-	t.Run("Methodologist_NotStudent", func(t *testing.T) {
-		assert.False(t, methodologist.IsStudent(), "Методист не должен быть студентом")
+	t.Run("Teacher_NotStudent", func(t *testing.T) {
+		assert.False(t, teacher.IsStudent(), "Методист не должен быть студентом")
 	})
 
-	t.Run("Teacher_NotMethodologist", func(t *testing.T) {
-		assert.False(t, teacher.IsMethodologist(), "Учитель не должен быть методистом")
+	t.Run("Teacher_NotTeacher", func(t *testing.T) {
+		assert.False(t, teacher.IsTeacher(), "Учитель не должен быть методистом")
 	})
 
-	t.Run("Student_NotMethodologist", func(t *testing.T) {
-		assert.False(t, student.IsMethodologist(), "Студент не должен быть методистом")
+	t.Run("Student_NotTeacher", func(t *testing.T) {
+		assert.False(t, student.IsTeacher(), "Студент не должен быть методистом")
 	})
 
-	t.Run("Admin_NotMethodologist", func(t *testing.T) {
-		assert.False(t, admin.IsMethodologist(), "Админ не методист (хотя может все)")
+	t.Run("Admin_NotTeacher", func(t *testing.T) {
+		assert.False(t, admin.IsTeacher(), "Админ не методист (хотя может все)")
 	})
 
 	t.Run("Admin_CanDoEverything", func(t *testing.T) {
@@ -76,22 +69,14 @@ func TestMethodologistRoleCheck(t *testing.T) {
 	})
 }
 
-// TestMethodologistCanCreateLesson проверяет логику CreateLesson
-func TestMethodologistCanCreateLesson(t *testing.T) {
-	methodologist := &models.User{
-		ID:        uuid.New(),
-		Email:     "methodologist@test.com",
-		FirstName: "Test",
-		LastName:  "Methodologist",
-		Role:      models.RoleMethodologist,
-	}
-
+// TestTeacherCanCreateLesson проверяет логику CreateLesson
+func TestTeacherCanCreateLesson(t *testing.T) {
 	teacher := &models.User{
 		ID:        uuid.New(),
 		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:      models.RoleMethodologist,
+		Role:      models.RoleTeacher,
 	}
 
 	admin := &models.User{
@@ -103,24 +88,23 @@ func TestMethodologistCanCreateLesson(t *testing.T) {
 	}
 
 	// Проверка что методист может создавать занятия (согласно lessons.go:103)
-	// if !user.IsAdmin() && !user.IsMethodologist()
-	canCreateMethodologist := methodologist.IsAdmin() || methodologist.IsMethodologist()
-	canCreateTeacher := teacher.IsAdmin() || teacher.IsMethodologist()
-	canCreateAdmin := admin.IsAdmin() || admin.IsMethodologist()
+	// if !user.IsAdmin() && !user.IsTeacher()
+	canCreateTeacher := teacher.IsAdmin() || teacher.IsTeacher()
+	canCreateAdmin := admin.IsAdmin() || admin.IsTeacher()
 
-	assert.True(t, canCreateMethodologist, "Методист должен создавать занятия")
+	assert.True(t, canCreateTeacher, "Методист должен создавать занятия")
 	assert.False(t, canCreateTeacher, "Учитель не должен создавать занятия")
 	assert.True(t, canCreateAdmin, "Админ должен создавать занятия")
 }
 
-// TestMethodologistCanUpdateLesson проверяет логику UpdateLesson
-func TestMethodologistCanUpdateLesson(t *testing.T) {
-	methodologist := &models.User{
+// TestTeacherCanUpdateLesson проверяет логику UpdateLesson
+func TestTeacherCanUpdateLesson(t *testing.T) {
+	teacher := &models.User{
 		ID:        uuid.New(),
-		Email:     "methodologist@test.com",
+		Email:     "teacher@test.com",
 		FirstName: "Test",
-		LastName:  "Methodologist",
-		Role:      models.RoleMethodologist,
+		LastName:  "Teacher",
+		Role:      models.RoleTeacher,
 	}
 
 	teacher1 := &models.User{
@@ -128,7 +112,7 @@ func TestMethodologistCanUpdateLesson(t *testing.T) {
 		Email:     "teacher1@test.com",
 		FirstName: "Test Teacher",
 		LastName:  "1",
-		Role:      models.RoleMethodologist,
+		Role:      models.RoleTeacher,
 	}
 
 	_ = &models.User{
@@ -136,7 +120,7 @@ func TestMethodologistCanUpdateLesson(t *testing.T) {
 		Email:     "teacher2@test.com",
 		FirstName: "Test Teacher",
 		LastName:  "2",
-		Role:      models.RoleMethodologist,
+		Role:      models.RoleTeacher,
 	}
 
 	admin := &models.User{
@@ -148,41 +132,33 @@ func TestMethodologistCanUpdateLesson(t *testing.T) {
 	}
 
 	// Логика из lessons.go:203
-	// if !user.IsAdmin() && !user.IsMethodologist()
+	// if !user.IsAdmin() && !user.IsTeacher()
 
-	t.Run("MethodologistCanEditAnyLesson", func(t *testing.T) {
-		canEdit := methodologist.IsAdmin() || methodologist.IsMethodologist()
+	t.Run("TeacherCanEditAnyLesson", func(t *testing.T) {
+		canEdit := teacher.IsAdmin() || teacher.IsTeacher()
 		assert.True(t, canEdit, "Методист должен редактировать любое занятие")
 	})
 
 	t.Run("TeacherCanEditOnlyHomework", func(t *testing.T) {
 		// Учитель может редактировать только homework_text своих уроков
-		canEditAll := teacher1.IsAdmin() || teacher1.IsMethodologist()
+		canEditAll := teacher1.IsAdmin() || teacher1.IsTeacher()
 		assert.False(t, canEditAll, "Учитель не может редактировать все поля")
 	})
 
 	t.Run("AdminCanEditAnyLesson", func(t *testing.T) {
-		canEdit := admin.IsAdmin() || admin.IsMethodologist()
+		canEdit := admin.IsAdmin() || admin.IsTeacher()
 		assert.True(t, canEdit, "Админ должен редактировать любое занятие")
 	})
 }
 
-// TestMethodologistCanDeleteLesson проверяет логику DeleteLesson
-func TestMethodologistCanDeleteLesson(t *testing.T) {
-	methodologist := &models.User{
-		ID:        uuid.New(),
-		Email:     "methodologist@test.com",
-		FirstName: "Test",
-		LastName:  "Methodologist",
-		Role:      models.RoleMethodologist,
-	}
-
+// TestTeacherCanDeleteLesson проверяет логику DeleteLesson
+func TestTeacherCanDeleteLesson(t *testing.T) {
 	teacher := &models.User{
 		ID:        uuid.New(),
 		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:      models.RoleMethodologist,
+		Role:      models.RoleTeacher,
 	}
 
 	admin := &models.User{
@@ -194,33 +170,24 @@ func TestMethodologistCanDeleteLesson(t *testing.T) {
 	}
 
 	// Логика из lessons.go:289
-	// if !user.IsAdmin() && !user.IsMethodologist()
+	// if !user.IsAdmin() && !user.IsTeacher()
 
-	canDeleteMethodologist := methodologist.IsAdmin() || methodologist.IsMethodologist()
-	canDeleteTeacher := teacher.IsAdmin() || teacher.IsMethodologist()
-	canDeleteAdmin := admin.IsAdmin() || admin.IsMethodologist()
+	canDeleteTeacher := teacher.IsAdmin() || teacher.IsTeacher()
+	canDeleteAdmin := admin.IsAdmin() || admin.IsTeacher()
 
-	assert.True(t, canDeleteMethodologist, "Методист должен удалять занятия")
+	assert.True(t, canDeleteTeacher, "Методист должен удалять занятия")
 	assert.False(t, canDeleteTeacher, "Учитель не должен удалять занятия")
 	assert.True(t, canDeleteAdmin, "Админ должен удалять занятия")
 }
 
-// TestMethodologistCanBulkEdit проверяет логику ApplyToAllSubsequent
-func TestMethodologistCanBulkEdit(t *testing.T) {
-	methodologist := &models.User{
-		ID:        uuid.New(),
-		Email:     "methodologist@test.com",
-		FirstName: "Test",
-		LastName:  "Methodologist",
-		Role:      models.RoleMethodologist,
-	}
-
+// TestTeacherCanBulkEdit проверяет логику ApplyToAllSubsequent
+func TestTeacherCanBulkEdit(t *testing.T) {
 	teacher := &models.User{
 		ID:        uuid.New(),
 		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:      models.RoleMethodologist,
+		Role:      models.RoleTeacher,
 	}
 
 	admin := &models.User{
@@ -232,33 +199,24 @@ func TestMethodologistCanBulkEdit(t *testing.T) {
 	}
 
 	// Логика из lessons.go:522
-	// if !admin.IsAdmin() && !admin.IsMethodologist()
+	// if !admin.IsAdmin() && !admin.IsTeacher()
 
-	canBulkEditMethodologist := methodologist.IsAdmin() || methodologist.IsMethodologist()
-	canBulkEditTeacher := teacher.IsAdmin() || teacher.IsMethodologist()
-	canBulkEditAdmin := admin.IsAdmin() || admin.IsMethodologist()
+	canBulkEditTeacher := teacher.IsAdmin() || teacher.IsTeacher()
+	canBulkEditAdmin := admin.IsAdmin() || admin.IsTeacher()
 
-	assert.True(t, canBulkEditMethodologist, "Методист должен делать массовое редактирование")
+	assert.True(t, canBulkEditTeacher, "Методист должен делать массовое редактирование")
 	assert.False(t, canBulkEditTeacher, "Учитель не должен делать массовое редактирование")
 	assert.True(t, canBulkEditAdmin, "Админ должен делать массовое редактирование")
 }
 
-// TestMethodologistCanEditPastLesson проверяет редактирование прошлых занятий
-func TestMethodologistCanEditPastLesson(t *testing.T) {
-	methodologist := &models.User{
-		ID:        uuid.New(),
-		Email:     "methodologist@test.com",
-		FirstName: "Test",
-		LastName:  "Methodologist",
-		Role:      models.RoleMethodologist,
-	}
-
+// TestTeacherCanEditPastLesson проверяет редактирование прошлых занятий
+func TestTeacherCanEditPastLesson(t *testing.T) {
 	teacher := &models.User{
 		ID:        uuid.New(),
 		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:      models.RoleMethodologist,
+		Role:      models.RoleTeacher,
 	}
 
 	admin := &models.User{
@@ -270,17 +228,16 @@ func TestMethodologistCanEditPastLesson(t *testing.T) {
 	}
 
 	// Логика из lessons.go:245
-	// isPastLesson && !user.IsAdmin() && !user.IsMethodologist() && !isHomeworkTextOnlyUpdate
+	// isPastLesson && !user.IsAdmin() && !user.IsTeacher() && !isHomeworkTextOnlyUpdate
 	// Методист и админ могут редактировать прошлые занятия
 
 	isPastLesson := true
 	isHomeworkTextOnlyUpdate := false
 
-	canEditPastMethodologist := !(isPastLesson && !methodologist.IsAdmin() && !methodologist.IsMethodologist() && !isHomeworkTextOnlyUpdate)
-	canEditPastTeacher := !(isPastLesson && !teacher.IsAdmin() && !teacher.IsMethodologist() && !isHomeworkTextOnlyUpdate)
-	canEditPastAdmin := !(isPastLesson && !admin.IsAdmin() && !admin.IsMethodologist() && !isHomeworkTextOnlyUpdate)
+	canEditPastTeacher := !(isPastLesson && !teacher.IsAdmin() && !teacher.IsTeacher() && !isHomeworkTextOnlyUpdate)
+	canEditPastAdmin := !(isPastLesson && !admin.IsAdmin() && !admin.IsTeacher() && !isHomeworkTextOnlyUpdate)
 
-	assert.True(t, canEditPastMethodologist, "Методист должен редактировать прошлые занятия")
+	assert.True(t, canEditPastTeacher, "Методист должен редактировать прошлые занятия")
 	assert.False(t, canEditPastTeacher, "Учитель не должен редактировать прошлые занятия (кроме homework)")
 	assert.True(t, canEditPastAdmin, "Админ должен редактировать прошлые занятия")
 }
@@ -292,13 +249,13 @@ func TestTeacherHomeworkOnlyPermission(t *testing.T) {
 		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:      models.RoleMethodologist,
+		Role:      models.RoleTeacher,
 	}
 
 	lessonTeacherID := teacher.ID
 
 	// Учитель пытается обновить только homework своего урока
-	isTeacherOwnLesson := teacher.IsMethodologist() && lessonTeacherID == teacher.ID
+	isTeacherOwnLesson := teacher.IsTeacher() && lessonTeacherID == teacher.ID
 	isHomeworkTextOnlyUpdate := true // только homework_text
 
 	// Логика из lessons.go:205
@@ -312,7 +269,7 @@ func TestTeacherHomeworkOnlyPermission(t *testing.T) {
 	// Учитель пытается обновить время своего урока
 	isHomeworkTextOnlyUpdate = false // не только homework
 
-	if teacher.IsAdmin() || teacher.IsMethodologist() {
+	if teacher.IsAdmin() || teacher.IsTeacher() {
 		t.Fail() // Учитель не админ и не методист
 	} else {
 		if isTeacherOwnLesson && isHomeworkTextOnlyUpdate {

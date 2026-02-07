@@ -61,7 +61,7 @@ export const HomeworkSection = ({ lessonId, lesson, onHomeworkCountChange, onHom
   // Проверка прав доступа
   // Admin может редактировать все уроки
   // Teacher может редактировать только свои уроки (где teacher_id === user.id)
-  // Methodologist может редактировать все уроки
+  // Teacher может редактировать все уроки
   // Student может только просматривать (canEdit = false)
   // Примечание: Нормализуем UUID к lowercase для надежного сравнения
   const normalizeId = (id) => String(id || '').toLowerCase().trim();
@@ -72,7 +72,7 @@ export const HomeworkSection = ({ lessonId, lesson, onHomeworkCountChange, onHom
   const canEdit = !readOnly && (
     user?.role === 'admin' ||
     isTeacherOwnLesson ||
-    user?.role === 'methodologist'
+    user?.role === 'teacher'
   );
 
   /**

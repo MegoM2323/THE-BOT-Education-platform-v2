@@ -2,16 +2,16 @@ import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Sidebar from "../components/common/Sidebar.jsx";
 import ErrorBoundary from "../components/common/ErrorBoundary.jsx";
-import MethodologistCalendar from "../components/methodologist/MethodologistCalendar.jsx";
-import MethodologistProfile from "../components/methodologist/MethodologistProfile.jsx";
+import TeacherCalendar from "../components/teacher/TeacherCalendar.jsx";
+import TeacherProfile from "../components/teacher/TeacherProfile.jsx";
 import Spinner from "../components/common/Spinner.jsx";
-import MethodologistCreditsView from "../components/methodologist/MethodologistCreditsView.jsx";
+import TeacherCreditsView from "../components/teacher/TeacherCreditsView.jsx";
 import ChatPage from "./ChatPage.jsx";
 import { useAuth } from "../hooks/useAuth.js";
 import { ROLES } from "../utils/constants.js";
 import "./Dashboard.css";
 
-export const MethodologistDashboard = () => {
+export const TeacherDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAuthorizing, setIsAuthorizing] = useState(true);
@@ -29,7 +29,7 @@ export const MethodologistDashboard = () => {
       return;
     }
 
-    if (user.role !== ROLES.METHODOLOGIST) {
+    if (user.role !== ROLES.TEACHER) {
       if (user.role === ROLES.STUDENT) {
         navigate("/dashboard/student", { replace: true });
       } else if (user.role === ROLES.ADMIN) {
@@ -66,7 +66,7 @@ export const MethodologistDashboard = () => {
 
   const navLinks = [
     {
-      path: "/dashboard/methodologist/calendar",
+      path: "/dashboard/teacher/calendar",
       label: "Календарь",
       icon: (
         <svg
@@ -86,7 +86,7 @@ export const MethodologistDashboard = () => {
       testId: "nav-calendar",
     },
     {
-      path: "/dashboard/methodologist/profile",
+      path: "/dashboard/teacher/profile",
       label: "Профиль",
       icon: (
         <svg
@@ -106,7 +106,7 @@ export const MethodologistDashboard = () => {
       testId: "nav-profile",
     },
     {
-      path: "/dashboard/methodologist/credits",
+      path: "/dashboard/teacher/credits",
       label: "Кредиты",
       icon: (
         <svg
@@ -123,7 +123,7 @@ export const MethodologistDashboard = () => {
       testId: "nav-credits",
     },
     {
-      path: "/dashboard/methodologist/chat",
+      path: "/dashboard/teacher/chat",
       label: "Чат",
       icon: (
         <svg
@@ -140,7 +140,7 @@ export const MethodologistDashboard = () => {
           />
         </svg>
       ),
-      testId: "nav-methodologist-chat",
+      testId: "nav-teacher-chat",
     },
   ];
 
@@ -159,7 +159,7 @@ export const MethodologistDashboard = () => {
     );
   }
 
-  if (!user || user.role !== ROLES.METHODOLOGIST) {
+  if (!user || user.role !== ROLES.TEACHER) {
     return null;
   }
 
@@ -194,7 +194,7 @@ export const MethodologistDashboard = () => {
               path="calendar"
               element={
                 <ErrorBoundary>
-                  <MethodologistCalendar />
+                  <TeacherCalendar />
                 </ErrorBoundary>
               }
             />
@@ -202,7 +202,7 @@ export const MethodologistDashboard = () => {
               path="profile"
               element={
                 <ErrorBoundary>
-                  <MethodologistProfile />
+                  <TeacherProfile />
                 </ErrorBoundary>
               }
             />
@@ -210,7 +210,7 @@ export const MethodologistDashboard = () => {
               path="credits"
               element={
                 <ErrorBoundary>
-                  <MethodologistCreditsView />
+                  <TeacherCreditsView />
                 </ErrorBoundary>
               }
             />
@@ -237,4 +237,4 @@ export const MethodologistDashboard = () => {
   );
 };
 
-export default MethodologistDashboard;
+export default TeacherDashboard;

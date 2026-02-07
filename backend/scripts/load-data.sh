@@ -179,9 +179,9 @@ INSERT INTO users (id, email, password_hash, full_name, role) VALUES
 
 -- Преподаватели
 INSERT INTO users (id, email, password_hash, full_name, role) VALUES
-('10000000-0000-0000-0000-000000000001', 'ivan.petrov@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Иван Петров', 'methodologist'),
-('10000000-0000-0000-0000-000000000002', 'maria.sidorova@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Мария Сидорова', 'methodologist'),
-('10000000-0000-0000-0000-000000000003', 'alexey.kozlov@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Алексей Козлов', 'methodologist');
+('10000000-0000-0000-0000-000000000001', 'ivan.petrov@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Иван Петров', 'teacher'),
+('10000000-0000-0000-0000-000000000002', 'maria.sidorova@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Мария Сидорова', 'teacher'),
+('10000000-0000-0000-0000-000000000003', 'alexey.kozlov@tutoring.com', '\$2a\$10\$LiLWVAWbrxx/8wSy4H2of.bs1tpzNA1y/qrnpdzT9wu0AlqTfB6jy', 'Алексей Козлов', 'teacher');
 
 -- Ученики (с payment_enabled)
 INSERT INTO users (id, email, password_hash, full_name, role, payment_enabled) VALUES

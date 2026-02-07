@@ -596,10 +596,10 @@ export const LessonEditModal = ({
 
       // Установить список преподавателей и текущего преподавателя
       // Для методиста показываем только его самого
-      const isUserMethodologist = user?.role === ROLES.METHODOLOGIST;
+      const isUserTeacher = user?.role === ROLES.TEACHER;
       let teachersList;
 
-      if (isUserMethodologist && user?.id) {
+      if (isUserTeacher && user?.id) {
         // Методист видит только себя в списке
         teachersList = [
           {
@@ -1149,15 +1149,15 @@ export const LessonEditModal = ({
     checkStartTime = new Date(lesson.start_time);
   }
   const isPastLesson = checkStartTime < new Date();
-  const isMethodologist = user?.role === ROLES.METHODOLOGIST;
+  const isTeacher = user?.role === ROLES.TEACHER;
 
   // Проверка: методист может редактировать только свои занятия
-  const isOwnLesson = !isMethodologist || lesson.teacher_id === user?.id;
+  const isOwnLesson = !isTeacher || lesson.teacher_id === user?.id;
   const canEditLesson = isOwnLesson;
 
   // Заморозка редактирования: прошедшее занятие для методиста ИЛИ чужое занятие для методиста
   const shouldFreezeInfoTab =
-    (isPastLesson && isMethodologist) || (isMethodologist && !isOwnLesson);
+    (isPastLesson && isTeacher) || (isTeacher && !isOwnLesson);
 
   // Скрыть recurring UI для занятий в серии
   const showRecurringControls = !lesson?.recurring_group_id;
@@ -1262,7 +1262,7 @@ export const LessonEditModal = ({
             {activeTab === "info" && (
               <>
                 {/* Предупреждение о чужом занятии для методиста */}
-                {isMethodologist && !isOwnLesson && (
+                {isTeacher && !isOwnLesson && (
                   <div className="lesson-edit-warning not-own-lesson-warning">
                     <span className="warning-icon">
                       <svg
@@ -1334,10 +1334,10 @@ export const LessonEditModal = ({
                           disabled={
                             shouldFreezeInfoTab ||
                             teachers.length === 0 ||
-                            isMethodologist
+                            isTeacher
                           }
                           title={
-                            isMethodologist
+                            isTeacher
                               ? "Вы можете назначать только себя"
                               : ""
                           }
@@ -1354,7 +1354,7 @@ export const LessonEditModal = ({
                             {formErrors.teacher_id}
                           </span>
                         )}
-                        {isMethodologist && isOwnLesson && (
+                        {isTeacher && isOwnLesson && (
                           <small className="form-hint">
                             Вы можете назначать только себя
                           </small>

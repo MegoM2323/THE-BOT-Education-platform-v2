@@ -8,7 +8,7 @@ vi.mock('../client.js', () => ({
   },
 }));
 
-describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, methodologists)', () => {
+describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, teachers)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -19,7 +19,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
 
   describe('T001: Deduplication Tests', () => {
     // TEST 1 (FAILING): getAssignableTeachersAll should deduplicate users
-    // Bug: Function merges teachers + admins + methodologists but doesn't deduplicate
+    // Bug: Function merges teachers + admins + teachers but doesn't deduplicate
     // If same user appears in multiple arrays, they'll be duplicated
     //
     // Current behavior: Returns duplicated users
@@ -34,7 +34,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         id: 'user-1',
         full_name: 'Alice Johnson',
         email: 'alice@example.com',
-        role: 'methodologist',
+        role: 'teacher',
       };
 
       const sharedUser2 = {
@@ -48,7 +48,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         id: 'user-3',
         full_name: 'Carol White',
         email: 'carol@example.com',
-        role: 'methodologist',
+        role: 'teacher',
       };
 
       const adminOnly = {
@@ -58,14 +58,14 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         role: 'admin',
       };
 
-      const methodologistOnly = {
+      const teacherOnly = {
         id: 'user-5',
         full_name: 'Eve Green',
         email: 'eve@example.com',
-        role: 'methodologist',
+        role: 'teacher',
       };
 
-      // Mock API responses for three separate calls (teachers, admins, methodologists)
+      // Mock API responses for three separate calls (teachers, admins, teachers)
       // Teachers list (includes sharedUser1 and teacherOnly)
       const teachersResponse = {
         users: [sharedUser1, teacherOnly],
@@ -79,17 +79,17 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         meta: { total_pages: 1, page: 1, per_page: 50, total: 3 },
       };
 
-      // Methodologists list (includes sharedUser2 and methodologistOnly)
+      // Teachers list (includes sharedUser2 and teacherOnly)
       // Note: sharedUser2 appears again here - another duplicate!
-      const methodologistsResponse = {
-        users: [sharedUser2, methodologistOnly],
+      const teachersResponse = {
+        users: [sharedUser2, teacherOnly],
         meta: { total_pages: 1, page: 1, per_page: 50, total: 2 },
       };
 
-      // Setup mocks for Promise.all([teachers, admins, methodologists])
+      // Setup mocks for Promise.all([teachers, admins, teachers])
       // First call gets teachers
       // Second call gets admins
-      // Third call gets methodologists
+      // Third call gets teachers
       let callCount = 0;
       apiClientModule.default.get.mockImplementation((url, options) => {
         callCount++;
@@ -98,7 +98,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         } else if (callCount === 2) {
           return Promise.resolve(adminsResponse);
         } else if (callCount === 3) {
-          return Promise.resolve(methodologistsResponse);
+          return Promise.resolve(teachersResponse);
         }
         return Promise.reject(new Error('Unexpected call'));
       });
@@ -137,7 +137,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         id: 'shared-user',
         full_name: 'Shared Teacher',
         email: 'shared@example.com',
-        role: 'methodologist',
+        role: 'teacher',
       };
 
       // Mock all three calls returning the same user
@@ -151,7 +151,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         meta: { total_pages: 1, page: 1, per_page: 50, total: 1 },
       };
 
-      const methodologistsResponse = {
+      const teachersResponse = {
         users: [user],
         meta: { total_pages: 1, page: 1, per_page: 50, total: 1 },
       };
@@ -161,7 +161,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         callCount++;
         if (callCount === 1) return Promise.resolve(teachersResponse);
         if (callCount === 2) return Promise.resolve(adminsResponse);
-        if (callCount === 3) return Promise.resolve(methodologistsResponse);
+        if (callCount === 3) return Promise.resolve(teachersResponse);
         return Promise.reject(new Error('Unexpected call'));
       });
 
@@ -175,8 +175,8 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
     it('test_getAssignableTeachersAll_preserves_unique_users', async () => {
       // Test: all users are unique across lists
       const teachers = [
-        { id: 't1', full_name: 'Teacher One', role: 'methodologist' },
-        { id: 't2', full_name: 'Teacher Two', role: 'methodologist' },
+        { id: 't1', full_name: 'Teacher One', role: 'teacher' },
+        { id: 't2', full_name: 'Teacher Two', role: 'teacher' },
       ];
 
       const admins = [
@@ -184,8 +184,8 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         { id: 'a2', full_name: 'Admin Two', role: 'admin' },
       ];
 
-      const methodologists = [
-        { id: 'm1', full_name: 'Methodologist One', role: 'methodologist' },
+      const teachers = [
+        { id: 'm1', full_name: 'Teacher One', role: 'teacher' },
       ];
 
       let callCount = 0;
@@ -205,7 +205,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         }
         if (callCount === 3) {
           return Promise.resolve({
-            users: methodologists,
+            users: teachers,
             meta: { total_pages: 1, page: 1, per_page: 50, total: 1 },
           });
         }
@@ -244,7 +244,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
         }
         if (callCount === 3) {
           return Promise.resolve({
-            users: [], // Methodologists empty
+            users: [], // Teachers empty
             meta: { total_pages: 1, page: 1, per_page: 50, total: 0 },
           });
         }
@@ -262,9 +262,9 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
   describe('T002: Sorting and Display', () => {
     it('test_getAssignableTeachersAll_sorted_by_full_name_russian', async () => {
       const users = [
-        { id: '3', full_name: 'Вячеслав Петров', role: 'methodologist' },
-        { id: '1', full_name: 'Алексей Иванов', role: 'methodologist' },
-        { id: '2', full_name: 'Борис Сидоров', role: 'methodologist' },
+        { id: '3', full_name: 'Вячеслав Петров', role: 'teacher' },
+        { id: '1', full_name: 'Алексей Иванов', role: 'teacher' },
+        { id: '2', full_name: 'Борис Сидоров', role: 'teacher' },
       ];
 
       let callCount = 0;
@@ -313,7 +313,7 @@ describe('getAssignableTeachersAll() - Assignable Teachers (teachers, admins, me
 
       await getAssignableTeachersAll();
 
-      // Should make exactly 3 calls: one for teachers, one for admins, one for methodologists
+      // Should make exactly 3 calls: one for teachers, one for admins, one for teachers
       expect(apiClientModule.default.get).toHaveBeenCalledTimes(3);
     });
 

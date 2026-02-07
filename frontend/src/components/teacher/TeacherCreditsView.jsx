@@ -5,9 +5,9 @@ import StudentCreditsHistoryModal from '../common/StudentCreditsHistoryModal.jsx
 import { useNotification } from '../../hooks/useNotification.js';
 import * as usersAPI from '../../api/users.js';
 import * as creditsAPI from '../../api/credits.js';
-import './MethodologistCreditsView.css';
+import './TeacherCreditsView.css';
 
-export const MethodologistCreditsView = () => {
+export const TeacherCreditsView = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortColumn, setSortColumn] = useState('name');
@@ -89,20 +89,20 @@ export const MethodologistCreditsView = () => {
 
   if (loading) {
     return (
-      <div className="methodologist-credits-loading">
+      <div className="teacher-credits-loading">
         <Spinner />
       </div>
     );
   }
 
   return (
-    <div className="methodologist-credits-view">
-      <div className="methodologist-credits-header">
-        <h2 className="methodologist-credits-title">Просмотр кредитов студентов</h2>
+    <div className="teacher-credits-view">
+      <div className="teacher-credits-header">
+        <h2 className="teacher-credits-title">Просмотр кредитов студентов</h2>
       </div>
 
-      <div className="methodologist-credits-table-wrapper">
-        <table className="methodologist-credits-table">
+      <div className="teacher-credits-table-wrapper">
+        <table className="teacher-credits-table">
           <thead>
             <tr>
               <th
@@ -167,4 +167,4 @@ export const MethodologistCreditsView = () => {
   );
 };
 
-export default MethodologistCreditsView;
+export default TeacherCreditsView;

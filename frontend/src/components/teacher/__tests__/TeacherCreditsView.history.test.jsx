@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from '../../../test/test-utils.jsx';
-import { MethodologistCreditsView } from '../MethodologistCreditsView.jsx';
+import { TeacherCreditsView } from '../TeacherCreditsView.jsx';
 import * as usersAPI from '../../../api/users.js';
 import * as creditsAPI from '../../../api/credits.js';
 import { useNotification } from '../../../hooks/useNotification.js';
@@ -23,7 +23,7 @@ vi.mock('../../common/StudentCreditsHistoryModal.jsx', () => ({
     ) : null,
 }));
 
-describe('MethodologistCreditsView - History Modal Integration', () => {
+describe('TeacherCreditsView - History Modal Integration', () => {
   const mockStudents = [
     { id: '1', full_name: 'Анна Иванова', email: 'anna@example.com', credits: 50 },
     { id: '2', full_name: 'Борис Петров', email: 'boris@example.com', credits: 100 },
@@ -57,7 +57,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
 
   describe('history button rendering', () => {
     it('should render "history" button for each student in table', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -66,7 +66,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should have correct aria-label on history button', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -79,7 +79,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     it('should display history button for only visible students', async () => {
       usersAPI.getStudentsAll.mockResolvedValue([mockStudents[0]]);
 
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -88,7 +88,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should show correct button styling', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -104,7 +104,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
 
   describe('history modal opening', () => {
     it('should open modal when history button is clicked', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -120,13 +120,13 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should NOT open modal initially', () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       expect(screen.queryByTestId('history-modal')).not.toBeInTheDocument();
     });
 
     it('should pass correct student object to modal', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -142,7 +142,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should pass correct student object for different students', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -175,7 +175,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should include student full_name in modal', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -194,7 +194,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
 
   describe('modal closing', () => {
     it('should close modal when close button is clicked', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -217,7 +217,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should be able to open modal again after closing', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -248,7 +248,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should reset selectedStudentForHistory on close', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -281,7 +281,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
 
   describe('StudentCreditsHistoryModal props', () => {
     it('should pass isOpen={true} when modal should be visible', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -297,13 +297,13 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should pass isOpen={false} when modal should be hidden', () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       expect(screen.queryByTestId('history-modal')).not.toBeInTheDocument();
     });
 
     it('should pass onClose callback to modal', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -327,7 +327,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should pass student object with correct structure to modal', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -344,7 +344,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should pass null student when modal should be hidden', () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       expect(screen.queryByTestId('history-modal')).not.toBeInTheDocument();
     });
@@ -353,7 +353,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
 
   describe('multiple modal interactions', () => {
     it('should switch between different students history', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -402,7 +402,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should close modal without affecting other UI elements', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -433,7 +433,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
 
   describe('history button positioning', () => {
     it('should display history button in actions column', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -448,7 +448,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should be the only button in actions column (no add/deduct)', async () => {
-      const { container } = renderWithProviders(<MethodologistCreditsView />);
+      const { container } = renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -466,7 +466,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should not show add/deduct buttons', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -483,7 +483,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
 
   describe('modal isolation', () => {
     it('should only show one modal at a time', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -500,7 +500,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     });
 
     it('should not have credits modal', async () => {
-      const { container } = renderWithProviders(<MethodologistCreditsView />);
+      const { container } = renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');
@@ -517,7 +517,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
     it('should not show history buttons when students list is empty', async () => {
       usersAPI.getStudentsAll.mockResolvedValue([]);
 
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         expect(screen.getByText('Студенты не найдены')).toBeInTheDocument();
@@ -530,7 +530,7 @@ describe('MethodologistCreditsView - History Modal Integration', () => {
 
   describe('sorting does not affect history modal', () => {
     it('should open history modal for sorted student', async () => {
-      renderWithProviders(<MethodologistCreditsView />);
+      renderWithProviders(<TeacherCreditsView />);
 
       await waitFor(() => {
         const historyButtons = screen.getAllByTestId('view-history-button');

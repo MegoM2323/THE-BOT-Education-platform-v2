@@ -239,7 +239,7 @@ func TestLessonBroadcastRepo_ListBroadcastsByLesson_WithSenderName(t *testing.T)
 	_, err := pool.Exec(ctx, `
 		INSERT INTO users (id, email, password_hash, first_name, last_name, role, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-	`, teacherID, "teacher@test.com", "hash", "Иван", "Иванов", "methodologist", time.Now(), time.Now())
+	`, teacherID, "teacher@test.com", "hash", "Иван", "Иванов", "teacher", time.Now(), time.Now())
 	require.NoError(t, err)
 
 	adminID := uuid.New()

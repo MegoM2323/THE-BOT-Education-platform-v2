@@ -27,8 +27,8 @@ func TestSendLessonBroadcastDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:             uuid.New(),
 				Email:          "teacher@test.com",
-				FullName:       "Teacher Name",
-				Role:           models.RoleMethodologist,
+				FirstName: "Teacher Name", LastName: "Lastname",
+				Role:           models.RoleTeacher,
 				PaymentEnabled: false,
 				CreatedAt:      time.Now(),
 				UpdatedAt:      time.Now(),
@@ -45,8 +45,8 @@ func TestSendLessonBroadcastDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:             uuid.New(),
 				Email:          "teacher@test.com",
-				FullName:       "Teacher Name",
-				Role:           models.RoleMethodologist,
+				FirstName: "Teacher Name", LastName: "Lastname",
+				Role:           models.RoleTeacher,
 				PaymentEnabled: false,
 				CreatedAt:      time.Now(),
 				UpdatedAt:      time.Now(),
@@ -62,7 +62,7 @@ func TestSendLessonBroadcastDeletedUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Создаем mock handler
-			handler := NewMethodologistHandler(nil, nil, nil, nil)
+			handler := NewTeacherHandler(nil, nil, nil, nil)
 
 			// Создаем HTTP request
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/teacher/lessons/invalid-id/broadcast", nil)
@@ -102,8 +102,8 @@ func TestGetTeacherScheduleDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:             uuid.New(),
 				Email:          "teacher@test.com",
-				FullName:       "Teacher Name",
-				Role:           models.RoleMethodologist,
+				FirstName: "Teacher Name", LastName: "Lastname",
+				Role:           models.RoleTeacher,
 				PaymentEnabled: false,
 				CreatedAt:      time.Now(),
 				UpdatedAt:      time.Now(),
@@ -120,7 +120,7 @@ func TestGetTeacherScheduleDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:             uuid.New(),
 				Email:          "admin@test.com",
-				FullName:       "Admin Name",
+				FirstName: "Admin Name", LastName: "Lastname",
 				Role:           models.RoleAdmin,
 				PaymentEnabled: false,
 				CreatedAt:      time.Now(),
@@ -138,8 +138,8 @@ func TestGetTeacherScheduleDeletedUser(t *testing.T) {
 			user: &models.User{
 				ID:             uuid.New(),
 				Email:          "teacher@test.com",
-				FullName:       "Teacher Name",
-				Role:           models.RoleMethodologist,
+				FirstName: "Teacher Name", LastName: "Lastname",
+				Role:           models.RoleTeacher,
 				PaymentEnabled: false,
 				CreatedAt:      time.Now(),
 				UpdatedAt:      time.Now(),
@@ -162,7 +162,7 @@ func TestGetTeacherScheduleDeletedUser(t *testing.T) {
 			}
 
 			// Создаем mock handler
-			handler := NewMethodologistHandler(nil, nil, nil, nil)
+			handler := NewTeacherHandler(nil, nil, nil, nil)
 
 			// Создаем HTTP request
 			req := httptest.NewRequest(http.MethodGet, "/api/v1/teacher/schedule", nil)
@@ -175,7 +175,7 @@ func TestGetTeacherScheduleDeletedUser(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// Вызываем handler
-			handler.GetMethodologistSchedule(w, req)
+			handler.GetTeacherSchedule(w, req)
 
 			// Проверяем status код (для deleted users должен быть 401)
 			assert.Equal(t, tt.expectedStatus, w.Code, "expected status %d, got %d", tt.expectedStatus, w.Code)

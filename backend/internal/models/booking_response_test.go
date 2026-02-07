@@ -129,7 +129,7 @@ func TestBookingResponse_ToBookingResponse_FromBookingWithDetails(t *testing.T) 
 				TeacherID:        teacherID,
 				TeacherName:      "John Doe",
 				StudentFullName:  "Jane Smith",
-				StudentEmail:     "jane@example.com",
+		// StudentEmail removed duplicate
 				BookingCreatedAt: bookingCreatedAt,
 			},
 			verify: func(resp *BookingResponse) {

@@ -97,10 +97,10 @@ func (s *ChatService) GetOrCreateRoom(ctx context.Context, currentUserID, otherU
 		return nil, fmt.Errorf("students cannot chat with each other")
 	}
 
-	if currentUser.IsMethodologist() || currentUser.IsAdmin() {
+	if currentUser.IsTeacher() || currentUser.IsAdmin() {
 		teacherID = currentUserID
 		studentID = otherUserID
-	} else if otherUser.IsMethodologist() || otherUser.IsAdmin() {
+	} else if otherUser.IsTeacher() || otherUser.IsAdmin() {
 		teacherID = otherUserID
 		studentID = currentUserID
 	} else {
@@ -124,7 +124,7 @@ func (s *ChatService) GetUserChats(ctx context.Context, userID uuid.UUID, role s
 	var err error
 
 	switch role {
-	case string(models.RoleMethodologist), string(models.RoleAdmin):
+	case string(models.RoleTeacher), string(models.RoleAdmin):
 		rooms, err = s.chatRepo.ListRoomsByTeacher(ctx, userID)
 	case string(models.RoleStudent):
 		rooms, err = s.chatRepo.ListRoomsByStudent(ctx, userID)

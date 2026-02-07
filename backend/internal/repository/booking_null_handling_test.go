@@ -211,7 +211,7 @@ func TestNullHandling_BookingWithDetailsNull(t *testing.T) {
 				TeacherID:        uuid.New(),
 				TeacherName:      "Teacher",
 				StudentFullName:  "Student",
-				StudentEmail:     "test@example.com",
+			// StudentEmail removed duplicate
 				BookingCreatedAt: time.Now(),
 			},
 			verifyFn: func(resp *models.BookingResponse) {

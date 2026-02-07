@@ -53,13 +53,13 @@ func TestListStudentsPaymentStatus_Success(t *testing.T) {
 	students := []*models.StudentPaymentStatus{
 		{
 			ID:             uuid.New(),
-			FullName:       "Иван Петров",
+			FirstName: "Иван Петров", LastName: "Lastname",
 			Email:          "ivan@example.com",
 			PaymentEnabled: true,
 		},
 		{
 			ID:             uuid.New(),
-			FullName:       "Мария Сидорова",
+			FirstName: "Мария Сидорова", LastName: "Lastname",
 			Email:          "maria@example.com",
 			PaymentEnabled: false,
 		},
@@ -107,7 +107,7 @@ func TestListStudentsPaymentStatus_FilterEnabled(t *testing.T) {
 	students := []*models.StudentPaymentStatus{
 		{
 			ID:             uuid.New(),
-			FullName:       "Иван Петров",
+			FirstName: "Иван Петров", LastName: "Lastname",
 			Email:          "ivan@example.com",
 			PaymentEnabled: true,
 		},
@@ -183,7 +183,7 @@ func TestUpdatePaymentStatus_Success(t *testing.T) {
 
 	updatedUser := &models.User{
 		ID:             studentID,
-		FullName:       "Иван Петров",
+		FirstName: "Иван Петров", LastName: "Lastname",
 		Email:          "ivan@example.com",
 		Role:           models.RoleStudent,
 		PaymentEnabled: enabled,

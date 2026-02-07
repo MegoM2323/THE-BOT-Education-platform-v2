@@ -14,8 +14,6 @@ export const Header = () => {
     switch (user.role) {
       case "admin":
         return "/dashboard/admin";
-      case "methodologist":
-        return "/dashboard/methodologist";
       case "teacher":
         return "/dashboard/teacher";
       case "student":

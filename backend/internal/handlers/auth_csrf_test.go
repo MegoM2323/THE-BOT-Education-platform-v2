@@ -55,7 +55,7 @@ func TestLoginGeneratesCSRFToken(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "CSRF Test User",
+		FirstName: "CSRF Test User", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)
@@ -209,7 +209,7 @@ func TestGetCSRFTokenEndpoint(t *testing.T) {
 	user, err := userService.CreateUser(ctx, &models.CreateUserRequest{
 		Email:    uniqueEmail,
 		Password: testPassword,
-		FullName: "CSRF Endpoint Test User",
+		FirstName: "CSRF Endpoint Test User", LastName: "Lastname",
 		Role:     "student",
 	})
 	require.NoError(t, err)

@@ -30,7 +30,7 @@ func TestGetVisibleLessons_AdminVsStudent_IdenticalForBookedLessons(t *testing.T
 
 	// Create test users
 	admin := createTestServiceUser(t, db, ctx, "admin.consistency@test.com", models.RoleAdmin)
-	teacher := createTestServiceUser(t, db, ctx, "teacher.consistency@test.com", models.RoleMethodologist)
+	teacher := createTestServiceUser(t, db, ctx, "teacher.consistency@test.com", models.RoleTeacher)
 	student := createTestServiceUser(t, db, ctx, "student.consistency@test.com", models.RoleStudent)
 
 	// Create 3 lessons
@@ -113,7 +113,7 @@ func TestGetVisibleLessons_StudentBookedIndividualAndGroupLesson(t *testing.T) {
 	lessonRepo := repository.NewLessonRepository(db)
 
 	// Create test users
-	teacher := createTestServiceUser(t, db, ctx, "teacher.mixed@test.com", models.RoleMethodologist)
+	teacher := createTestServiceUser(t, db, ctx, "teacher.mixed@test.com", models.RoleTeacher)
 	student := createTestServiceUser(t, db, ctx, "student.mixed@test.com", models.RoleStudent)
 
 	// Create past individual lesson
@@ -182,7 +182,7 @@ func TestGetVisibleLessons_AfterBookingCancellation(t *testing.T) {
 	lessonRepo := repository.NewLessonRepository(db)
 
 	// Create test users
-	teacher := createTestServiceUser(t, db, ctx, "teacher.cancel@test.com", models.RoleMethodologist)
+	teacher := createTestServiceUser(t, db, ctx, "teacher.cancel@test.com", models.RoleTeacher)
 	student := createTestServiceUser(t, db, ctx, "student.cancel@test.com", models.RoleStudent)
 
 	// Create future individual lesson

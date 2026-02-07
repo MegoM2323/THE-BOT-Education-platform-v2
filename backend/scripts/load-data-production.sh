@@ -84,7 +84,7 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "Test credentials:"
     echo "  Admin: admin@thebot.ru / password123"
-    echo "  Methodologist: method1@thebot.ru / password123"
+    echo "  Teacher: method1@thebot.ru / password123"
     echo "  Student: student1@thebot.ru / password123"
     echo ""
 else

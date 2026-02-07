@@ -298,7 +298,7 @@ func TestGenerateLinkToken_AfterFailedAttempt_WorksCorrectly(t *testing.T) {
 	user := &models.User{
 		ID:        userID,
 		Email:     "test@example.com",
-		FullName:  "Test User",
+		FirstName: "Test User", LastName: "Lastname",
 		Role:      "student",
 		DeletedAt: sql.NullTime{Valid: false},
 	}
@@ -348,7 +348,7 @@ func TestGenerateLinkToken_WithValidLink_ReturnsError(t *testing.T) {
 	user := &models.User{
 		ID:        userID,
 		Email:     "test@example.com",
-		FullName:  "Test User",
+		FirstName: "Test User", LastName: "Lastname",
 		Role:      "student",
 		DeletedAt: sql.NullTime{Valid: false},
 	}

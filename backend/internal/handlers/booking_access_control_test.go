@@ -49,14 +49,16 @@ func TestBookingHandler_AccessControl(t *testing.T) {
 		creditRepo,
 		cancelledBookingRepo,
 		bookingValidator,
+		nil, // telegramService
+		nil, // userRepo
 	)
 
 	// Создаём handler
 	bookingHandler := NewBookingHandler(bookingService)
 
 	// Создаём тестовые данные: два студента, два учителя, два занятия
-	teacher1 := createTestUser(t, sqlxDB, "teacher1@test.com", "Test Teacher 1", string(models.RoleMethodologist))
-	teacher2 := createTestUser(t, sqlxDB, "teacher2@test.com", "Test Teacher 2", string(models.RoleMethodologist))
+	teacher1 := createTestUser(t, sqlxDB, "teacher1@test.com", "Test Teacher 1", string(models.RoleTeacher))
+	teacher2 := createTestUser(t, sqlxDB, "teacher2@test.com", "Test Teacher 2", string(models.RoleTeacher))
 	admin := createTestUser(t, sqlxDB, "admin@test.com", "Test Admin", string(models.RoleAdmin))
 	student := createTestUser(t, sqlxDB, "student@test.com", "Test Student", string(models.RoleStudent))
 	student2 := createTestUser(t, sqlxDB, "student2@test.com", "Test Student 2", string(models.RoleStudent))
@@ -219,14 +221,16 @@ func TestBookingHandler_GetBookingStatus_AccessControl(t *testing.T) {
 		creditRepo,
 		cancelledBookingRepo,
 		bookingValidator,
+		nil, // telegramService
+		nil, // userRepo
 	)
 
 	// Создаём handler
 	bookingHandler := NewBookingHandler(bookingService)
 
 	// Создаём тестовые данные
-	teacher1 := createTestUser(t, sqlxDB, "teacher1@test.com", "Test Teacher 1", string(models.RoleMethodologist))
-	teacher2 := createTestUser(t, sqlxDB, "teacher2@test.com", "Test Teacher 2", string(models.RoleMethodologist))
+	teacher1 := createTestUser(t, sqlxDB, "teacher1@test.com", "Test Teacher 1", string(models.RoleTeacher))
+	teacher2 := createTestUser(t, sqlxDB, "teacher2@test.com", "Test Teacher 2", string(models.RoleTeacher))
 	student := createTestUser(t, sqlxDB, "student@test.com", "Test Student", string(models.RoleStudent))
 	student2 := createTestUser(t, sqlxDB, "student2@test.com", "Test Student 2", string(models.RoleStudent))
 

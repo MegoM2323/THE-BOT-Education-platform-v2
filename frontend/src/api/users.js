@@ -146,7 +146,7 @@ export const getUserStats = async (userId, options = {}) => {
  * @returns {Promise<Array>} Список учителей
  */
 export const getTeachers = async (options = {}) => {
-  return await getUsers({ role: 'methodologist' }, options);
+  return await getUsers({ role: 'teacher' }, options);
 };
 
 /**
@@ -273,7 +273,7 @@ export const getTeachersAll = async (filters = {}, options = {}) => {
 
     while (true) {
       const result = await getUsersWithPagination(
-        { ...filters, role: 'methodologist', page, per_page },
+        { ...filters, role: 'teacher', page, per_page },
         options
       );
 
@@ -352,12 +352,12 @@ export const getUsersAll = async (filters = {}, options = {}) => {
  */
 export const getAssignableTeachersAll = async (filters = {}, options = {}) => {
   try {
-    const [methodologists, admins] = await Promise.all([
-      getUsersAll({ ...filters, role: 'methodologist' }, options),
+    const [teachers, admins] = await Promise.all([
+      getUsersAll({ ...filters, role: 'teacher' }, options),
       getUsersAll({ ...filters, role: 'admin' }, options),
     ]);
 
-    const allAssignableTeachers = [...methodologists, ...admins];
+    const allAssignableTeachers = [...teachers, ...admins];
 
     const seen = new Set();
     const deduplicated = [];

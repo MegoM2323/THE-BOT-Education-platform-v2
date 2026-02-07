@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestChatStudentCreatesRoomWithTeacher - Student creates a chat room with a methodologist
+// TestChatStudentCreatesRoomWithTeacher - Student creates a chat room with a teacher
 func TestChatStudentCreatesRoomWithTeacher(t *testing.T) {
 	ctx := context.Background()
 
@@ -26,9 +26,9 @@ func TestChatStudentCreatesRoomWithTeacher(t *testing.T) {
 		ID:   studentID,
 		Role: models.RoleStudent,
 	}
-	methodologist := &models.User{
+	teacher := &models.User{
 		ID:   methodistID,
-		Role: models.RoleMethodologist,
+		Role: models.RoleTeacher,
 	}
 
 	mockChatRepoIntegration := &integrationMockChatRepository{
@@ -37,15 +37,15 @@ func TestChatStudentCreatesRoomWithTeacher(t *testing.T) {
 	mockUserRepoIntegration := &integrationMockUserRepository{
 		users: map[uuid.UUID]*models.User{
 			studentID:   student,
-			methodistID: methodologist,
+			methodistID: teacher,
 		},
 	}
 
 	chatService := NewChatService(mockChatRepoIntegration, mockUserRepoIntegration, nil)
 
-	// Test 1: Student can create room with methodologist
+	// Test 1: Student can create room with teacher
 	room, err := chatService.GetOrCreateRoom(ctx, studentID, methodistID)
-	assert.NoError(t, err, "Student should be able to create room with methodologist")
+	assert.NoError(t, err, "Student should be able to create room with teacher")
 	assert.NotNil(t, room)
 	assert.Equal(t, methodistID, room.TeacherID)
 	assert.Equal(t, studentID, room.StudentID)
@@ -63,8 +63,8 @@ func TestChatStudentCreatesRoomWithTeacher(t *testing.T) {
 	assert.Contains(t, err.Error(), "students cannot chat with each other")
 }
 
-// TestChatMethodologistSeesStudentChat - Methodologist can see chat initiated by student
-func TestChatMethodologistSeesStudentChat(t *testing.T) {
+// TestChatTeacherSeesStudentChat - Teacher can see chat initiated by student
+func TestChatTeacherSeesStudentChat(t *testing.T) {
 	ctx := context.Background()
 
 	studentID := uuid.New()
@@ -74,9 +74,9 @@ func TestChatMethodologistSeesStudentChat(t *testing.T) {
 		ID:   studentID,
 		Role: models.RoleStudent,
 	}
-	methodologist := &models.User{
+	teacher := &models.User{
 		ID:   methodistID,
-		Role: models.RoleMethodologist,
+		Role: models.RoleTeacher,
 	}
 
 	mockChatRepoIntegration2 := &integrationMockChatRepository{
@@ -85,25 +85,25 @@ func TestChatMethodologistSeesStudentChat(t *testing.T) {
 	mockUserRepoIntegration2 := &integrationMockUserRepository{
 		users: map[uuid.UUID]*models.User{
 			studentID:   student,
-			methodistID: methodologist,
+			methodistID: teacher,
 		},
 	}
 
 	chatService := NewChatService(mockChatRepoIntegration2, mockUserRepoIntegration2, nil)
 
-	// Step 1: Student creates room with methodologist
+	// Step 1: Student creates room with teacher
 	room, err := chatService.GetOrCreateRoom(ctx, studentID, methodistID)
 	require.NoError(t, err)
 	require.NotNil(t, room)
 
-	// Step 2: Methodologist loads their chat list
-	chatRooms, err := chatService.GetUserChats(ctx, methodistID, string(models.RoleMethodologist))
-	assert.NoError(t, err, "Methodologist should be able to load chat list")
-	assert.Greater(t, len(chatRooms), 0, "Methodologist should see the chat with student")
+	// Step 2: Teacher loads their chat list
+	chatRooms, err := chatService.GetUserChats(ctx, methodistID, string(models.RoleTeacher))
+	assert.NoError(t, err, "Teacher should be able to load chat list")
+	assert.Greater(t, len(chatRooms), 0, "Teacher should see the chat with student")
 
-	// Step 3: Verify methodologist can access the room
+	// Step 3: Verify teacher can access the room
 	accessibleRoom, err := chatService.GetRoomByID(ctx, room.ID, methodistID)
-	assert.NoError(t, err, "Methodologist should be able to open the room")
+	assert.NoError(t, err, "Teacher should be able to open the room")
 	assert.NotNil(t, accessibleRoom)
 }
 
@@ -119,8 +119,8 @@ func TestChatAdminListsAllChats(t *testing.T) {
 
 	student1 := &models.User{ID: studentID1, Role: models.RoleStudent}
 	student2 := &models.User{ID: studentID2, Role: models.RoleStudent}
-	methodologist1 := &models.User{ID: methodistID1, Role: models.RoleMethodologist}
-	methodologist2 := &models.User{ID: methodistID2, Role: models.RoleMethodologist}
+	teacher1 := &models.User{ID: methodistID1, Role: models.RoleTeacher}
+	teacher2 := &models.User{ID: methodistID2, Role: models.RoleTeacher}
 	admin := &models.User{ID: adminID, Role: models.RoleAdmin}
 
 	mockChatRepoIntegration3 := &integrationMockChatRepository{
@@ -130,8 +130,8 @@ func TestChatAdminListsAllChats(t *testing.T) {
 		users: map[uuid.UUID]*models.User{
 			studentID1:   student1,
 			studentID2:   student2,
-			methodistID1: methodologist1,
-			methodistID2: methodologist2,
+			methodistID1: teacher1,
+			methodistID2: teacher2,
 			adminID:      admin,
 		},
 	}
@@ -161,7 +161,7 @@ func TestChatMessageOrdering(t *testing.T) {
 	methodistID := uuid.New()
 
 	student := &models.User{ID: studentID, Role: models.RoleStudent}
-	methodologist := &models.User{ID: methodistID, Role: models.RoleMethodologist}
+	teacher := &models.User{ID: methodistID, Role: models.RoleTeacher}
 
 	mockChatRepoIntegration4 := &integrationMockChatRepository{
 		rooms:    make(map[uuid.UUID]*models.ChatRoom),
@@ -170,7 +170,7 @@ func TestChatMessageOrdering(t *testing.T) {
 	mockUserRepoIntegration4 := &integrationMockUserRepository{
 		users: map[uuid.UUID]*models.User{
 			studentID:   student,
-			methodistID: methodologist,
+			methodistID: teacher,
 		},
 	}
 
@@ -231,7 +231,7 @@ func TestChatValidation(t *testing.T) {
 
 	student1 := &models.User{ID: studentID1, Role: models.RoleStudent}
 	student2 := &models.User{ID: studentID2, Role: models.RoleStudent}
-	methodologist := &models.User{ID: methodistID, Role: models.RoleMethodologist}
+	teacher := &models.User{ID: methodistID, Role: models.RoleTeacher}
 
 	mockChatRepoIntegration5 := &integrationMockChatRepository{
 		rooms: make(map[uuid.UUID]*models.ChatRoom),
@@ -240,7 +240,7 @@ func TestChatValidation(t *testing.T) {
 		users: map[uuid.UUID]*models.User{
 			studentID1:  student1,
 			studentID2:  student2,
-			methodistID: methodologist,
+			methodistID: teacher,
 		},
 	}
 
@@ -256,7 +256,7 @@ func TestChatValidation(t *testing.T) {
 
 	// Test 3: Valid rooms should work
 	room, err := chatService.GetOrCreateRoom(ctx, studentID1, methodistID)
-	assert.NoError(t, err, "Student should be able to create room with methodologist")
+	assert.NoError(t, err, "Student should be able to create room with teacher")
 	assert.NotNil(t, room)
 
 	// Test 4: Unauthorized user cannot access room

@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import MethodologistCreditsView from '../MethodologistCreditsView.jsx';
+import TeacherCreditsView from '../TeacherCreditsView.jsx';
 import * as usersAPI from '../../../api/users.js';
 import * as creditsAPI from '../../../api/credits.js';
 import { useNotification } from '../../../hooks/useNotification.js';
@@ -23,7 +23,7 @@ const mockCredits = {
   '3': { balance: 25 },
 };
 
-describe('MethodologistCreditsView', () => {
+describe('TeacherCreditsView', () => {
   const mockNotification = {
     error: vi.fn(),
     success: vi.fn(),
@@ -43,7 +43,7 @@ describe('MethodologistCreditsView', () => {
   });
 
   it('компонент загружает студентов при монтировании', async () => {
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     expect(usersAPI.getStudentsAll).toHaveBeenCalledTimes(1);
 
@@ -53,7 +53,7 @@ describe('MethodologistCreditsView', () => {
   });
 
   it('таблица отображает правильные колонки (Имя, Email, Баланс)', async () => {
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       const headers = screen.getAllByRole('columnheader');
@@ -66,7 +66,7 @@ describe('MethodologistCreditsView', () => {
   });
 
   it('БЕЗ кнопок действий (no + or - buttons)', async () => {
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       const buttons = screen.queryAllByRole('button', { hidden: false });
@@ -78,7 +78,7 @@ describe('MethodologistCreditsView', () => {
   });
 
   it('сортировка по имени по умолчанию', async () => {
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       const rows = screen.getAllByRole('row');
@@ -100,7 +100,7 @@ describe('MethodologistCreditsView', () => {
     usersAPI.getStudentsAll.mockResolvedValue(russianStudents);
     creditsAPI.getUserCredits.mockResolvedValue({ balance: 50 });
 
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       const rows = screen.getAllByRole('row');
@@ -115,7 +115,7 @@ describe('MethodologistCreditsView', () => {
   it('обработка пустого списка студентов', async () => {
     usersAPI.getStudentsAll.mockResolvedValue([]);
 
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       expect(screen.getByText('Студенты не найдены')).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe('MethodologistCreditsView', () => {
   });
 
   it('баланс отображается в badge формате', async () => {
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       const badges = screen.getAllByText(/\d+ кредитов/);
@@ -138,7 +138,7 @@ describe('MethodologistCreditsView', () => {
   it('обработка ошибок при загрузке студентов', async () => {
     usersAPI.getStudentsAll.mockRejectedValue(new Error('Network error'));
 
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       expect(mockNotification.error).toHaveBeenCalledWith('Ошибка загрузки студентов');
@@ -148,9 +148,9 @@ describe('MethodologistCreditsView', () => {
   it('loading state отображается', async () => {
     usersAPI.getStudentsAll.mockImplementation(() => new Promise(() => {}));
 
-    const { container } = renderWithProviders(<MethodologistCreditsView />);
+    const { container } = renderWithProviders(<TeacherCreditsView />);
 
-    const loadingDiv = container.querySelector('.methodologist-credits-loading');
+    const loadingDiv = container.querySelector('.teacher-credits-loading');
     expect(loadingDiv).toBeInTheDocument();
   });
 
@@ -162,7 +162,7 @@ describe('MethodologistCreditsView', () => {
       return Promise.resolve(mockCredits[studentId] || { balance: 0 });
     });
 
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       expect(screen.getByText('Анна Иванова')).toBeInTheDocument();
@@ -178,7 +178,7 @@ describe('MethodologistCreditsView', () => {
   });
 
   it('sortedStudents мемоизирована (не создает новый массив при каждом render)', async () => {
-    renderWithProviders(<MethodologistCreditsView />);
+    renderWithProviders(<TeacherCreditsView />);
 
     await waitFor(() => {
       expect(screen.getByText('Анна Иванова')).toBeInTheDocument();

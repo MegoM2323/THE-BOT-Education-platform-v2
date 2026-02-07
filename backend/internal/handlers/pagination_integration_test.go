@@ -84,12 +84,12 @@ func TestPaginationResponseStructure(t *testing.T) {
 		{
 			ID:       uuid.New(),
 			Email:    "test1@example.com",
-			FullName: "Test User 1",
+			FirstName: "User", LastName: "Test User 1",
 		},
 		{
 			ID:       uuid.New(),
 			Email:    "test2@example.com",
-			FullName: "Test User 2",
+			FirstName: "User", LastName: "Test User 2",
 		},
 	}
 

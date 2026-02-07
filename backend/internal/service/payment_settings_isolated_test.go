@@ -94,7 +94,7 @@ func TestPaymentSettings_GetStatus_Success(t *testing.T) {
 	expectedUser := &models.User{
 		ID:             userID,
 		Email:          "student@example.com",
-		FullName:       "Test Student",
+		FirstName: "Test Student", LastName: "Lastname",
 		Role:           models.RoleStudent,
 		PaymentEnabled: true,
 		CreatedAt:      time.Now(),
@@ -120,14 +120,14 @@ func TestPaymentSettings_UpdateStatus_Success(t *testing.T) {
 	admin := &models.User{
 		ID:       adminID,
 		Email:    "admin@example.com",
-		FullName: "Admin User",
+		FirstName: "Admin User", LastName: "Lastname",
 		Role:     models.RoleAdmin,
 	}
 
 	student := &models.User{
 		ID:             studentID,
 		Email:          "student@example.com",
-		FullName:       "Student User",
+		FirstName: "Student User", LastName: "Lastname",
 		Role:           models.RoleStudent,
 		PaymentEnabled: false,
 	}
@@ -135,7 +135,7 @@ func TestPaymentSettings_UpdateStatus_Success(t *testing.T) {
 	updatedStudent := &models.User{
 		ID:             studentID,
 		Email:          "student@example.com",
-		FullName:       "Student User",
+		FirstName: "Student User", LastName: "Lastname",
 		Role:           models.RoleStudent,
 		PaymentEnabled: true,
 		UpdatedAt:      time.Now(),
@@ -164,8 +164,8 @@ func TestPaymentSettings_UpdateStatus_NonAdminDenied(t *testing.T) {
 	teacher := &models.User{
 		ID:       teacherID,
 		Email:    "teacher@example.com",
-		FullName: "Teacher User",
-		Role:     models.RoleMethodologist,
+		FirstName: "Teacher User", LastName: "Lastname",
+		Role:     models.RoleTeacher,
 	}
 
 	mockRepo.On("GetByID", ctx, teacherID).Return(teacher, nil)
@@ -188,15 +188,15 @@ func TestPaymentSettings_UpdateStatus_NonStudentTargetDenied(t *testing.T) {
 	admin := &models.User{
 		ID:       adminID,
 		Email:    "admin@example.com",
-		FullName: "Admin User",
+		FirstName: "Admin User", LastName: "Lastname",
 		Role:     models.RoleAdmin,
 	}
 
 	teacher := &models.User{
 		ID:       teacherID,
 		Email:    "teacher@example.com",
-		FullName: "Teacher User",
-		Role:     models.RoleMethodologist,
+		FirstName: "Teacher User", LastName: "Lastname",
+		Role:     models.RoleTeacher,
 	}
 
 	mockRepo.On("GetByID", ctx, adminID).Return(admin, nil)
@@ -219,7 +219,7 @@ func TestPaymentSettings_ListStudents_Success(t *testing.T) {
 	admin := &models.User{
 		ID:       adminID,
 		Email:    "admin@example.com",
-		FullName: "Admin User",
+		FirstName: "Admin User", LastName: "Lastname",
 		Role:     models.RoleAdmin,
 	}
 
@@ -227,7 +227,7 @@ func TestPaymentSettings_ListStudents_Success(t *testing.T) {
 		{
 			ID:             uuid.New(),
 			Email:          "charlie@example.com",
-			FullName:       "Charlie Student",
+			FirstName: "Charlie Student", LastName: "Lastname",
 			Role:           models.RoleStudent,
 			PaymentEnabled: true,
 			UpdatedAt:      time.Now(),
@@ -235,7 +235,7 @@ func TestPaymentSettings_ListStudents_Success(t *testing.T) {
 		{
 			ID:             uuid.New(),
 			Email:          "alice@example.com",
-			FullName:       "Alice Student",
+			FirstName: "Alice Student", LastName: "Lastname",
 			Role:           models.RoleStudent,
 			PaymentEnabled: false,
 			UpdatedAt:      time.Now(),
@@ -243,7 +243,7 @@ func TestPaymentSettings_ListStudents_Success(t *testing.T) {
 		{
 			ID:             uuid.New(),
 			Email:          "bob@example.com",
-			FullName:       "Bob Student",
+			FirstName: "Bob Student", LastName: "Lastname",
 			Role:           models.RoleStudent,
 			PaymentEnabled: true,
 			UpdatedAt:      time.Now(),
@@ -278,7 +278,7 @@ func TestPaymentSettings_ListStudents_WithFilter(t *testing.T) {
 	admin := &models.User{
 		ID:       adminID,
 		Email:    "admin@example.com",
-		FullName: "Admin User",
+		FirstName: "Admin User", LastName: "Lastname",
 		Role:     models.RoleAdmin,
 	}
 
@@ -286,7 +286,7 @@ func TestPaymentSettings_ListStudents_WithFilter(t *testing.T) {
 		{
 			ID:             uuid.New(),
 			Email:          "charlie@example.com",
-			FullName:       "Charlie Student",
+			FirstName: "Charlie Student", LastName: "Lastname",
 			Role:           models.RoleStudent,
 			PaymentEnabled: true,
 			UpdatedAt:      time.Now(),
@@ -294,7 +294,7 @@ func TestPaymentSettings_ListStudents_WithFilter(t *testing.T) {
 		{
 			ID:             uuid.New(),
 			Email:          "alice@example.com",
-			FullName:       "Alice Student",
+			FirstName: "Alice Student", LastName: "Lastname",
 			Role:           models.RoleStudent,
 			PaymentEnabled: false,
 			UpdatedAt:      time.Now(),

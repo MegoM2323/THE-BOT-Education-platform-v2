@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // TestCreateLessonRequest_ApplyDefaults_AutoEndTime tests automatic end_time calculation
@@ -36,15 +35,15 @@ func TestCreateLessonRequest_ApplyDefaults_AutoEndTime(t *testing.T) {
 			req := &CreateLessonRequest{
 				TeacherID: uuid.New(),
 				StartTime: tt.startTime,
-				EndTime:   tt.endTime,
+			}
+			if tt.endTime != nil {
+				req.EndTime = *tt.endTime
 			}
 
 			// Apply defaults (this is what the service does before validation)
 			req.ApplyDefaults()
 
 			// Verify end_time is set correctly
-			require.NotNil(t, req.EndTime, "EndTime should be set after ApplyDefaults")
-
 			actualDiff := req.EndTime.Sub(req.StartTime)
 			assert.Equal(t, tt.expectedEndDiff, actualDiff, "End time should be %v after start time", tt.expectedEndDiff)
 		})
@@ -93,7 +92,9 @@ func TestCreateLessonRequest_Validation_EndTimeGreaterThanStartTime(t *testing.T
 			req := &CreateLessonRequest{
 				TeacherID: uuid.New(),
 				StartTime: tt.startTime,
-				EndTime:   tt.endTime,
+			}
+			if tt.endTime != nil {
+				req.EndTime = *tt.endTime
 			}
 
 			// Apply defaults first (like the service does)
@@ -191,21 +192,21 @@ func TestApplyDefaults_Integration(t *testing.T) {
 	tests := []struct {
 		name                string
 		endTime             *time.Time
-		maxStudents         *int
+		maxStudents         int
 		expectedEndDiff     time.Duration
 		expectedMaxStudents int
 	}{
 		{
-			name:                "Auto end_time and default max_students",
+			name:                "Auto end_time with max_students=1",
 			endTime:             nil,
-			maxStudents:         nil,
+			maxStudents:         1,
 			expectedEndDiff:     2 * time.Hour,
 			expectedMaxStudents: 1,
 		},
 		{
 			name:                "Custom end_time and max_students",
 			endTime:             ptrTime(startTime.Add(3 * time.Hour)),
-			maxStudents:         ptrInt(6),
+			maxStudents:         6,
 			expectedEndDiff:     3 * time.Hour,
 			expectedMaxStudents: 6,
 		},
@@ -216,20 +217,20 @@ func TestApplyDefaults_Integration(t *testing.T) {
 			req := &CreateLessonRequest{
 				TeacherID:   uuid.New(),
 				StartTime:   startTime,
-				EndTime:     tt.endTime,
 				MaxStudents: tt.maxStudents,
+			}
+			if tt.endTime != nil {
+				req.EndTime = *tt.endTime
 			}
 
 			req.ApplyDefaults()
 
 			// Verify end_time
-			require.NotNil(t, req.EndTime, "EndTime should be set")
 			actualEndDiff := req.EndTime.Sub(req.StartTime)
 			assert.Equal(t, tt.expectedEndDiff, actualEndDiff, "End time should be correct")
 
 			// Verify max_students
-			require.NotNil(t, req.MaxStudents, "MaxStudents should be set")
-			assert.Equal(t, tt.expectedMaxStudents, *req.MaxStudents, "MaxStudents should be correct")
+			assert.Equal(t, tt.expectedMaxStudents, req.MaxStudents, "MaxStudents should be correct")
 
 			// Verify request is valid
 			err := req.Validate()

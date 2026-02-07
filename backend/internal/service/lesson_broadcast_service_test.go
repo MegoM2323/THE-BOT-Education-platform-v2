@@ -154,6 +154,14 @@ func (m *MockUserRepo) UpdateTelegramUsername(ctx context.Context, userID uuid.U
 	return args.Error(0)
 }
 
+func (m *MockUserRepo) GetAllUsersWithTelegramInfo(ctx context.Context) ([]map[string]interface{}, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]map[string]interface{}), args.Error(1)
+}
+
 // Тесты CreateLessonBroadcast
 
 func TestCreateLessonBroadcast_InvalidMessage_Empty(t *testing.T) {
@@ -279,7 +287,7 @@ func TestCreateLessonBroadcast_Success_Teacher(t *testing.T) {
 
 	teacher := &models.User{
 		ID:   teacherID,
-		Role: models.RoleMethodologist,
+		Role: models.RoleTeacher,
 	}
 
 	broadcast := &models.LessonBroadcast{

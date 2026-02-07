@@ -28,8 +28,8 @@ func TestGetVisibleLessons_RealDatabase(t *testing.T) {
 
 	// Create test users
 	admin := createTestUserVisibility(t, db, ctx, "admin@test.com", models.RoleAdmin)
-	teacher1 := createTestUserVisibility(t, db, ctx, "teacher1@test.com", models.RoleMethodologist)
-	teacher2 := createTestUserVisibility(t, db, ctx, "teacher2@test.com", models.RoleMethodologist)
+	teacher1 := createTestUserVisibility(t, db, ctx, "teacher1@test.com", models.RoleTeacher)
+	teacher2 := createTestUserVisibility(t, db, ctx, "teacher2@test.com", models.RoleTeacher)
 	student1 := createTestUserVisibility(t, db, ctx, "student1@test.com", models.RoleStudent)
 	student2 := createTestUserVisibility(t, db, ctx, "student2@test.com", models.RoleStudent)
 
@@ -61,7 +61,7 @@ func TestGetVisibleLessons_RealDatabase(t *testing.T) {
 	})
 
 	t.Run("Teacher1 sees only their lessons", func(t *testing.T) {
-		lessons, err := lessonRepo.GetVisibleLessons(ctx, teacher1.ID, string(models.RoleMethodologist), &models.ListLessonsFilter{})
+		lessons, err := lessonRepo.GetVisibleLessons(ctx, teacher1.ID, string(models.RoleTeacher), &models.ListLessonsFilter{})
 		require.NoError(t, err)
 		require.Len(t, lessons, 2, "Teacher1 should see only their 2 lessons")
 
@@ -73,7 +73,7 @@ func TestGetVisibleLessons_RealDatabase(t *testing.T) {
 	})
 
 	t.Run("Teacher2 sees only their lessons", func(t *testing.T) {
-		lessons, err := lessonRepo.GetVisibleLessons(ctx, teacher2.ID, string(models.RoleMethodologist), &models.ListLessonsFilter{})
+		lessons, err := lessonRepo.GetVisibleLessons(ctx, teacher2.ID, string(models.RoleTeacher), &models.ListLessonsFilter{})
 		require.NoError(t, err)
 		require.Len(t, lessons, 2, "Teacher2 should see only their 2 lessons")
 
@@ -193,7 +193,7 @@ func TestIndividualLessonConstraints(t *testing.T) {
 	ctx := context.Background()
 	lessonRepo := NewLessonRepository(db)
 
-	teacher := createTestUserVisibility(t, db, ctx, "teacher@test.com", models.RoleMethodologist)
+	teacher := createTestUserVisibility(t, db, ctx, "teacher@test.com", models.RoleTeacher)
 
 	t.Run("Individual lesson created with max_students=1", func(t *testing.T) {
 		lesson := createTestLessonWithType(t, lessonRepo, ctx, teacher.ID, 1)
@@ -328,7 +328,7 @@ func TestGetVisibleLessons_Student_IncludesPastBookings_Suite2(t *testing.T) {
 	lessonRepo := NewLessonRepository(db)
 
 	// Create test users
-	teacher := createTestUserVisibility(t, db, ctx, "teacher.past@test.com", models.RoleMethodologist)
+	teacher := createTestUserVisibility(t, db, ctx, "teacher.past@test.com", models.RoleTeacher)
 	student := createTestUserVisibility(t, db, ctx, "student.past@test.com", models.RoleStudent)
 
 	// Create past lesson (24 hours ago)
@@ -375,7 +375,7 @@ func TestGetVisibleLessons_Student_IncludesCancelledBookings_Suite2(t *testing.T
 	lessonRepo := NewLessonRepository(db)
 
 	// Create test users
-	teacher := createTestUserVisibility(t, db, ctx, "teacher.cancelled@test.com", models.RoleMethodologist)
+	teacher := createTestUserVisibility(t, db, ctx, "teacher.cancelled@test.com", models.RoleTeacher)
 	student := createTestUserVisibility(t, db, ctx, "student.cancelled@test.com", models.RoleStudent)
 
 	// Create lesson (future)
@@ -422,7 +422,7 @@ func TestGetVisibleLessons_Student_ExcludesUnbookedIndividual_Suite2(t *testing.
 	lessonRepo := NewLessonRepository(db)
 
 	// Create test users
-	teacher := createTestUserVisibility(t, db, ctx, "teacher.unbooked@test.com", models.RoleMethodologist)
+	teacher := createTestUserVisibility(t, db, ctx, "teacher.unbooked@test.com", models.RoleTeacher)
 	student1 := createTestUserVisibility(t, db, ctx, "student1.unbooked@test.com", models.RoleStudent)
 	student2 := createTestUserVisibility(t, db, ctx, "student2.unbooked@test.com", models.RoleStudent)
 
@@ -472,7 +472,7 @@ func TestGetVisibleLessons_GroupLessonsAlwaysVisible_Suite2(t *testing.T) {
 	lessonRepo := NewLessonRepository(db)
 
 	// Create test users
-	teacher := createTestUserVisibility(t, db, ctx, "teacher.group@test.com", models.RoleMethodologist)
+	teacher := createTestUserVisibility(t, db, ctx, "teacher.group@test.com", models.RoleTeacher)
 	student := createTestUserVisibility(t, db, ctx, "student.group@test.com", models.RoleStudent)
 
 	// Create group lesson (not booked by this student)

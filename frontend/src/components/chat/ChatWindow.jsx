@@ -232,7 +232,7 @@ const ChatWindow = ({ room }) => {
           <div className="chat-participant-details">
             <div className="chat-participant-name">{room.participant_name || 'Пользователь'}</div>
             <div className="chat-participant-role">
-              {room.participant_role === 'methodologist' || room.participant_role === 'teacher' ? 'Преподаватель' : 'Студент'}
+              {room.participant_role === 'teacher' || room.participant_role === 'teacher' ? 'Преподаватель' : 'Студент'}
             </div>
           </div>
         </div>

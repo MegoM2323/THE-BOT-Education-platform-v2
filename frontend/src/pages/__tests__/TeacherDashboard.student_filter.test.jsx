@@ -2,15 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
-import MethodologistDashboard from '../MethodologistDashboard.jsx';
+import TeacherDashboard from '../TeacherDashboard.jsx';
 
 // Mock the useAuth hook
 vi.mock('../../hooks/useAuth.js', () => ({
   useAuth: () => ({
     user: {
-      id: 'test-methodologist-id',
-      role: 'methodologist',
-      full_name: 'Test Methodologist',
+      id: 'test-teacher-id',
+      role: 'teacher',
+      full_name: 'Test Teacher',
     },
     loading: false,
   }),
@@ -35,25 +35,25 @@ vi.mock('../../components/admin/TelegramManagement.jsx', () => ({
 }));
 
 
-vi.mock('../../components/methodologist/MethodologistCreditsView.jsx', () => ({
+vi.mock('../../components/teacher/TeacherCreditsView.jsx', () => ({
   default: () => <div>Credits View</div>,
 }));
 
-describe('T004: StudentFilterSearch in MethodologistDashboard', () => {
-  it('MethodologistDashboard renders Calendar component from admin/Calendar.jsx', () => {
+describe('T004: StudentFilterSearch in TeacherDashboard', () => {
+  it('TeacherDashboard renders Calendar component from admin/Calendar.jsx', () => {
     render(
       <BrowserRouter>
-        <MethodologistDashboard />
+        <TeacherDashboard />
       </BrowserRouter>
     );
 
     expect(screen.getByTestId('calendar-component')).toBeInTheDocument();
   });
 
-  it('Calendar component is rendered in /dashboard/methodologist/calendar route', () => {
+  it('Calendar component is rendered in /dashboard/teacher/calendar route', () => {
     const { container } = render(
       <BrowserRouter>
-        <MethodologistDashboard />
+        <TeacherDashboard />
       </BrowserRouter>
     );
 
@@ -61,9 +61,9 @@ describe('T004: StudentFilterSearch in MethodologistDashboard', () => {
     expect(screen.getByTestId('calendar-component')).toBeInTheDocument();
   });
 
-  it('MethodologistDashboard uses correct import path for Calendar', () => {
+  it('TeacherDashboard uses correct import path for Calendar', () => {
     // This is verified through the file structure check
-    // frontend/src/pages/MethodologistDashboard.jsx, line 5:
+    // frontend/src/pages/TeacherDashboard.jsx, line 5:
     // import Calendar from "../components/admin/Calendar.jsx";
     expect(true).toBe(true);
   });

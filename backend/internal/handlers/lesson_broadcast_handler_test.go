@@ -215,7 +215,7 @@ func TestListBroadcasts_Success(t *testing.T) {
 
 	user := &models.User{
 		ID:   userID,
-		Role: models.RoleMethodologist,
+		Role: models.RoleTeacher,
 	}
 	ctx := context.WithValue(req.Context(), middleware.UserContextKey, user)
 	req = req.WithContext(ctx)
@@ -262,7 +262,7 @@ func TestGetBroadcast_Success(t *testing.T) {
 
 	user := &models.User{
 		ID:   userID,
-		Role: models.RoleMethodologist,
+		Role: models.RoleTeacher,
 	}
 	ctx := context.WithValue(req.Context(), middleware.UserContextKey, user)
 	req = req.WithContext(ctx)
@@ -300,7 +300,7 @@ func TestGetBroadcast_NotFound(t *testing.T) {
 
 	user := &models.User{
 		ID:   userID,
-		Role: models.RoleMethodologist,
+		Role: models.RoleTeacher,
 	}
 	ctx := context.WithValue(req.Context(), middleware.UserContextKey, user)
 	req = req.WithContext(ctx)

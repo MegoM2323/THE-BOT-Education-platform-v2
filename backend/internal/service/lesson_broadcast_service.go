@@ -111,7 +111,7 @@ func (s *LessonBroadcastService) CreateLessonBroadcast(
 	}
 
 	// Проверка прав: admin, методист или teacher этого урока
-	if !user.IsAdmin() && !user.IsMethodologist() && !(user.IsMethodologist() && lesson.TeacherID == userID) {
+	if !user.IsAdmin() && !user.IsTeacher() && !(user.IsTeacher() && lesson.TeacherID == userID) {
 		return nil, repository.ErrUnauthorized
 	}
 
@@ -231,7 +231,7 @@ func (s *LessonBroadcastService) GetBroadcastFileWithAccess(
 	}
 
 	// Teacher урока имеет доступ
-	if !hasAccess && user.IsMethodologist() && lesson.TeacherID == userID {
+	if !hasAccess && user.IsTeacher() && lesson.TeacherID == userID {
 		hasAccess = true
 	}
 

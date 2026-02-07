@@ -30,7 +30,7 @@ func TestUpdateUserEmailValidation(t *testing.T) {
 				uuid.New(): {
 					ID:       uuid.New(),
 					Email:    "user1@example.com",
-					FullName: "User 1",
+					FirstName: "User 1", LastName: "Lastname",
 					Role:     models.RoleStudent,
 				},
 			},
@@ -45,7 +45,7 @@ func TestUpdateUserEmailValidation(t *testing.T) {
 				uuid.New(): {
 					ID:       uuid.New(),
 					Email:    "user1@example.com",
-					FullName: "User 1",
+					FirstName: "User 1", LastName: "Lastname",
 					Role:     models.RoleStudent,
 				},
 			},
@@ -60,7 +60,7 @@ func TestUpdateUserEmailValidation(t *testing.T) {
 				uuid.New(): {
 					ID:       uuid.New(),
 					Email:    "user1@example.com",
-					FullName: "User 1",
+					FirstName: "User 1", LastName: "Lastname",
 					Role:     models.RoleStudent,
 				},
 			},
@@ -75,7 +75,7 @@ func TestUpdateUserEmailValidation(t *testing.T) {
 				uuid.New(): {
 					ID:       uuid.New(),
 					Email:    "user1@example.com",
-					FullName: "User 1",
+					FirstName: "User 1", LastName: "Lastname",
 					Role:     models.RoleStudent,
 				},
 			},
@@ -90,7 +90,7 @@ func TestUpdateUserEmailValidation(t *testing.T) {
 				uuid.New(): {
 					ID:       uuid.New(),
 					Email:    "user1@example.com",
-					FullName: "User 1",
+					FirstName: "User 1", LastName: "Lastname",
 					Role:     models.RoleStudent,
 				},
 			},
@@ -105,7 +105,7 @@ func TestUpdateUserEmailValidation(t *testing.T) {
 				uuid.New(): {
 					ID:       uuid.New(),
 					Email:    "user1@example.com",
-					FullName: "User 1",
+					FirstName: "User 1", LastName: "Lastname",
 					Role:     models.RoleStudent,
 				},
 			},
@@ -134,7 +134,7 @@ func TestUpdateUserEmailValidation(t *testing.T) {
 				testUser := &models.User{
 					ID:             tt.userID,
 					Email:          "original@example.com",
-					FullName:       "Test User",
+					FirstName: "Test User", LastName: "Lastname",
 					Role:           models.RoleStudent,
 					PaymentEnabled: true,
 				}
@@ -185,14 +185,14 @@ func TestUpdateUserEmailUniqueness(t *testing.T) {
 	user1 := &models.User{
 		ID:       user1ID,
 		Email:    "user1@example.com",
-		FullName: "User 1",
+		FirstName: "User 1", LastName: "Lastname",
 		Role:     models.RoleStudent,
 	}
 
 	user2 := &models.User{
 		ID:       user2ID,
 		Email:    "user2@example.com",
-		FullName: "User 2",
+		FirstName: "User 2", LastName: "Lastname",
 		Role:     models.RoleStudent,
 	}
 
@@ -226,7 +226,7 @@ func TestUpdateUserEmailSelfUpdate(t *testing.T) {
 	user := &models.User{
 		ID:       userID,
 		Email:    "user@example.com",
-		FullName: "User",
+		FirstName: "User", LastName: "Lastname",
 		Role:     models.RoleStudent,
 	}
 
@@ -260,7 +260,7 @@ func TestUpdateUserEmailWithoutChange(t *testing.T) {
 	user := &models.User{
 		ID:       userID,
 		Email:    "user@example.com",
-		FullName: "User",
+		FirstName: "User", LastName: "Lastname",
 		Role:     models.RoleStudent,
 	}
 

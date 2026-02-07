@@ -48,6 +48,8 @@ func TestUpdateLesson_Admin_CanEditPastLesson(t *testing.T) {
 		creditRepo,
 		repository.NewCancelledBookingRepository(sqlxDB),
 		validator.NewBookingValidator(lessonRepo, bookingRepo, creditRepo),
+		nil, // telegramService
+		nil, // userRepo
 	)
 	bulkEditService := service.NewBulkEditService(
 		pool,
@@ -58,11 +60,11 @@ func TestUpdateLesson_Admin_CanEditPastLesson(t *testing.T) {
 	)
 
 	// Создаём handler
-	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
+	handler := NewLessonHandler(lessonService, bookingService, bulkEditService, nil)
 
 	// Создаём админа и преподавателя
 	admin := createTestUser(t, sqlxDB, "admin@test.com", "Admin User", string(models.RoleAdmin))
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
 
 	// Создаём прошлое занятие (2 часа назад)
 	pastTime := time.Now().Add(-2 * time.Hour)
@@ -144,6 +146,8 @@ func TestUpdateLesson_Teacher_CannotEditSubject(t *testing.T) {
 		creditRepo,
 		repository.NewCancelledBookingRepository(sqlxDB),
 		validator.NewBookingValidator(lessonRepo, bookingRepo, creditRepo),
+		nil, // telegramService
+		nil, // userRepo
 	)
 	bulkEditService := service.NewBulkEditService(
 		pool,
@@ -154,10 +158,10 @@ func TestUpdateLesson_Teacher_CannotEditSubject(t *testing.T) {
 	)
 
 	// Создаём handler
-	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
+	handler := NewLessonHandler(lessonService, bookingService, bulkEditService, nil)
 
 	// Создаём преподавателя
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
 
 	// Создаём будущее занятие (учитель будет пытаться изменить своё занятие)
 	futureTime := time.Now().Add(2 * time.Hour)
@@ -221,6 +225,8 @@ func TestUpdateLesson_Teacher_CanEditHomeworkText(t *testing.T) {
 		creditRepo,
 		repository.NewCancelledBookingRepository(sqlxDB),
 		validator.NewBookingValidator(lessonRepo, bookingRepo, creditRepo),
+		nil, // telegramService
+		nil, // userRepo
 	)
 	bulkEditService := service.NewBulkEditService(
 		pool,
@@ -231,10 +237,10 @@ func TestUpdateLesson_Teacher_CanEditHomeworkText(t *testing.T) {
 	)
 
 	// Создаём handler
-	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
+	handler := NewLessonHandler(lessonService, bookingService, bulkEditService, nil)
 
 	// Создаём преподавателя
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
 
 	// Создаём будущее занятие
 	futureTime := time.Now().Add(2 * time.Hour)
@@ -305,6 +311,8 @@ func TestUpdateLesson_Teacher_CannotEditOtherTeacherHomework(t *testing.T) {
 		creditRepo,
 		repository.NewCancelledBookingRepository(sqlxDB),
 		validator.NewBookingValidator(lessonRepo, bookingRepo, creditRepo),
+		nil, // telegramService
+		nil, // userRepo
 	)
 	bulkEditService := service.NewBulkEditService(
 		pool,
@@ -315,11 +323,11 @@ func TestUpdateLesson_Teacher_CannotEditOtherTeacherHomework(t *testing.T) {
 	)
 
 	// Создаём handler
-	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
+	handler := NewLessonHandler(lessonService, bookingService, bulkEditService, nil)
 
 	// Создаём двух преподавателей
-	teacher1 := createTestUser(t, sqlxDB, "teacher1@test.com", "Teacher One", string(models.RoleMethodologist))
-	teacher2 := createTestUser(t, sqlxDB, "teacher2@test.com", "Teacher Two", string(models.RoleMethodologist))
+	teacher1 := createTestUser(t, sqlxDB, "teacher1@test.com", "Teacher One", string(models.RoleTeacher))
+	teacher2 := createTestUser(t, sqlxDB, "teacher2@test.com", "Teacher Two", string(models.RoleTeacher))
 
 	// Создаём занятие teacher1
 	futureTime := time.Now().Add(2 * time.Hour)
@@ -384,6 +392,8 @@ func TestUpdateLesson_Student_CannotEditLesson(t *testing.T) {
 		creditRepo,
 		repository.NewCancelledBookingRepository(sqlxDB),
 		validator.NewBookingValidator(lessonRepo, bookingRepo, creditRepo),
+		nil, // telegramService
+		nil, // userRepo
 	)
 	bulkEditService := service.NewBulkEditService(
 		pool,
@@ -394,11 +404,11 @@ func TestUpdateLesson_Student_CannotEditLesson(t *testing.T) {
 	)
 
 	// Создаём handler
-	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
+	handler := NewLessonHandler(lessonService, bookingService, bulkEditService, nil)
 
 	// Создаём студента и преподавателя
 	student := createTestUser(t, sqlxDB, "student@test.com", "Student User", string(models.RoleStudent))
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
 
 	// Создаём будущее занятие
 	futureTime := time.Now().Add(2 * time.Hour)
@@ -462,6 +472,8 @@ func TestUpdateLesson_Admin_EditFutureLesson_NoWarning(t *testing.T) {
 		creditRepo,
 		repository.NewCancelledBookingRepository(sqlxDB),
 		validator.NewBookingValidator(lessonRepo, bookingRepo, creditRepo),
+		nil, // telegramService
+		nil, // userRepo
 	)
 	bulkEditService := service.NewBulkEditService(
 		pool,
@@ -472,11 +484,11 @@ func TestUpdateLesson_Admin_EditFutureLesson_NoWarning(t *testing.T) {
 	)
 
 	// Создаём handler
-	handler := NewLessonHandler(lessonService, bookingService, bulkEditService)
+	handler := NewLessonHandler(lessonService, bookingService, bulkEditService, nil)
 
 	// Создаём админа и преподавателя
 	admin := createTestUser(t, sqlxDB, "admin@test.com", "Admin User", string(models.RoleAdmin))
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleMethodologist))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Teacher User", string(models.RoleTeacher))
 
 	// Создаём будущее занятие
 	futureTime := time.Now().Add(2 * time.Hour)

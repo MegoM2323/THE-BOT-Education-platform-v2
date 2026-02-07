@@ -103,16 +103,16 @@ describe('UserManagement Integration Tests', () => {
     });
   });
 
-  describe('T3: Filter by role=methodologist', () => {
-    it('should fetch and display only methodologist users', async () => {
-      const mockMethodologists = Array.from({ length: 10 }, (_, i) => ({
+  describe('T3: Filter by role=teacher', () => {
+    it('should fetch and display only teacher users', async () => {
+      const mockTeachers = Array.from({ length: 10 }, (_, i) => ({
         id: i + 1,
-        email: `methodologist${i + 1}@test.com`,
-        full_name: `Methodologist ${i + 1}`,
-        role: 'methodologist',
+        email: `teacher${i + 1}@test.com`,
+        full_name: `Teacher ${i + 1}`,
+        role: 'teacher',
       }));
 
-      usersAPI.getUsersAll.mockResolvedValue(mockMethodologists);
+      usersAPI.getUsersAll.mockResolvedValue(mockTeachers);
 
       renderUserManagement();
 
@@ -121,15 +121,15 @@ describe('UserManagement Integration Tests', () => {
       }, { timeout: 5000 });
 
       const roleFilter = screen.getByTestId('role-filter');
-      fireEvent.change(roleFilter, { target: { value: 'methodologist' } });
+      fireEvent.change(roleFilter, { target: { value: 'teacher' } });
 
       await waitFor(() => {
         const userRows = screen.getAllByTestId('user-row');
         expect(userRows).toHaveLength(10);
       }, { timeout: 5000 });
 
-      expect(usersAPI.getUsersAll).toHaveBeenCalledWith({ role: 'methodologist' });
-      expect(screen.getByText('Methodologist 1')).toBeInTheDocument();
+      expect(usersAPI.getUsersAll).toHaveBeenCalledWith({ role: 'teacher' });
+      expect(screen.getByText('Teacher 1')).toBeInTheDocument();
     });
   });
 

@@ -190,10 +190,10 @@ INSERT INTO users (id, email, password_hash, full_name, role, created_at, update
 -- ADMINISTRATORS
 ('00000000-0000-0000-0000-000000000001', 'admin@thebot.ru', '$HASH', 'Администратор THE BOT', 'admin', NOW(), NOW()),
 
--- METHODOLOGISTS (тьюторы)
-('10000000-0000-0000-0000-000000000001', 'method1@thebot.ru', '$HASH', 'Иван Петров', 'methodologist', NOW(), NOW()),
-('10000000-0000-0000-0000-000000000002', 'method2@thebot.ru', '$HASH', 'Мария Сидорова', 'methodologist', NOW(), NOW()),
-('10000000-0000-0000-0000-000000000003', 'method3@thebot.ru', '$HASH', 'Александр Морозов', 'methodologist', NOW(), NOW()),
+-- TEACHERS (тьюторы)
+('10000000-0000-0000-0000-000000000001', 'method1@thebot.ru', '$HASH', 'Иван Петров', 'teacher', NOW(), NOW()),
+('10000000-0000-0000-0000-000000000002', 'method2@thebot.ru', '$HASH', 'Мария Сидорова', 'teacher', NOW(), NOW()),
+('10000000-0000-0000-0000-000000000003', 'method3@thebot.ru', '$HASH', 'Александр Морозов', 'teacher', NOW(), NOW()),
 
 -- STUDENTS
 ('20000000-0000-0000-0000-000000000001', 'student1@thebot.ru', '$HASH', 'Дмитрий Смирнов', 'student', NOW(), NOW()),
@@ -206,7 +206,7 @@ INSERT INTO users (id, email, password_hash, full_name, role, created_at, update
 ('20000000-0000-0000-0000-000000000008', 'student8@thebot.ru', '$HASH', 'Константин Лебедев', 'student', NOW(), NOW())
 ON CONFLICT (email) WHERE deleted_at IS NULL DO NOTHING;
 "
-echo -e "${GREEN}✓ 1 admin + 3 methodologists + 8 students created${NC}"
+echo -e "${GREEN}✓ 1 admin + 3 teachers + 8 students created${NC}"
 
 # PHASE 2: SETUP CREDITS
 echo -e "${BLUE}[2/8] Setting up student credits...${NC}"
@@ -392,7 +392,7 @@ echo ""
 echo "ADMIN:"
 echo "  📧 admin@thebot.ru"
 echo ""
-echo "METHODOLOGISTS (Тьюторы):"
+echo "TEACHERS (Тьюторы):"
 echo "  📧 method1@thebot.ru (Иван Петров)"
 echo "  📧 method2@thebot.ru (Мария Сидорова)"
 echo "  📧 method3@thebot.ru (Александр Морозов)"
@@ -409,7 +409,7 @@ echo "  📧 student8@thebot.ru (Константин Лебедев) - 25 credi
 echo ""
 echo -e "${BLUE}Data Loaded:${NC}"
 echo "  ✓ 1 administrator"
-echo "  ✓ 3 methodologists"
+echo "  ✓ 3 teachers"
 echo "  ✓ 8 students"
 echo "  ✓ 20+ lessons (past and future)"
 echo "  ✓ 6 subjects"

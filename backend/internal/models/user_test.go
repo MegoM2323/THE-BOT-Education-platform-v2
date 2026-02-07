@@ -13,7 +13,7 @@ func TestUser_MarshalJSON_PaymentEnabled(t *testing.T) {
 	user := &User{
 		ID:             uuid.New(),
 		Email:          "test@example.com",
-		FullName:       "Test User",
+		FirstName: "Test User", LastName: "Lastname",
 		Role:           RoleStudent,
 		PaymentEnabled: true,
 	}
@@ -34,7 +34,7 @@ func TestUser_MarshalJSON_PaymentDisabled(t *testing.T) {
 	user := &User{
 		ID:             uuid.New(),
 		Email:          "test@example.com",
-		FullName:       "Test User",
+		FirstName: "Test User", LastName: "Lastname",
 		Role:           RoleStudent,
 		PaymentEnabled: false,
 	}

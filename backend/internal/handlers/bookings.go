@@ -62,16 +62,16 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	if user.IsStudent() {
 		req.StudentID = user.ID
 		req.IsAdmin = false
-	} else if user.IsAdmin() || user.IsMethodologist() {
+	} else if user.IsAdmin() || user.IsTeacher() {
 		// Админ/методист должен указать student_id в запросе
 		if req.StudentID == uuid.Nil {
-			response.BadRequest(w, response.ErrCodeInvalidInput, "student_id is required for admin or methodologist")
+			response.BadRequest(w, response.ErrCodeInvalidInput, "student_id is required for admin or teacher")
 			return
 		}
 		req.IsAdmin = true
-		req.AdminID = user.ID // Track admin/methodologist who created the booking
+		req.AdminID = user.ID // Track admin/teacher who created the booking
 	} else {
-		response.Forbidden(w, "Only students, admins and methodologists can create bookings")
+		response.Forbidden(w, "Only students, admins and teachers can create bookings")
 		return
 	}
 
@@ -124,7 +124,7 @@ func (h *BookingHandler) GetBooking(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Преподаватели видят только бронирования на свои занятия
-	if user.IsMethodologist() && booking.TeacherID != user.ID {
+	if user.IsTeacher() && booking.TeacherID != user.ID {
 		response.Forbidden(w, "Unauthorized access to booking")
 		return
 	}
@@ -173,7 +173,7 @@ func (h *BookingHandler) GetBookingStatus(w http.ResponseWriter, r *http.Request
 	}
 
 	// Преподаватели видят только бронирования на свои занятия
-	if user.IsMethodologist() && booking.TeacherID != user.ID {
+	if user.IsTeacher() && booking.TeacherID != user.ID {
 		response.Forbidden(w, "Unauthorized access to booking")
 		return
 	}
@@ -229,11 +229,11 @@ func (h *BookingHandler) GetMyBookings(w http.ResponseWriter, r *http.Request) {
 
 // ListBookings обрабатывает GET /api/v1/bookings
 // @Summary      List bookings
-// @Description  Get filtered list of bookings (students see own, methodologists and admins see by filters)
+// @Description  Get filtered list of bookings (students see own, teachers and admins see by filters)
 // @Tags         bookings
 // @Accept       json
 // @Produce      json
-// @Param        student_id  query  string  false  "Filter by student ID (methodologists/admins only)"
+// @Param        student_id  query  string  false  "Filter by student ID (teachers/admins only)"
 // @Param        lesson_id  query  string  false  "Filter by lesson ID"
 // @Param        status  query  string  false  "Filter by status (active, cancelled)"
 // @Param        page  query  int  false  "Page number (default: 1)"
@@ -323,7 +323,7 @@ func (h *BookingHandler) CancelBooking(w http.ResponseWriter, r *http.Request) {
 	req := &models.CancelBookingRequest{
 		BookingID: bookingID,
 		StudentID: user.ID,
-		IsAdmin:   user.IsAdmin() || user.IsMethodologist(),
+		IsAdmin:   user.IsAdmin() || user.IsTeacher(),
 	}
 
 	// Отменяем бронирование и получаем результат с информацией о статусе операции

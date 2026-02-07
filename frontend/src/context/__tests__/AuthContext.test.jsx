@@ -48,7 +48,7 @@ describe('AuthContext - Token Management (HttpOnly Cookies)', () => {
     });
 
     it('should handle login response with user data only', async () => {
-      const mockUser = { id: 1, email: 'test@example.com', role: 'methodologist' };
+      const mockUser = { id: 1, email: 'test@example.com', role: 'teacher' };
 
       authAPI.login.mockResolvedValueOnce({
         user: mockUser,

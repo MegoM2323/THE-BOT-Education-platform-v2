@@ -11,7 +11,7 @@ import Login from './pages/Login.jsx';
 import TelegramRegister from './pages/TelegramRegister.jsx';
 import StudentDashboard from './pages/StudentDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
-import MethodologistDashboard from './pages/MethodologistDashboard.jsx';
+import TeacherDashboard from './pages/TeacherDashboard.jsx';
 import ChatPage from './pages/ChatPage.jsx';
 import { ROLES } from './utils/constants.js';
 
@@ -49,10 +49,10 @@ function App() {
                 />
 
                 <Route
-                  path="/dashboard/methodologist/*"
+                  path="/dashboard/teacher/*"
                   element={
-                    <ProtectedRoute allowedRoles={[ROLES.METHODOLOGIST]}>
-                      <MethodologistDashboard />
+                    <ProtectedRoute allowedRoles={[ROLES.TEACHER]}>
+                      <TeacherDashboard />
                     </ProtectedRoute>
                   }
                 />

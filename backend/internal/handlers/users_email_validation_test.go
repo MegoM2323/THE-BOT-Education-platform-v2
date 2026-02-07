@@ -161,7 +161,7 @@ func TestUpdateUser_PreservesOtherFields(t *testing.T) {
 	student := createTestUser(t, db, "student@test.com", "Student User", string(models.RoleStudent))
 
 	// Запоминаем оригинальные значения
-	originalFullName := student.FullName
+	originalFullName := student.FirstName + " " + student.LastName
 	originalRole := student.Role
 
 	// Создаем репозитории и сервис
@@ -182,6 +182,6 @@ func TestUpdateUser_PreservesOtherFields(t *testing.T) {
 	assert.Equal(t, newEmail, result.Email, "email should be updated")
 
 	// Проверяем что другие поля остались без изменений
-	assert.Equal(t, originalFullName, result.FullName, "full name should not change")
+	assert.Equal(t, originalFullName, result.FirstName+" "+result.LastName, "full name should not change")
 	assert.Equal(t, originalRole, result.Role, "role should not change")
 }

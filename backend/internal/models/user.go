@@ -16,7 +16,7 @@ type UserRole string
 
 const (
 	RoleStudent       UserRole = "student"
-	RoleMethodologist UserRole = "methodologist"
+	RoleTeacher UserRole = "teacher"
 	RoleAdmin         UserRole = "admin"
 )
 
@@ -139,15 +139,15 @@ func (u *User) IsAdmin() bool {
 	return u.Role == RoleAdmin
 }
 
-// IsMethodologist проверяет, является ли пользователь методистом
-func (u *User) IsMethodologist() bool {
-	return u.Role == RoleMethodologist
+// IsTeacher проверяет, является ли пользователь методистом
+func (u *User) IsTeacher() bool {
+	return u.Role == RoleTeacher
 }
 
 // CanBeAssignedAsTeacher проверяет, может ли пользователь быть назначен преподавателем занятия
-// Допустимые роли: admin, methodologist
+// Допустимые роли: admin, teacher
 func (u *User) CanBeAssignedAsTeacher() bool {
-	return u.IsAdmin() || u.IsMethodologist()
+	return u.IsAdmin() || u.IsTeacher()
 }
 
 // Validate выполняет валидацию CreateUserRequest
@@ -187,7 +187,7 @@ func (r *CreateUserRequest) Validate() error {
 	}
 
 	// Валидация роли
-	if r.Role != RoleStudent && r.Role != RoleAdmin && r.Role != RoleMethodologist {
+	if r.Role != RoleStudent && r.Role != RoleAdmin && r.Role != RoleTeacher {
 		return ErrInvalidRole
 	}
 

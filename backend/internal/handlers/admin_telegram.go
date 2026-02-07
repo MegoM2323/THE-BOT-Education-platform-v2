@@ -10,7 +10,6 @@ import (
 	"log"
 
 	"tutoring-platform/internal/middleware"
-	"tutoring-platform/internal/models"
 	"tutoring-platform/internal/repository"
 	"tutoring-platform/internal/service"
 	"tutoring-platform/pkg/response"
@@ -52,99 +51,44 @@ func (h *AdminTelegramHandler) ListUsersWithTelegram(w http.ResponseWriter, r *h
 		return
 	}
 
-	// Получаем параметры фильтрации
-	searchQuery := r.URL.Query().Get("search")    // Поиск по username
-	linked := r.URL.Query().Get("linked")         // Фильтр: linked=true/false
-	subscribed := r.URL.Query().Get("subscribed") // Фильтр: subscribed=true/false
+	searchQuery := r.URL.Query().Get("search")
+	linked := r.URL.Query().Get("linked")
+	subscribed := r.URL.Query().Get("subscribed")
 
-	// Получаем всех пользователей с Telegram информацией
-	allTelegramUsers, err := h.telegramRepo.GetAllLinked(r.Context())
+	usersWithTelegram, err := h.userService.GetAllUsersWithTelegramInfo(r.Context())
 	if err != nil {
-		log.Printf("ERROR: Failed to retrieve telegram users: %v", err)
-		response.InternalError(w, "Failed to retrieve telegram users")
-		return
-	}
-
-	// Получаем всех обычных пользователей
-	var roleFilter *models.UserRole
-	allUsers, err := h.userService.ListUsers(r.Context(), roleFilter)
-	if err != nil {
-		log.Printf("ERROR: Failed to retrieve users: %v", err)
+		log.Printf("ERROR: Failed to retrieve users with telegram info: %v", err)
 		response.InternalError(w, "Failed to retrieve users")
 		return
 	}
 
-	// Создаем map Telegram пользователей для быстрого поиска
-	telegramMap := make(map[uuid.UUID]*models.TelegramUser)
-	for _, tu := range allTelegramUsers {
-		telegramMap[tu.UserID] = tu
-	}
+	var result []map[string]interface{}
+	for _, userMap := range usersWithTelegram {
+		telegramLinked, _ := userMap["telegram_linked"].(bool)
+		telegramUsername, _ := userMap["telegram_username"].(string)
+		isSubscribed, _ := userMap["subscribed"].(bool)
 
-	// Подготавливаем результат
-	type UserWithTelegram struct {
-		ID               uuid.UUID `json:"id"`
-		Email            string    `json:"email"`
-		FullName         string    `json:"full_name"`
-		Role             string    `json:"role"`
-		CreatedAt        string    `json:"created_at"`
-		TelegramLinked   bool      `json:"telegram_linked"`
-		TelegramUsername string    `json:"telegram_username,omitempty"`
-		TelegramID       int64     `json:"telegram_id,omitempty"`
-		ChatID           int64     `json:"chat_id,omitempty"`
-		Subscribed       bool      `json:"subscribed,omitempty"`
-		LinkedAt         string    `json:"linked_at,omitempty"`
-	}
-
-	var result []UserWithTelegram
-
-	for _, u := range allUsers {
-		userWithTg := UserWithTelegram{
-			ID:             u.ID,
-			Email:          u.Email,
-			FullName:       u.GetFullName(),
-			Role:           string(u.Role),
-			CreatedAt:      u.CreatedAt.Format("2006-01-02 15:04:05"),
-			TelegramLinked: false,
+		if linked == "true" && !telegramLinked {
+			continue
+		}
+		if linked == "false" && telegramLinked {
+			continue
 		}
 
-		// Если у пользователя есть Telegram привязка
-		if tgUser, exists := telegramMap[u.ID]; exists {
-			userWithTg.TelegramLinked = true
-			userWithTg.TelegramUsername = tgUser.Username
-			userWithTg.TelegramID = tgUser.TelegramID
-			userWithTg.ChatID = tgUser.ChatID
-			userWithTg.Subscribed = tgUser.Subscribed
-			userWithTg.LinkedAt = tgUser.CreatedAt.Format("2006-01-02 15:04:05")
+		if subscribed == "true" && (!telegramLinked || !isSubscribed) {
+			continue
+		}
+		if subscribed == "false" && telegramLinked && isSubscribed {
+			continue
 		}
 
-		// Применяем фильтры
-		if linked != "" {
-			if linked == "true" && !userWithTg.TelegramLinked {
+		if searchQuery != "" {
+			if !telegramLinked || len(telegramUsername) < len(searchQuery) {
 				continue
 			}
-			if linked == "false" && userWithTg.TelegramLinked {
-				continue
-			}
-		}
-
-		if subscribed != "" && userWithTg.TelegramLinked {
-			if subscribed == "true" && !userWithTg.Subscribed {
-				continue
-			}
-			if subscribed == "false" && userWithTg.Subscribed {
-				continue
-			}
-		}
-
-		// Фильтр по поиску username
-		if searchQuery != "" && userWithTg.TelegramUsername != "" {
-			if len(userWithTg.TelegramUsername) < len(searchQuery) {
-				continue
-			}
-			// Простой поиск по substring
 			match := false
-			for i := 0; i <= len(userWithTg.TelegramUsername)-len(searchQuery); i++ {
-				if userWithTg.TelegramUsername[i:i+len(searchQuery)] == searchQuery {
+			for i := 0; i <= len(telegramUsername)-len(searchQuery); i++ {
+				if telegramUsername[i:i+len(searchQuery)] == searchQuery {
 					match = true
 					break
 				}
@@ -154,7 +98,7 @@ func (h *AdminTelegramHandler) ListUsersWithTelegram(w http.ResponseWriter, r *h
 			}
 		}
 
-		result = append(result, userWithTg)
+		result = append(result, userMap)
 	}
 
 	response.OK(w, map[string]interface{}{

@@ -22,7 +22,7 @@ describe('HomeworkSection - Homework Text Save (T406)', () => {
 
   const mockUser = {
     id: 'teacher-1',
-    role: 'methodologist',
+    role: 'teacher',
   };
 
   const mockNotification = {
@@ -228,7 +228,7 @@ describe('HomeworkSection - Homework Text Save (T406)', () => {
 
   it('should not save if teacher cannot edit lesson', async () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 'other-teacher', role: 'methodologist' },
+      user: { id: 'other-teacher', role: 'teacher' },
     });
 
     renderComponent();

@@ -63,7 +63,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
       if (user?.role === "student") {
         // Студенты видят только преподавателей
         users = await getTeachersAll();
-      } else if (user?.role === "methodologist" || user?.role === "teacher") {
+      } else if (user?.role === "teacher" || user?.role === "teacher") {
         // Преподаватели видят студентов
         users = await getStudentsAll();
       }
@@ -370,7 +370,7 @@ const ChatList = ({ selectedRoom, onRoomSelect, urlRoomId }) => {
                       {availableUser.full_name || "Пользователь"}
                     </div>
                     <div className="chat-user-role">
-                      {availableUser.role === "methodologist" ||
+                      {availableUser.role === "teacher" ||
                       availableUser.role === "teacher"
                         ? "Преподаватель"
                         : "Студент"}

@@ -67,7 +67,7 @@ func TestScenario_12_BulkEditRemoveStudent(t *testing.T) {
 	defer cleanupTestDB(t, pool)
 
 	admin := createTestUser(t, pool, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
+	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleTeacher))
 	student := createTestUser(t, pool, "student@test.com", "Student", string(models.RoleStudent))
 
 	// Create lessons with student pre-booked
@@ -109,8 +109,8 @@ func TestScenario_13_BulkEditChangeTeacher(t *testing.T) {
 	defer cleanupTestDB(t, pool)
 
 	admin := createTestUser(t, pool, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher1 := createTestUser(t, pool, "teacher1@test.com", "Teacher", string(models.RoleMethodologist))
-	teacher2 := createTestUser(t, pool, "teacher2@test.com", "Teacher", string(models.RoleMethodologist))
+	teacher1 := createTestUser(t, pool, "teacher1@test.com", "Teacher", string(models.RoleTeacher))
+	teacher2 := createTestUser(t, pool, "teacher2@test.com", "Teacher", string(models.RoleTeacher))
 
 	// Create lessons with teacher1
 	lessons := createMatchingLessons(t, pool, teacher1.ID, 3)
@@ -146,7 +146,7 @@ func TestScenario_14_BulkEditMissingFutureLessons(t *testing.T) {
 	defer cleanupTestDB(t, pool)
 
 	admin := createTestUser(t, pool, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
+	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleTeacher))
 	student := createTestUser(t, pool, "student@test.com", "Student", string(models.RoleStudent))
 
 	addCreditToStudent(t, pool, student.ID, 20)
@@ -186,7 +186,7 @@ func TestScenario_15_BulkEditInsufficientCredits(t *testing.T) {
 	defer cleanupTestDB(t, pool)
 
 	admin := createTestUser(t, pool, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
+	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleTeacher))
 	student := createTestUser(t, pool, "student@test.com", "Student", string(models.RoleStudent))
 
 	// Give student only 1 credit, but will try to add to 3 lessons
@@ -226,7 +226,7 @@ func TestBulkEdit_ValidateApplicableModifications(t *testing.T) {
 	defer cleanupTestDB(t, pool)
 
 	admin := createTestUser(t, pool, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
+	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleTeacher))
 
 	// Create lessons at different times (should NOT match for bulk edit)
 	lesson1 := createLessonWithTime(t, pool, teacher.ID, 4, time.Now().AddDate(0, 0, 1), 9, 0)
@@ -261,7 +261,7 @@ func TestBulkEdit_DuplicateStudentBooking(t *testing.T) {
 	defer cleanupTestDB(t, pool)
 
 	admin := createTestUser(t, pool, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
+	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleTeacher))
 	student := createTestUser(t, pool, "student@test.com", "Student", string(models.RoleStudent))
 
 	addCreditToStudent(t, pool, student.ID, 20)
@@ -303,7 +303,7 @@ func TestBulkEdit_LessonCapacityFull(t *testing.T) {
 	defer cleanupTestDB(t, pool)
 
 	admin := createTestUser(t, pool, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
+	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleTeacher))
 	student := createTestUser(t, pool, "student@test.com", "Student", string(models.RoleStudent))
 
 	addCreditToStudent(t, pool, student.ID, 20)
@@ -349,7 +349,7 @@ func TestBulkEdit_ModificationTracking(t *testing.T) {
 	defer cleanupTestDB(t, pool)
 
 	admin := createTestUser(t, pool, "admin@test.com", "Admin", string(models.RoleAdmin))
-	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleMethodologist))
+	teacher := createTestUser(t, pool, "teacher@test.com", "Teacher", string(models.RoleTeacher))
 	student := createTestUser(t, pool, "student@test.com", "Student", string(models.RoleStudent))
 
 	addCreditToStudent(t, pool, student.ID, 20)

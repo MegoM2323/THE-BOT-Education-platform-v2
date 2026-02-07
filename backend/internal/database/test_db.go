@@ -147,26 +147,26 @@ func SafeGetTestPool(t *testing.T) *pgxpool.Pool {
 }
 
 // applyMigrationsToTestDB applies all database migrations from the migrations directory.
-// This ensures the test database schema matches production exactly, including the methodologist role.
+// This ensures the test database schema matches production exactly, including the teacher role.
 // NOTE: This function runs inside sync.Once and does not receive *testing.T to avoid race conditions.
 func applyMigrationsToTestDB(db *sqlx.DB) error {
 	migrationsOnce.Do(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		// Check if schema already exists and has recent migrations (methodologist role)
+		// Check if schema already exists and has recent migrations (teacher role)
 		// Use information_schema for robust constraint validation instead of LIKE string matching
-		var hasMethodologistRole int
-		checkErr := db.GetContext(ctx, &hasMethodologistRole,
+		var hasTeacherRole int
+		checkErr := db.GetContext(ctx, &hasTeacherRole,
 			`SELECT 1 FROM information_schema.table_constraints tc
 			 WHERE tc.table_name = 'users'
 			   AND tc.constraint_name = 'users_role_check'
 			   AND tc.constraint_type = 'CHECK'
 			 LIMIT 1`)
 
-		// If methodologist role already exists, migrations are already applied
-		if checkErr == nil && hasMethodologistRole == 1 {
-			log.Printf("Database already has full schema with methodologist role, skipping migrations")
+		// If teacher role already exists, migrations are already applied
+		if checkErr == nil && hasTeacherRole == 1 {
+			log.Printf("Database already has full schema with teacher role, skipping migrations")
 			return
 		}
 
@@ -328,7 +328,7 @@ func GetTestSqlxDB(t *testing.T) *sqlx.DB {
 	testDB.SetConnMaxIdleTime(10 * time.Minute)
 
 	// Apply all database migrations to ensure schema is up to date
-	// This includes all constraints like methodologist role in users table
+	// This includes all constraints like teacher role in users table
 	if migrationErr := applyMigrationsToTestDB(testDB); migrationErr != nil {
 		t.Fatalf("Failed to apply migrations to test database: %v", migrationErr)
 	}

@@ -226,7 +226,7 @@ func TestChatHandler_GetMyRooms_Success(t *testing.T) {
 			StudentID:       studentID,
 			ParticipantID:   teacherID,
 			ParticipantName: "Иван Преподаватель",
-			ParticipantRole: string(models.RoleMethodologist),
+			ParticipantRole: string(models.RoleTeacher),
 			CreatedAt:       time.Now(),
 			UpdatedAt:       time.Now(),
 		},
@@ -235,7 +235,7 @@ func TestChatHandler_GetMyRooms_Success(t *testing.T) {
 	mockChatRepo.On("ListRoomsByStudent", mock.Anything, studentID).Return(expectedRooms, nil)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	req := httptest.NewRequest("GET", "/api/v1/chat/rooms", nil)
 	req = setSessionInContext(req, studentID, models.RoleStudent)
@@ -269,7 +269,7 @@ func TestChatHandler_GetMyRooms_NoSession(t *testing.T) {
 	mockUserRepo := new(MockUserRepository)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	req := httptest.NewRequest("GET", "/api/v1/chat/rooms", nil)
 	w := httptest.NewRecorder()
@@ -288,7 +288,7 @@ func TestChatHandler_SendMessage_EmptyMessage(t *testing.T) {
 	mockUserRepo := new(MockUserRepository)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	roomID := uuid.New()
 	userID := uuid.New()
@@ -316,7 +316,7 @@ func TestChatHandler_SendMessage_InvalidRoomID(t *testing.T) {
 	mockUserRepo := new(MockUserRepository)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	userID := uuid.New()
 
@@ -342,7 +342,7 @@ func TestChatHandler_SendMessage_NoSession(t *testing.T) {
 	mockUserRepo := new(MockUserRepository)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	roomID := uuid.New()
 
@@ -369,7 +369,7 @@ func TestChatHandler_GetOrCreateRoom_InvalidJSON(t *testing.T) {
 	mockUserRepo := new(MockUserRepository)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	userID := uuid.New()
 
@@ -391,7 +391,7 @@ func TestChatHandler_GetOrCreateRoom_InvalidParticipantID(t *testing.T) {
 	mockUserRepo := new(MockUserRepository)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	userID := uuid.New()
 
@@ -420,7 +420,7 @@ func TestChatHandler_GetOrCreateRoom_NoSession(t *testing.T) {
 	mockUserRepo := new(MockUserRepository)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	reqBody := struct {
 		ParticipantID string `json:"participant_id"`
@@ -453,7 +453,7 @@ func TestChatHandler_SendMessage_FileUploadValidation(t *testing.T) {
 	roomID := uuid.New()
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	// Test 1: Valid multipart form with message and file
 	body := new(bytes.Buffer)
@@ -494,7 +494,7 @@ func TestChatHandler_ResponseFormat_Success(t *testing.T) {
 	mockChatRepo.On("ListRoomsByStudent", mock.Anything, userID).Return([]*models.ChatRoom{}, nil)
 
 	chatService := service.NewChatService(mockChatRepo, mockUserRepo, nil)
-	handler := NewChatHandler(chatService)
+	handler := NewChatHandler(chatService, "/tmp/uploads")
 
 	req := httptest.NewRequest("GET", "/api/v1/chat/rooms", nil)
 	req = setSessionInContext(req, userID, models.RoleStudent)

@@ -142,7 +142,7 @@ func (h *CreditHandler) GetMyHistory(w http.ResponseWriter, r *http.Request) {
 	// Студенты видят только свою историю
 	if user.IsStudent() {
 		filter.UserID = &user.ID
-	} else if user.IsAdmin() || user.IsMethodologist() {
+	} else if user.IsAdmin() || user.IsTeacher() {
 		// Админы и методисты могут фильтровать по user_id, если указан
 		if userIDStr := r.URL.Query().Get("user_id"); userIDStr != "" {
 			userID, err := uuid.Parse(userIDStr)
@@ -410,7 +410,7 @@ func (h *CreditHandler) handleCreditError(w http.ResponseWriter, err error) {
 // GetUserCredits обрабатывает GET /api/v1/credits/user/{id}
 // Только для админов и методистов - получить баланс конкретного пользователя по ID
 // @Summary      Get user credits
-// @Description  Get credit balance for a specific user (admin and methodologist only)
+// @Description  Get credit balance for a specific user (admin and teacher only)
 // @Tags         credits
 // @Accept       json
 // @Produce      json
@@ -428,8 +428,8 @@ func (h *CreditHandler) GetUserCredits(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Только админы и методисты могут видеть баланс других пользователей
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -519,7 +519,7 @@ func (h *CreditHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 // GetAllCredits обрабатывает GET /api/v1/credits/all
 // Для админов и методистов - получить все балансы кредитов студентов
 // @Summary      Get all credits
-// @Description  Get all student credit balances (admin and methodologist)
+// @Description  Get all student credit balances (admin and teacher)
 // @Tags         credits
 // @Accept       json
 // @Produce      json
@@ -535,8 +535,8 @@ func (h *CreditHandler) GetAllCredits(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Только админы и методисты могут получать все кредиты
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 

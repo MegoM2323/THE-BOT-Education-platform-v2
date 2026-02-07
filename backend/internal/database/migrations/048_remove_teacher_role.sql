@@ -3,8 +3,8 @@
 -- Created: 2025-01-18
 --
 -- This migration updates the users role CHECK constraint to remove the 'teacher' role
--- Previously allowed roles: 'student', 'teacher', 'admin', 'methodologist'
--- New allowed roles: 'student', 'admin', 'methodologist'
+-- Previously allowed roles: 'student', 'teacher', 'admin', 'teacher'
+-- New allowed roles: 'student', 'admin', 'teacher'
 -- Also removes the validate_teacher_role trigger and function that are no longer needed
 
 BEGIN;
@@ -37,7 +37,7 @@ BEGIN
         WHERE rel.relname = 'users' AND con.conname = 'users_role_check'
     ) THEN
         ALTER TABLE users ADD CONSTRAINT users_role_check
-            CHECK (role IN ('student', 'admin', 'methodologist'));
+            CHECK (role IN ('student', 'admin', 'teacher'));
     END IF;
 END $$;
 

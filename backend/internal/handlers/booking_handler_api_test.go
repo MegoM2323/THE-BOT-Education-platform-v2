@@ -70,6 +70,8 @@ func TestBookingHandler_CreateBooking_PreviouslyCancelled(t *testing.T) {
 		creditRepo,
 		cancelledBookingRepo,
 		bookingValidator,
+		nil, // telegramService
+		nil, // userRepo
 	)
 
 	// Создаём handler
@@ -77,7 +79,7 @@ func TestBookingHandler_CreateBooking_PreviouslyCancelled(t *testing.T) {
 
 	// Создаём тестовые данные: студент, учитель, занятие
 	student := createTestUser(t, sqlxDB, "student@test.com", "Test Student", string(models.RoleStudent))
-	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Test Teacher", string(models.RoleMethodologist))
+	teacher := createTestUser(t, sqlxDB, "teacher@test.com", "Test Teacher", string(models.RoleTeacher))
 
 	// Даём студенту кредиты
 	addCreditToStudent(t, sqlxDB, student.ID, 10)
@@ -162,13 +164,15 @@ func TestBookingHandler_ErrorHandling(t *testing.T) {
 		creditRepo,
 		cancelledBookingRepo,
 		bookingValidator,
+		nil, // telegramService
+		nil, // userRepo
 	)
 
 	bookingHandler := NewBookingHandler(bookingService)
 
 	// Создаём тестовые данные
 	student := createTestUser(t, sqlxDB, "student2@test.com", "Student 2", string(models.RoleStudent))
-	teacher := createTestUser(t, sqlxDB, "teacher2@test.com", "Teacher 2", string(models.RoleMethodologist))
+	teacher := createTestUser(t, sqlxDB, "teacher2@test.com", "Teacher 2", string(models.RoleTeacher))
 
 	tests := []struct {
 		name           string

@@ -9,43 +9,43 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateUserRequest_ValidateMethodologistRole(t *testing.T) {
+func TestCreateUserRequest_ValidateTeacherRole(t *testing.T) {
 	req := &CreateUserRequest{
-		Email:    "methodologist@example.com",
+		Email:    "teacher@example.com",
 		Password: "SecurePassword123",
-		FullName: "Methodologist Name",
-		Role:     RoleMethodologist,
+		FirstName: "Teacher Name", LastName: "Lastname",
+		Role:     RoleTeacher,
 	}
 
 	err := req.Validate()
-	assert.NoError(t, err, "Should allow creating user with methodologist role")
-	assert.Equal(t, RoleMethodologist, req.Role)
+	assert.NoError(t, err, "Should allow creating user with teacher role")
+	assert.Equal(t, RoleTeacher, req.Role)
 }
 
-func TestUser_IsMethodologist(t *testing.T) {
-	methodologistUser := &User{
+func TestUser_IsTeacher(t *testing.T) {
+	teacherUser := &User{
 		ID:       uuid.New(),
-		Email:    "methodologist@example.com",
-		FullName: "Methodologist",
-		Role:     RoleMethodologist,
+		Email:    "teacher@example.com",
+		FirstName: "Teacher", LastName: "Lastname",
+		Role:     RoleTeacher,
 	}
 
-	assert.True(t, methodologistUser.IsMethodologist(), "User with methodologist role should be detected as methodologist")
+	assert.True(t, teacherUser.IsTeacher(), "User with teacher role should be detected as teacher")
 
 	studentUser := &User{
 		ID:       uuid.New(),
 		Email:    "student@example.com",
-		FullName: "Student",
+		FirstName: "Student", LastName: "Lastname",
 		Role:     RoleStudent,
 	}
 
-	assert.False(t, studentUser.IsMethodologist(), "Student should not be methodologist")
+	assert.False(t, studentUser.IsTeacher(), "Student should not be teacher")
 }
 
 func TestUserRole_ValidRoles(t *testing.T) {
 	validRoles := []UserRole{
 		RoleStudent,
-		RoleMethodologist,
+		RoleTeacher,
 		RoleAdmin,
 	}
 
@@ -54,7 +54,7 @@ func TestUserRole_ValidRoles(t *testing.T) {
 			req := &CreateUserRequest{
 				Email:    "test@example.com",
 				Password: "SecurePassword123",
-				FullName: "Test User",
+				FirstName: "Test User", LastName: "Lastname",
 				Role:     role,
 			}
 
@@ -68,7 +68,7 @@ func TestUserRole_InvalidRole(t *testing.T) {
 	req := &CreateUserRequest{
 		Email:    "test@example.com",
 		Password: "SecurePassword123",
-		FullName: "Test User",
+		FirstName: "Test User", LastName: "Lastname",
 		Role:     UserRole("invalid_role"),
 	}
 
@@ -77,22 +77,22 @@ func TestUserRole_InvalidRole(t *testing.T) {
 	assert.Equal(t, ErrInvalidRole, err)
 }
 
-func TestUpdateUserRequest_MethodologistRole(t *testing.T) {
-	methodologistRole := RoleMethodologist
+func TestUpdateUserRequest_TeacherRole(t *testing.T) {
+	teacherRole := RoleTeacher
 	req := &UpdateUserRequest{
-		Role: &methodologistRole,
+		Role: &teacherRole,
 	}
 
 	assert.NotNil(t, req.Role)
-	assert.Equal(t, RoleMethodologist, *req.Role)
+	assert.Equal(t, RoleTeacher, *req.Role)
 }
 
-func TestUser_MarshalJSON_MethodologistRole(t *testing.T) {
+func TestUser_MarshalJSON_TeacherRole(t *testing.T) {
 	user := &User{
 		ID:             uuid.New(),
-		Email:          "methodologist@example.com",
-		FullName:       "Methodologist User",
-		Role:           RoleMethodologist,
+		Email:          "teacher@example.com",
+		FirstName: "Teacher User", LastName: "Lastname",
+		Role:           RoleTeacher,
 		PaymentEnabled: false,
 	}
 
@@ -104,5 +104,5 @@ func TestUser_MarshalJSON_MethodologistRole(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, result, "role")
-	assert.Equal(t, string(RoleMethodologist), result["role"])
+	assert.Equal(t, string(RoleTeacher), result["role"])
 }

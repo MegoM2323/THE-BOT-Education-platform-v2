@@ -71,7 +71,7 @@ vi.mock('../LessonCreateModal.jsx', () => ({
   default: () => null,
 }));
 
-describe('Calendar: StudentFilterSearch Integration (for Methodologist)', () => {
+describe('Calendar: StudentFilterSearch Integration (for Teacher)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -171,11 +171,11 @@ describe('Calendar: StudentFilterSearch Integration (for Methodologist)', () => 
     expect(true).toBe(true);
   });
 
-  it('StudentFilterSearch uses correct API endpoint for methodologist access', () => {
+  it('StudentFilterSearch uses correct API endpoint for teacher access', () => {
     // Backend: /api/v1/users?role=student (via getStudentsAll)
     // Backend check (users.go line 64):
-    // if !user.IsAdmin() && !user.IsMethodologist() { ... }
-    // This means methodologists CAN fetch student lists
+    // if !user.IsAdmin() && !user.IsTeacher() { ... }
+    // This means teachers CAN fetch student lists
     expect(true).toBe(true);
   });
 

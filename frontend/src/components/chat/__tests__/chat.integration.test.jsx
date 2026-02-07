@@ -4,8 +4,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
  * Chat System Integration Tests
  *
  * Tests for all critical chat system paths:
- * 1. Student creates chat with methodologist
- * 2. Methodologist sees student chat
+ * 1. Student creates chat with teacher
+ * 2. Teacher sees student chat
  * 3. Admin sees all chats
  * 4. Message ordering is correct
  * 5. Validation works (student cannot chat with student, etc)
@@ -35,38 +35,38 @@ describe('Chat System Integration Tests', () => {
     vi.clearAllMocks();
   });
 
-  describe('Test 1: Student creates chat with methodologist', () => {
-    it('should load available teachers (methodologists only)', async () => {
-      // Mock response: only methodologists for students
+  describe('Test 1: Student creates chat with teacher', () => {
+    it('should load available teachers (teachers only)', async () => {
+      // Mock response: only teachers for students
       mockChatAPI.getTeachersAll.mockResolvedValue({
         data: [
-          { id: '1', name: 'Методист 1', role: 'methodologist' },
-          { id: '2', name: 'Методист 2', role: 'methodologist' },
+          { id: '1', name: 'Методист 1', role: 'teacher' },
+          { id: '2', name: 'Методист 2', role: 'teacher' },
         ],
       });
 
       const response = await mockChatAPI.getTeachersAll();
       expect(response.data).toHaveLength(2);
-      expect(response.data[0].role).toBe('methodologist');
-      expect(response.data[1].role).toBe('methodologist');
+      expect(response.data[0].role).toBe('teacher');
+      expect(response.data[1].role).toBe('teacher');
     });
 
-    it('should create room when student clicks on methodologist', async () => {
-      const methodologistId = '1';
+    it('should create room when student clicks on teacher', async () => {
+      const teacherId = '1';
       const studentId = '100';
 
       mockChatAPI.getOrCreateRoom.mockResolvedValue({
         data: {
           id: 'room-1',
-          teacher_id: methodologistId,
+          teacher_id: teacherId,
           student_id: studentId,
           created_at: new Date().toISOString(),
         },
       });
 
-      const response = await mockChatAPI.getOrCreateRoom(methodologistId);
+      const response = await mockChatAPI.getOrCreateRoom(teacherId);
       expect(response.data.id).toBe('room-1');
-      expect(response.data.teacher_id).toBe(methodologistId);
+      expect(response.data.teacher_id).toBe(teacherId);
       expect(response.data.student_id).toBe(studentId);
     });
 
@@ -110,9 +110,9 @@ describe('Chat System Integration Tests', () => {
     });
   });
 
-  describe('Test 2: Methodologist sees student chat', () => {
-    it('should load methodologist chat list', async () => {
-      const methodologistId = '1';
+  describe('Test 2: Teacher sees student chat', () => {
+    it('should load teacher chat list', async () => {
+      const teacherId = '1';
 
       mockChatAPI.getUserChats.mockResolvedValue({
         data: [
@@ -135,7 +135,7 @@ describe('Chat System Integration Tests', () => {
         ],
       });
 
-      const response = await mockChatAPI.getUserChats(methodologistId);
+      const response = await mockChatAPI.getUserChats(teacherId);
       expect(response.data).toHaveLength(2);
       expect(response.data[0].id).toBe('room-1');
       expect(response.data[0].student_name).toBe('Студент 1');
@@ -328,7 +328,7 @@ describe('Chat System Integration Tests', () => {
     it('student should NOT see other students in teacher list', async () => {
       mockChatAPI.getTeachersAll.mockResolvedValue({
         data: [
-          { id: '1', name: 'Методист 1', role: 'methodologist' },
+          { id: '1', name: 'Методист 1', role: 'teacher' },
           // Note: No other students
         ],
       });
@@ -381,7 +381,7 @@ describe('Chat System Integration Tests', () => {
   describe('Test 6: Real-time SSE updates', () => {
     it('should receive message updates via SSE without page refresh', async () => {
       const roomId = 'room-1';
-      const methodologistId = '1';
+      const teacherId = '1';
 
       // Setup SSE listener
       mockSSE.on.mockImplementation((event, callback) => {
@@ -417,7 +417,7 @@ describe('Chat System Integration Tests', () => {
 
     it('should handle room created event via SSE', async () => {
       const studentId = '100';
-      const methodologistId = '1';
+      const teacherId = '1';
 
       mockSSE.on.mockImplementation((event, callback) => {
         if (event === 'room_created') {
@@ -426,7 +426,7 @@ describe('Chat System Integration Tests', () => {
               type: 'room_created',
               data: {
                 id: 'room-new',
-                teacher_id: methodologistId,
+                teacher_id: teacherId,
                 student_id: studentId,
               },
             });
@@ -481,31 +481,31 @@ describe('Chat System Integration Tests', () => {
   });
 
   describe('Test Summary - Critical Paths', () => {
-    it('complete flow: student creates chat → methodologist sees it → sends message', async () => {
+    it('complete flow: student creates chat → teacher sees it → sends message', async () => {
       const studentId = '100';
-      const methodologistId = '1';
+      const teacherId = '1';
 
       // Step 1: Student loads available teachers
       mockChatAPI.getTeachersAll.mockResolvedValue({
-        data: [{ id: methodologistId, name: 'Методист 1', role: 'methodologist' }],
+        data: [{ id: teacherId, name: 'Методист 1', role: 'teacher' }],
       });
 
       // Step 2: Student creates room
       mockChatAPI.getOrCreateRoom.mockResolvedValue({
-        data: { id: 'room-1', teacher_id: methodologistId, student_id: studentId },
+        data: { id: 'room-1', teacher_id: teacherId, student_id: studentId },
       });
 
-      // Step 3: Methodologist loads chats
+      // Step 3: Teacher loads chats
       mockChatAPI.getUserChats.mockResolvedValue({
         data: [{ id: 'room-1', student_id: studentId, student_name: 'Студент 1' }],
       });
 
-      // Step 4: Methodologist opens room
+      // Step 4: Teacher opens room
       mockChatAPI.getRoomByID.mockResolvedValue({
-        data: { id: 'room-1', teacher_id: methodologistId, student_id: studentId },
+        data: { id: 'room-1', teacher_id: teacherId, student_id: studentId },
       });
 
-      // Step 5: Methodologist sends message
+      // Step 5: Teacher sends message
       mockChatAPI.sendMessage.mockResolvedValue({
         data: { id: 'msg-1', text: 'Ответ', room_id: 'room-1' },
       });
@@ -514,10 +514,10 @@ describe('Chat System Integration Tests', () => {
       let response = await mockChatAPI.getTeachersAll();
       expect(response.data).toHaveLength(1);
 
-      response = await mockChatAPI.getOrCreateRoom(methodologistId);
+      response = await mockChatAPI.getOrCreateRoom(teacherId);
       expect(response.data.id).toBe('room-1');
 
-      response = await mockChatAPI.getUserChats(methodologistId);
+      response = await mockChatAPI.getUserChats(teacherId);
       expect(response.data).toHaveLength(1);
 
       response = await mockChatAPI.getRoomByID('room-1');

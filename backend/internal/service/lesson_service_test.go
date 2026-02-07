@@ -59,13 +59,12 @@ func TestCreateLesson_InvalidMaxStudents_IndividualWith2(t *testing.T) {
 	// Попытка создать individual с max_students = 2
 	// With explicit lesson_type=individual and max_students=2, should fail with ErrIndividualLessonMaxStudents
 	endTime := time.Now().Add(50 * time.Hour)
-	maxStudents := 2
 	lessonType := models.LessonTypeIndividual
 	createReq := &models.CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   time.Now().Add(48 * time.Hour),
-		EndTime:     &endTime,
-		MaxStudents: &maxStudents, // НЕПРАВИЛЬНО! Individual требует ровно 1
+		EndTime:     endTime,
+		MaxStudents: 2, // НЕПРАВИЛЬНО! Individual требует ровно 1
 		LessonType:  &lessonType,  // Явно указываем тип individual
 	}
 
@@ -81,12 +80,11 @@ func TestCreateLesson_InvalidMaxStudents_IndividualWith2(t *testing.T) {
 func TestCreateLesson_ValidIndividual(t *testing.T) {
 	// Создать valid request для individual
 	endTime := time.Now().Add(50 * time.Hour)
-	maxStudents := 1
 	createReq := &models.CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   time.Now().Add(48 * time.Hour),
-		EndTime:     &endTime,
-		MaxStudents: &maxStudents, // Правильно!
+		EndTime:     endTime,
+		MaxStudents: 1, // Правильно!
 	}
 
 	// Действие - валидация
@@ -114,12 +112,11 @@ func TestValidateLessonTypeChange_IndividualToIndividual(t *testing.T) {
 func TestCreateLesson_GroupValidation(t *testing.T) {
 	// Проверяем что group урок может иметь > 1 студента
 	endTime := time.Now().Add(50 * time.Hour)
-	maxStudents := 5
 	createReq := &models.CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   time.Now().Add(48 * time.Hour),
-		EndTime:     &endTime,
-		MaxStudents: &maxStudents, // Правильно для group
+		EndTime:     endTime,
+		MaxStudents: 5, // Правильно для group
 	}
 
 	// Действие - валидация
@@ -133,14 +130,13 @@ func TestCreateLesson_GroupValidation(t *testing.T) {
 func TestCreateLesson_GroupWith1Student(t *testing.T) {
 	// Group урок с 1 студентом - ЗАПРЕЩЕН при создании (требуется минимум 4)
 	endTime := time.Now().Add(50 * time.Hour)
-	maxStudents := 1
 	lessonType := models.LessonTypeGroup
 	createReq := &models.CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   time.Now().Add(48 * time.Hour),
-		EndTime:     &endTime,
+		EndTime:     endTime,
 		LessonType:  &lessonType,  // Explicitly group lesson
-		MaxStudents: &maxStudents, // Group требует минимум 4 студента на создание
+		MaxStudents: 1, // Group требует минимум 4 студента на создание
 	}
 
 	// Действие - валидация

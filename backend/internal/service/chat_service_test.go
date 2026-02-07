@@ -151,7 +151,7 @@ func TestChatService_GetOrCreateRoom(t *testing.T) {
 
 		teacher := &models.User{
 			ID:   teacherID,
-			Role: models.RoleMethodologist,
+			Role: models.RoleTeacher,
 		}
 
 		student := &models.User{
@@ -196,7 +196,7 @@ func TestChatService_GetOrCreateRoom(t *testing.T) {
 
 		teacher := &models.User{
 			ID:   teacherID,
-			Role: models.RoleMethodologist,
+			Role: models.RoleTeacher,
 		}
 
 		expectedRoom := &models.ChatRoom{
@@ -315,7 +315,7 @@ func TestChatService_GetChatHistory(t *testing.T) {
 		mockChatRepo.On("GetMessagesByRoom", mock.Anything, roomID, 50, 0).Return(expectedMessages, nil)
 		mockChatRepo.On("GetAttachmentsByMessage", mock.Anything, mock.Anything).Return([]*models.FileAttachment{}, nil)
 
-		messages, err := service.GetChatHistory(context.Background(), userID, string(models.RoleMethodologist), req)
+		messages, err := service.GetChatHistory(context.Background(), userID, string(models.RoleTeacher), req)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, messages)
@@ -427,7 +427,7 @@ func TestChatService_GetUserChats(t *testing.T) {
 
 		mockChatRepo.On("ListRoomsByTeacher", mock.Anything, teacherID).Return(expectedRooms, nil)
 
-		rooms, err := service.GetUserChats(context.Background(), teacherID, string(models.RoleMethodologist))
+		rooms, err := service.GetUserChats(context.Background(), teacherID, string(models.RoleTeacher))
 
 		assert.NoError(t, err)
 		assert.NotNil(t, rooms)

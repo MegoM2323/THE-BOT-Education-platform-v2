@@ -138,7 +138,7 @@ func TestLessonValidator_ValidateCreateLessonRequest(t *testing.T) {
 		{
 			name: "Valid request with color and subject",
 			req: &models.CreateLessonRequest{
-				Color:   &validColor,
+				Color:   validColor,
 				Subject: &validSubject,
 			},
 			wantErr: false,
@@ -146,14 +146,14 @@ func TestLessonValidator_ValidateCreateLessonRequest(t *testing.T) {
 		{
 			name: "Valid request with color only",
 			req: &models.CreateLessonRequest{
-				Color: &validColor,
+				Color: validColor,
 			},
 			wantErr: false,
 		},
 		{
-			name: "Valid request with nil color and subject",
+			name: "Valid request with empty color and subject",
 			req: &models.CreateLessonRequest{
-				Color:   nil,
+				Color:   "",
 				Subject: nil,
 			},
 			wantErr: false,
@@ -161,7 +161,7 @@ func TestLessonValidator_ValidateCreateLessonRequest(t *testing.T) {
 		{
 			name: "Invalid color",
 			req: &models.CreateLessonRequest{
-				Color:   &invalidColor,
+				Color:   invalidColor,
 				Subject: &validSubject,
 			},
 			wantErr: true,
@@ -169,7 +169,7 @@ func TestLessonValidator_ValidateCreateLessonRequest(t *testing.T) {
 		{
 			name: "Invalid subject - too long",
 			req: &models.CreateLessonRequest{
-				Color:   &validColor,
+				Color:   validColor,
 				Subject: &tooLongSubject,
 			},
 			wantErr: true,

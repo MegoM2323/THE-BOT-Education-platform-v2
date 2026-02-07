@@ -1,5 +1,5 @@
--- 046_add_methodologist_role.sql
--- Добавление роли methodologist в CHECK constraint таблицы users
+-- 046_add_teacher_role.sql
+-- Добавление роли teacher в CHECK constraint таблицы users
 
 DO $$
 DECLARE
@@ -24,6 +24,6 @@ BEGIN
         WHERE rel.relname = 'users' AND con.conname = 'users_role_check'
     ) THEN
         ALTER TABLE users ADD CONSTRAINT users_role_check
-            CHECK (role IN ('student', 'teacher', 'admin', 'methodologist'));
+            CHECK (role IN ('student', 'teacher', 'admin', 'teacher'));
     END IF;
 END $$;

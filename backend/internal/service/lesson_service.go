@@ -69,7 +69,7 @@ func (s *LessonService) CreateLesson(ctx context.Context, req *models.CreateLess
 	}
 
 	// Проверяем что пользователь может быть назначен преподавателем
-	// Допустимые роли: teacher, admin, methodologist
+	// Допустимые роли: teacher, admin, teacher
 	if !teacher.CanBeAssignedAsTeacher() {
 		return nil, fmt.Errorf("user cannot be assigned as teacher (role: %s): %w", teacher.Role, models.ErrInvalidTeacherID)
 	}
@@ -243,7 +243,7 @@ func (s *LessonService) UpdateLesson(ctx context.Context, lessonID uuid.UUID, re
 		}
 
 		// Проверяем что пользователь может быть назначен преподавателем
-		// Допустимые роли: teacher, admin, methodologist
+		// Допустимые роли: teacher, admin, teacher
 		if !teacher.CanBeAssignedAsTeacher() {
 			return nil, fmt.Errorf("user cannot be assigned as teacher (role: %s): %w", teacher.Role, models.ErrInvalidTeacherID)
 		}

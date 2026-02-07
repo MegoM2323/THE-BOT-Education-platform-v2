@@ -30,7 +30,7 @@ export const LessonCreateModal = ({
   const queryClient = useQueryClient();
 
   // Проверка роли: методист может назначать только себя
-  const isMethodologist = user?.role === ROLES.METHODOLOGIST;
+  const isTeacher = user?.role === ROLES.TEACHER;
 
   // Состояния для формы
   const [teachers, setTeachers] = useState([]);
@@ -97,7 +97,7 @@ export const LessonCreateModal = ({
   const loadTeachers = async () => {
     try {
       // Для методиста показываем только его самого
-      if (isMethodologist && user?.id) {
+      if (isTeacher && user?.id) {
         const selfTeacher = {
           id: user.id,
           full_name: user.full_name || user.name || user.email,
@@ -438,10 +438,10 @@ export const LessonCreateModal = ({
                     value={formData.teacher_id}
                     onChange={handleInputChange}
                     disabled={
-                      creating || teachers.length === 0 || isMethodologist
+                      creating || teachers.length === 0 || isTeacher
                     }
                     title={
-                      isMethodologist ? "Вы можете назначать только себя" : ""
+                      isTeacher ? "Вы можете назначать только себя" : ""
                     }
                   >
                     <option value="">Выберите преподавателя</option>
@@ -454,7 +454,7 @@ export const LessonCreateModal = ({
                   {errors.teacher_id && (
                     <span className="form-error">{errors.teacher_id}</span>
                   )}
-                  {isMethodologist && (
+                  {isTeacher && (
                     <small className="form-hint">
                       Вы можете назначать только себя
                     </small>

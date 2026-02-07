@@ -25,7 +25,7 @@ func TestUserService_CreateUser_PaymentEnabledDefault(t *testing.T) {
 	req := &models.CreateUserRequest{
 		Email:    "test@example.com",
 		Password: "password123",
-		FullName: "Test User",
+		FirstName: "Test User", LastName: "Lastname",
 		Role:     models.RoleStudent,
 	}
 

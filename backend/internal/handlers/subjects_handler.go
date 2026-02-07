@@ -100,8 +100,8 @@ func (h *SubjectsHandler) CreateSubject(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -152,8 +152,8 @@ func (h *SubjectsHandler) UpdateSubject(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -225,8 +225,8 @@ func (h *SubjectsHandler) DeleteSubject(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -307,8 +307,8 @@ func (h *SubjectsHandler) AssignSubjectToTeacher(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -366,8 +366,8 @@ func (h *SubjectsHandler) RemoveSubjectFromTeacher(w http.ResponseWriter, r *htt
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -395,7 +395,7 @@ func (h *SubjectsHandler) RemoveSubjectFromTeacher(w http.ResponseWriter, r *htt
 
 // GetMySubjects обрабатывает GET /api/v1/my-subjects
 // @Summary      Get current user's subjects
-// @Description  Get list of subjects for the currently logged-in methodologist
+// @Description  Get list of subjects for the currently logged-in teacher
 // @Tags         subjects
 // @Accept       json
 // @Produce      json
@@ -411,8 +411,8 @@ func (h *SubjectsHandler) GetMySubjects(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if !user.IsMethodologist() {
-		response.Forbidden(w, "Methodologist access required")
+	if !user.IsTeacher() {
+		response.Forbidden(w, "Teacher access required")
 		return
 	}
 

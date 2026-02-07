@@ -25,7 +25,7 @@ export const ReportSection = ({ lessonId, lesson, students = [] }) => {
   // Проверка прав доступа
   // Admin может редактировать отчеты всех уроков
   // Teacher может редактировать отчеты только своих уроков (где teacher_id === user.id)
-  // Methodologist может редактировать отчеты всех уроков
+  // Teacher может редактировать отчеты всех уроков
   // Student может только просматривать (canEdit = false)
   const normalizeId = (id) => String(id || '').toLowerCase().trim();
   const isTeacherOwnLesson = user?.role === 'teacher' &&
@@ -34,7 +34,7 @@ export const ReportSection = ({ lessonId, lesson, students = [] }) => {
 
   const canEdit = user?.role === 'admin' ||
     isTeacherOwnLesson ||
-    user?.role === 'methodologist';
+    user?.role === 'teacher';
 
   // Проверка: можно ли редактировать отчет (только после начала занятия)
   const canEditReport = () => {
@@ -262,8 +262,8 @@ export const ReportSection = ({ lessonId, lesson, students = [] }) => {
           </div>
         )}
 
-        {/* Кнопка отправки отчета родителям (для admin и methodologist) */}
-        {reportText && students.length > 0 && (user?.role === 'admin' || user?.role === 'methodologist') && (
+        {/* Кнопка отправки отчета родителям (для admin и teacher) */}
+        {reportText && students.length > 0 && (user?.role === 'admin' || user?.role === 'teacher') && (
           <div className="report-parent-actions">
             <Button
               onClick={handleSendReportToParents}

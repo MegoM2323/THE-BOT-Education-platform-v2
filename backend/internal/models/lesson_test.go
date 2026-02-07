@@ -21,13 +21,9 @@ func TestApplyDefaults_EndTime(t *testing.T) {
 
 	req.ApplyDefaults()
 
-	if req.EndTime == nil {
-		t.Fatal("Expected EndTime to be set after ApplyDefaults")
-	}
-
 	expectedEndTime := startTime.Add(2 * time.Hour)
 	if !req.EndTime.Equal(expectedEndTime) {
-		t.Errorf("Expected EndTime=%v, got %v", expectedEndTime, *req.EndTime)
+		t.Errorf("Expected EndTime=%v, got %v", expectedEndTime, req.EndTime)
 	}
 }
 
@@ -40,12 +36,8 @@ func TestApplyDefaults_MaxStudents_Individual(t *testing.T) {
 
 	req.ApplyDefaults()
 
-	if req.MaxStudents == nil {
-		t.Fatal("Expected MaxStudents to be set after ApplyDefaults")
-	}
-
-	if *req.MaxStudents != 1 {
-		t.Errorf("Expected MaxStudents=1 for individual lesson, got %d", *req.MaxStudents)
+	if req.MaxStudents != 1 {
+		t.Errorf("Expected MaxStudents=1 for individual lesson, got %d", req.MaxStudents)
 	}
 }
 
@@ -60,12 +52,8 @@ func TestApplyDefaults_MaxStudents_Group(t *testing.T) {
 
 	req.ApplyDefaults()
 
-	if req.MaxStudents == nil {
-		t.Fatal("Expected MaxStudents to be set after ApplyDefaults")
-	}
-
-	if *req.MaxStudents != 4 {
-		t.Errorf("Expected MaxStudents=4 for group lesson, got %d", *req.MaxStudents)
+	if req.MaxStudents != 4 {
+		t.Errorf("Expected MaxStudents=4 for group lesson, got %d", req.MaxStudents)
 	}
 }
 
@@ -79,12 +67,8 @@ func TestApplyDefaults_MaxStudents_DefaultIndividual(t *testing.T) {
 
 	req.ApplyDefaults()
 
-	if req.MaxStudents == nil {
-		t.Fatal("Expected MaxStudents to be set after ApplyDefaults")
-	}
-
-	if *req.MaxStudents != 1 {
-		t.Errorf("Expected MaxStudents=1 for default lesson, got %d", *req.MaxStudents)
+	if req.MaxStudents != 1 {
+		t.Errorf("Expected MaxStudents=1 for default lesson, got %d", req.MaxStudents)
 	}
 
 	if req.LessonType == nil {
@@ -105,18 +89,18 @@ func TestApplyDefaults_DoesNotOverrideProvidedValues(t *testing.T) {
 	req := &CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   startTime,
-		EndTime:     &customEndTime,
-		MaxStudents: &customMaxStudents,
+		EndTime:     customEndTime,
+		MaxStudents: customMaxStudents,
 	}
 
 	req.ApplyDefaults()
 
 	if !req.EndTime.Equal(customEndTime) {
-		t.Errorf("Expected EndTime to remain %v, got %v", customEndTime, *req.EndTime)
+		t.Errorf("Expected EndTime to remain %v, got %v", customEndTime, req.EndTime)
 	}
 
-	if *req.MaxStudents != customMaxStudents {
-		t.Errorf("Expected MaxStudents to remain %d, got %d", customMaxStudents, *req.MaxStudents)
+	if req.MaxStudents != customMaxStudents {
+		t.Errorf("Expected MaxStudents to remain %d, got %d", customMaxStudents, req.MaxStudents)
 	}
 }
 
@@ -126,7 +110,7 @@ func TestValidate_EndTimeOptional(t *testing.T) {
 	req := &CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   time.Now(),
-		MaxStudents: &maxStudents,
+		MaxStudents: maxStudents,
 		// EndTime is nil - should be valid
 	}
 
@@ -141,7 +125,7 @@ func TestValidate_MaxStudentsOptional(t *testing.T) {
 	req := &CreateLessonRequest{
 		TeacherID: uuid.New(),
 		StartTime: time.Now(),
-		EndTime:   &endTime,
+		EndTime: endTime,
 		// MaxStudents is nil - should be valid
 	}
 
@@ -159,8 +143,8 @@ func TestValidate_EndTimeMustBeAfterStartTime(t *testing.T) {
 	req := &CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   startTime,
-		EndTime:     &endTime,
-		MaxStudents: &maxStudents,
+		EndTime: endTime,
+		MaxStudents: maxStudents,
 	}
 
 	if err := req.Validate(); err != ErrInvalidLessonTime {
@@ -177,8 +161,8 @@ func TestValidate_IndividualLessonMustHaveMaxStudents1(t *testing.T) {
 	req := &CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   time.Now(),
-		EndTime:     &endTime,
-		MaxStudents: &maxStudents,
+		EndTime: endTime,
+		MaxStudents: maxStudents,
 		LessonType:  &lessonType,
 	}
 
@@ -208,8 +192,8 @@ func TestValidate_GroupLessonMinimum4Students(t *testing.T) {
 			req := &CreateLessonRequest{
 				TeacherID:   uuid.New(),
 				StartTime:   time.Now(),
-				EndTime:     &endTime,
-				MaxStudents: &tt.maxStudents,
+				EndTime: endTime,
+				MaxStudents: tt.maxStudents,
 			}
 
 			err := req.Validate()
@@ -228,8 +212,8 @@ func TestValidate_ValidIndividualLesson(t *testing.T) {
 	req := &CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   time.Now(),
-		EndTime:     &endTime,
-		MaxStudents: &maxStudents,
+		EndTime: endTime,
+		MaxStudents: maxStudents,
 	}
 
 	if err := req.Validate(); err != nil {
@@ -245,8 +229,8 @@ func TestValidate_ValidGroupLesson(t *testing.T) {
 	req := &CreateLessonRequest{
 		TeacherID:   uuid.New(),
 		StartTime:   time.Now(),
-		EndTime:     &endTime,
-		MaxStudents: &maxStudents,
+		EndTime: endTime,
+		MaxStudents: maxStudents,
 	}
 
 	if err := req.Validate(); err != nil {

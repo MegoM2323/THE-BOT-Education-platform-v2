@@ -190,7 +190,7 @@ DECLARE
     user_role VARCHAR(50);
 BEGIN
     SELECT role INTO user_role FROM users WHERE id = NEW.teacher_id;
-    IF user_role != 'methodologist' THEN
+    IF user_role != 'teacher' THEN
         RAISE EXCEPTION 'User % is not a teacher (role: %)', NEW.teacher_id, user_role;
     END IF;
     RETURN NEW;

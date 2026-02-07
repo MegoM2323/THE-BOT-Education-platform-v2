@@ -5,7 +5,7 @@
 // Роли пользователей
 export const ROLES = {
   ADMIN: 'admin',
-  METHODOLOGIST: 'methodologist',
+  TEACHER: 'teacher',
   STUDENT: 'student',
 };
 

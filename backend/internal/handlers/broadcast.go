@@ -40,8 +40,8 @@ func (h *BroadcastHandler) GetLinkedUsers(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -111,8 +111,8 @@ func (h *BroadcastHandler) CreateBroadcastList(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -156,8 +156,8 @@ func (h *BroadcastHandler) GetBroadcastLists(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -184,8 +184,8 @@ func (h *BroadcastHandler) GetBroadcastListByID(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -218,8 +218,8 @@ func (h *BroadcastHandler) UpdateBroadcastList(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -278,8 +278,8 @@ func (h *BroadcastHandler) DeleteBroadcastList(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -311,8 +311,8 @@ func (h *BroadcastHandler) SendBroadcast(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -388,8 +388,8 @@ func (h *BroadcastHandler) GetBroadcasts(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -444,8 +444,8 @@ func (h *BroadcastHandler) GetBroadcastDetails(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 
@@ -518,8 +518,8 @@ func (h *BroadcastHandler) CancelBroadcast(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if !user.IsAdmin() && !user.IsMethodologist() {
-		response.Forbidden(w, "Admin or methodologist access required")
+	if !user.IsAdmin() && !user.IsTeacher() {
+		response.Forbidden(w, "Admin or teacher access required")
 		return
 	}
 

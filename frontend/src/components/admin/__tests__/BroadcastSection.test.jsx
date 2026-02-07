@@ -102,7 +102,7 @@ describe('BroadcastSection', () => {
     });
 
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 'user-1', role: 'methodologist' },
+      user: { id: 'user-1', role: 'teacher' },
     });
   });
 

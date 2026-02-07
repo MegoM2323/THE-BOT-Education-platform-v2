@@ -276,7 +276,7 @@ func (r *ChatRepository) GetMessagesByRoom(ctx context.Context, roomID uuid.UUID
 			CASE
 				WHEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), '') != '' THEN
 					CASE u.role
-						WHEN 'methodologist' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
+						WHEN 'teacher' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
 						WHEN 'student' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Студент)'
 						WHEN 'admin' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Администратор)'
 						ELSE COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email)
@@ -311,7 +311,7 @@ func (r *ChatRepository) GetPendingMessages(ctx context.Context) ([]*models.Mess
 			CASE
 				WHEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), '') != '' THEN
 					CASE u.role
-						WHEN 'methodologist' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
+						WHEN 'teacher' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
 						WHEN 'student' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Студент)'
 						WHEN 'admin' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Администратор)'
 						ELSE COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email)
@@ -367,7 +367,7 @@ func (r *ChatRepository) GetMessageByID(ctx context.Context, msgID uuid.UUID) (*
 			CASE
 				WHEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), '') != '' THEN
 					CASE u.role
-						WHEN 'methodologist' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
+						WHEN 'teacher' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Преподаватель)'
 						WHEN 'student' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Студент)'
 						WHEN 'admin' THEN COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email) || ' (Администратор)'
 						ELSE COALESCE(NULLIF(TRIM(CONCAT(u.first_name, ' ', u.last_name)), ''), u.email)

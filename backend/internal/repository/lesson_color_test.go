@@ -20,7 +20,7 @@ func TestLessonColor_CreateAndRetrieve(t *testing.T) {
 	lessonRepo := NewLessonRepository(db)
 
 	// Создаём тестового учителя
-	teacher := createTestUserVisibility(t, db, ctx, "teacher@test.com", models.RoleMethodologist)
+	teacher := createTestUserVisibility(t, db, ctx, "teacher@test.com", models.RoleTeacher)
 
 	tests := []struct {
 		name          string
@@ -97,7 +97,7 @@ func TestLessonColor_Update(t *testing.T) {
 	lessonRepo := NewLessonRepository(db)
 
 	// Создаём тестового учителя
-	teacher := createTestUserVisibility(t, db, ctx, "teacher2@test.com", models.RoleMethodologist)
+	teacher := createTestUserVisibility(t, db, ctx, "teacher2@test.com", models.RoleTeacher)
 
 	// Создаём занятие с дефолтным цветом
 	lesson := &models.Lesson{

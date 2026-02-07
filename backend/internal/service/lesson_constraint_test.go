@@ -98,19 +98,19 @@ func TestGroupLessonConstraints(t *testing.T) {
 		req := &models.CreateLessonRequest{
 			TeacherID:   uuid.New(),
 			StartTime:   testTime(),
-			MaxStudents: intPtrLocal(3), // Less than minimum
+			MaxStudents: 3, // Less than minimum
 		}
 
 		err := req.Validate()
 		assert.Equal(t, models.ErrGroupLessonMinStudents, err, "Group lesson with max_students < 4 should fail validation")
 
 		// Test with exactly 4
-		req.MaxStudents = intPtrLocal(4)
+		req.MaxStudents = 4
 		err = req.Validate()
 		assert.NoError(t, err, "Group lesson with max_students = 4 should be valid")
 
 		// Test with more than 4
-		req.MaxStudents = intPtrLocal(10)
+		req.MaxStudents = 10
 		err = req.Validate()
 		assert.NoError(t, err, "Group lesson with max_students > 4 should be valid")
 	})
@@ -126,8 +126,7 @@ func TestGroupLessonConstraints(t *testing.T) {
 
 		req.ApplyDefaults()
 
-		assert.NotNil(t, req.MaxStudents)
-		assert.Equal(t, 1, *req.MaxStudents, "Default lesson should be individual with 1 max_students")
+		assert.Equal(t, 1, req.MaxStudents, "Default lesson should be individual with 1 max_students")
 		assert.NotNil(t, req.LessonType)
 		assert.Equal(t, models.LessonTypeIndividual, *req.LessonType, "Default lesson type should be individual")
 
@@ -141,8 +140,7 @@ func TestGroupLessonConstraints(t *testing.T) {
 		}
 		req2.ApplyDefaults()
 
-		assert.NotNil(t, req2.MaxStudents)
-		assert.Equal(t, 4, *req2.MaxStudents, "Group lesson should default to 4 max_students when lesson_type=group is explicit")
+		assert.Equal(t, 4, req2.MaxStudents, "Group lesson should default to 4 max_students when lesson_type=group is explicit")
 	})
 }
 
