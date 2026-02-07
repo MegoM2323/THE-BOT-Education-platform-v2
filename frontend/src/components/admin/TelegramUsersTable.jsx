@@ -221,13 +221,17 @@ export const TelegramUsersTable = ({
                         @{user.telegram.username}
                       </span>
                     ) : (
-                      <span className="no-data">-</span>
+                      <span className="no-data">Не привязан</span>
                     )}
                   </td>
                   <td>
-                    <code className="telegram-id">{user.telegram?.telegram_id || '-'}</code>
+                    <code className="telegram-id">
+                      {user.telegram?.telegram_id && String(user.telegram.telegram_id).trim()
+                        ? user.telegram.telegram_id
+                        : '-'}
+                    </code>
                   </td>
-                  <td>{formatDate(user.telegram?.linked_at)}</td>
+                  <td>{user.telegram?.linked_at ? formatDate(user.telegram.linked_at) : '-'}</td>
                 </tr>
               ))
             )}

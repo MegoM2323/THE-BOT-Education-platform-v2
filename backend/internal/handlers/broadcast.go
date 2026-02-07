@@ -79,8 +79,11 @@ func (h *BroadcastHandler) GetLinkedUsers(w http.ResponseWriter, r *http.Request
 	}
 
 	var responseUsers []UserWithTelegram
+	var skippedCount int
 	for _, tu := range telegramUsers {
 		if tu.User == nil {
+			skippedCount++
+			log.Printf("[DEBUG] Skipped TelegramUser with nil User: telegram_id=%d, user_id=%s (likely deleted user)", tu.TelegramID, tu.UserID)
 			continue
 		}
 		responseUsers = append(responseUsers, UserWithTelegram{
@@ -94,6 +97,9 @@ func (h *BroadcastHandler) GetLinkedUsers(w http.ResponseWriter, r *http.Request
 				LinkedAt:   tu.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 			},
 		})
+	}
+	if skippedCount > 0 {
+		log.Printf("[DEBUG] GetLinkedUsers: returned %d users, skipped %d with nil User (orphaned records)", len(responseUsers), skippedCount)
 	}
 
 	response.OK(w, map[string]interface{}{

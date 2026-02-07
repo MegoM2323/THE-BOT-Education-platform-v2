@@ -451,7 +451,6 @@ export const Calendar = ({
             {headerActionsTop}
           </div>
 
-          {/* НИЖНЯЯ СТРОКА HEADER - навигация + диапазон дат + кнопка "Применить шаблон" */}
           {/* T5: Скрываем только если teacher передал свою навигацию в headerActionsTop */}
           {!(role === 'teacher' && headerActionsTop) && (
             <div className="calendar-header-bottom">
