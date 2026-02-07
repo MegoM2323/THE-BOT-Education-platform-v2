@@ -1048,26 +1048,8 @@ export const LessonEditModal = ({
     setShowBulkEditConfirmation(true);
   };
 
-  /**
-   * Обработчик создания серии повторяющихся занятий
-   */
-  const handleCreateRecurringSeries = async () => {
-    if (!lesson?.id) return;
-    const confirmed = window.confirm(
-      `Создать серию повторяющихся занятий до конца семестра (4 месяца)?`,
-    );
-    if (!confirmed) return;
-    try {
-      const result = await createRecurringSeries(lesson.id);
-      showNotification(`Создано ${result.data?.count || 0} занятий`, "success");
-      await loadLessonData();
-      invalidateLessonData(queryClient);
-      onClose();
-      onLessonUpdated?.(lesson);
-    } catch (error) {
-      showNotification(error.response?.data?.message || error.message, "error");
-    }
-  };
+  // handleCreateRecurringSeries удалён - теперь создание серии происходит
+  // автоматически при включении checkbox "Повторять еженедельно"
 
   /**
    * Confirm bulk edit and apply to all subsequent lessons
@@ -1434,28 +1416,36 @@ export const LessonEditModal = ({
                             <input
                               type="checkbox"
                               checked={isRecurring}
-                              onChange={(e) => setIsRecurring(e.target.checked)}
+                              onChange={async (e) => {
+                                const checked = e.target.checked;
+                                setIsRecurring(checked);
+
+                                // Автоматически создать серию при включении галочки (как в Google Calendar)
+                                if (checked && lesson?.id) {
+                                  const confirmed = window.confirm(
+                                    `Создать серию повторяющихся занятий до конца семестра (4 месяца)?`
+                                  );
+                                  if (confirmed) {
+                                    try {
+                                      const result = await createRecurringSeries(lesson.id);
+                                      showNotification(`Создано ${result.data?.count || 0} занятий`, "success");
+                                      await loadLessonData();
+                                      invalidateLessonData(queryClient);
+                                      onLessonUpdated?.(lesson);
+                                    } catch (error) {
+                                      showNotification(error.response?.data?.message || error.message, "error");
+                                      setIsRecurring(false); // Вернуть галочку обратно если ошибка
+                                    }
+                                  } else {
+                                    setIsRecurring(false); // Отменить если пользователь нажал "Отмена"
+                                  }
+                                }
+                              }}
                               disabled={shouldFreezeInfoTab}
                             />
                             <span>Повторять еженедельно</span>
                           </label>
                         </div>
-
-                        {isRecurring && (
-                          <div
-                            className="form-group"
-                            style={{ gridColumn: "1 / -1" }}
-                          >
-                            <Button
-                              variant="secondary"
-                              onClick={handleCreateRecurringSeries}
-                              disabled={!isRecurring || shouldFreezeInfoTab}
-                              className="create-recurring-series-btn"
-                            >
-                              Создать серию
-                            </Button>
-                          </div>
-                        )}
                       </div>
                     )}
 
