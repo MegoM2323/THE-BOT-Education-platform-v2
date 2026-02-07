@@ -44,6 +44,8 @@ func TestBookingRaceCondition(t *testing.T) {
 		creditRepo,
 		cancelledBookingRepo,
 		bookingValidator,
+		nil,
+		nil,
 	)
 
 	// Setup test data
@@ -205,6 +207,8 @@ func TestBookingRaceConditionMultipleSpots(t *testing.T) {
 		creditRepo,
 		cancelledBookingRepo,
 		bookingValidator,
+		nil,
+		nil,
 	)
 
 	// Create teacher with unique email
@@ -334,6 +338,8 @@ func TestBookingNoRaceWithAvailableSpots(t *testing.T) {
 		creditRepo,
 		cancelledBookingRepo,
 		bookingValidator,
+		nil,
+		nil,
 	)
 
 	// Create teacher with unique email

@@ -47,6 +47,5 @@ func LoadBusinessRules() BusinessRules {
 
 // Recurring lessons rules
 const (
-	MaxRecurringWeeks     = 12  // Максимум недель для повторяющегося занятия
-	DefaultRecurringWeeks = 4   // Количество недель по умолчанию
+	DefaultRecurringSemesterMonths = 4 // Длительность семестра по умолчанию (4 месяца)
 )

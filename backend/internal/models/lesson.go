@@ -183,8 +183,7 @@ type CreateLessonRequest struct {
 	HomeworkText     *string     `json:"homework_text,omitempty"`      // Optional: homework text instructions
 	Link             *string     `json:"link,omitempty"`               // Optional: link to meeting/resources
 	StudentIDs       []uuid.UUID `json:"student_ids,omitempty"`        // Optional: students to enroll on creation
-	IsRecurring      bool        `json:"is_recurring,omitempty"`       // Optional: создать повторяющееся занятие
-	RecurringWeeks   *int        `json:"recurring_weeks,omitempty"`    // Optional: количество недель (4, 8, 12)
+	IsRecurring      bool        `json:"is_recurring,omitempty"`       // Optional: создать повторяющееся занятие еженедельно
 	RecurringEndDate *time.Time  `json:"recurring_end_date,omitempty"` // Optional: дата окончания повторений
 }
 
@@ -206,7 +205,6 @@ type UpdateLessonRequest struct {
 
 // CreateRecurringSeriesRequest запрос на создание серии повторяющихся занятий
 type CreateRecurringSeriesRequest struct {
-	RecurringWeeks int `json:"recurring_weeks" validate:"required,min=4,max=12"`
 }
 
 // RecurringSeriesResponse ответ на создание серии

@@ -36,8 +36,8 @@ func TestChatStudentCreatesRoomWithTeacher(t *testing.T) {
 	}
 	mockUserRepoIntegration := &integrationMockUserRepository{
 		users: map[uuid.UUID]*models.User{
-			studentID:    student,
-			methodistID:  methodologist,
+			studentID:   student,
+			methodistID: methodologist,
 		},
 	}
 
@@ -128,11 +128,11 @@ func TestChatAdminListsAllChats(t *testing.T) {
 	}
 	mockUserRepoIntegration3 := &integrationMockUserRepository{
 		users: map[uuid.UUID]*models.User{
-			studentID1:    student1,
-			studentID2:    student2,
-			methodistID1:  methodologist1,
-			methodistID2:  methodologist2,
-			adminID:       admin,
+			studentID1:   student1,
+			studentID2:   student2,
+			methodistID1: methodologist1,
+			methodistID2: methodologist2,
+			adminID:      admin,
 		},
 	}
 

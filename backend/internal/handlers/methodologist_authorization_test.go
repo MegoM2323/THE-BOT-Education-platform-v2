@@ -12,35 +12,35 @@ import (
 // TestMethodologistRoleCheck проверяет что роль методиста правильно определяется
 func TestMethodologistRoleCheck(t *testing.T) {
 	methodologist := &models.User{
-		ID:       uuid.New(),
-		Email:    "methodologist@test.com",
+		ID:        uuid.New(),
+		Email:     "methodologist@test.com",
 		FirstName: "Test",
 		LastName:  "Methodologist",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
-		ID:       uuid.New(),
-		Email:    "teacher@test.com",
+		ID:        uuid.New(),
+		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	student := &models.User{
-		ID:       uuid.New(),
-		Email:    "student@test.com",
+		ID:        uuid.New(),
+		Email:     "student@test.com",
 		FirstName: "Test",
 		LastName:  "Student",
-		Role:     models.RoleStudent,
+		Role:      models.RoleStudent,
 	}
 
 	admin := &models.User{
-		ID:       uuid.New(),
-		Email:    "admin@test.com",
+		ID:        uuid.New(),
+		Email:     "admin@test.com",
 		FirstName: "Test",
 		LastName:  "Admin",
-		Role:     models.RoleAdmin,
+		Role:      models.RoleAdmin,
 	}
 
 	t.Run("Methodologist_IsMethodologist", func(t *testing.T) {
@@ -79,27 +79,27 @@ func TestMethodologistRoleCheck(t *testing.T) {
 // TestMethodologistCanCreateLesson проверяет логику CreateLesson
 func TestMethodologistCanCreateLesson(t *testing.T) {
 	methodologist := &models.User{
-		ID:       uuid.New(),
-		Email:    "methodologist@test.com",
+		ID:        uuid.New(),
+		Email:     "methodologist@test.com",
 		FirstName: "Test",
 		LastName:  "Methodologist",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
-		ID:       uuid.New(),
-		Email:    "teacher@test.com",
+		ID:        uuid.New(),
+		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	admin := &models.User{
-		ID:       uuid.New(),
-		Email:    "admin@test.com",
+		ID:        uuid.New(),
+		Email:     "admin@test.com",
 		FirstName: "Test",
 		LastName:  "Admin",
-		Role:     models.RoleAdmin,
+		Role:      models.RoleAdmin,
 	}
 
 	// Проверка что методист может создавать занятия (согласно lessons.go:103)
@@ -116,35 +116,35 @@ func TestMethodologistCanCreateLesson(t *testing.T) {
 // TestMethodologistCanUpdateLesson проверяет логику UpdateLesson
 func TestMethodologistCanUpdateLesson(t *testing.T) {
 	methodologist := &models.User{
-		ID:       uuid.New(),
-		Email:    "methodologist@test.com",
+		ID:        uuid.New(),
+		Email:     "methodologist@test.com",
 		FirstName: "Test",
 		LastName:  "Methodologist",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	teacher1 := &models.User{
-		ID:       uuid.New(),
-		Email:    "teacher1@test.com",
+		ID:        uuid.New(),
+		Email:     "teacher1@test.com",
 		FirstName: "Test Teacher",
 		LastName:  "1",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	_ = &models.User{
-		ID:       uuid.New(),
-		Email:    "teacher2@test.com",
+		ID:        uuid.New(),
+		Email:     "teacher2@test.com",
 		FirstName: "Test Teacher",
 		LastName:  "2",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	admin := &models.User{
-		ID:       uuid.New(),
-		Email:    "admin@test.com",
+		ID:        uuid.New(),
+		Email:     "admin@test.com",
 		FirstName: "Test",
 		LastName:  "Admin",
-		Role:     models.RoleAdmin,
+		Role:      models.RoleAdmin,
 	}
 
 	// Логика из lessons.go:203
@@ -170,27 +170,27 @@ func TestMethodologistCanUpdateLesson(t *testing.T) {
 // TestMethodologistCanDeleteLesson проверяет логику DeleteLesson
 func TestMethodologistCanDeleteLesson(t *testing.T) {
 	methodologist := &models.User{
-		ID:       uuid.New(),
-		Email:    "methodologist@test.com",
+		ID:        uuid.New(),
+		Email:     "methodologist@test.com",
 		FirstName: "Test",
 		LastName:  "Methodologist",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
-		ID:       uuid.New(),
-		Email:    "teacher@test.com",
+		ID:        uuid.New(),
+		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	admin := &models.User{
-		ID:       uuid.New(),
-		Email:    "admin@test.com",
+		ID:        uuid.New(),
+		Email:     "admin@test.com",
 		FirstName: "Test",
 		LastName:  "Admin",
-		Role:     models.RoleAdmin,
+		Role:      models.RoleAdmin,
 	}
 
 	// Логика из lessons.go:289
@@ -208,27 +208,27 @@ func TestMethodologistCanDeleteLesson(t *testing.T) {
 // TestMethodologistCanBulkEdit проверяет логику ApplyToAllSubsequent
 func TestMethodologistCanBulkEdit(t *testing.T) {
 	methodologist := &models.User{
-		ID:       uuid.New(),
-		Email:    "methodologist@test.com",
+		ID:        uuid.New(),
+		Email:     "methodologist@test.com",
 		FirstName: "Test",
 		LastName:  "Methodologist",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
-		ID:       uuid.New(),
-		Email:    "teacher@test.com",
+		ID:        uuid.New(),
+		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	admin := &models.User{
-		ID:       uuid.New(),
-		Email:    "admin@test.com",
+		ID:        uuid.New(),
+		Email:     "admin@test.com",
 		FirstName: "Test",
 		LastName:  "Admin",
-		Role:     models.RoleAdmin,
+		Role:      models.RoleAdmin,
 	}
 
 	// Логика из lessons.go:522
@@ -246,27 +246,27 @@ func TestMethodologistCanBulkEdit(t *testing.T) {
 // TestMethodologistCanEditPastLesson проверяет редактирование прошлых занятий
 func TestMethodologistCanEditPastLesson(t *testing.T) {
 	methodologist := &models.User{
-		ID:       uuid.New(),
-		Email:    "methodologist@test.com",
+		ID:        uuid.New(),
+		Email:     "methodologist@test.com",
 		FirstName: "Test",
 		LastName:  "Methodologist",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	teacher := &models.User{
-		ID:       uuid.New(),
-		Email:    "teacher@test.com",
+		ID:        uuid.New(),
+		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	admin := &models.User{
-		ID:       uuid.New(),
-		Email:    "admin@test.com",
+		ID:        uuid.New(),
+		Email:     "admin@test.com",
 		FirstName: "Test",
 		LastName:  "Admin",
-		Role:     models.RoleAdmin,
+		Role:      models.RoleAdmin,
 	}
 
 	// Логика из lessons.go:245
@@ -288,11 +288,11 @@ func TestMethodologistCanEditPastLesson(t *testing.T) {
 // TestTeacherHomeworkOnlyPermission проверяет что учитель может только homework
 func TestTeacherHomeworkOnlyPermission(t *testing.T) {
 	teacher := &models.User{
-		ID:       uuid.New(),
-		Email:    "teacher@test.com",
+		ID:        uuid.New(),
+		Email:     "teacher@test.com",
 		FirstName: "Test",
 		LastName:  "Teacher",
-		Role:     models.RoleMethodologist,
+		Role:      models.RoleMethodologist,
 	}
 
 	lessonTeacherID := teacher.ID

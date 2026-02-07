@@ -147,7 +147,7 @@ func (h *LessonHandler) CreateLesson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Проверяем, нужно ли создать повторяющиеся занятия
-	if req.IsRecurring && req.RecurringWeeks != nil && *req.RecurringWeeks > 0 {
+	if req.IsRecurring {
 		lessons, err := h.lessonService.CreateRecurringLessons(r.Context(), &req)
 		if err != nil {
 			response.BadRequest(w, response.ErrCodeValidationFailed, fmt.Sprintf("Failed to create recurring lessons: %s", err.Error()))
@@ -698,18 +698,13 @@ func (h *LessonHandler) CreateRecurringSeriesFromLesson(w http.ResponseWriter, r
 		return
 	}
 
-	if req.RecurringWeeks < 4 || req.RecurringWeeks > 12 {
-		response.BadRequest(w, response.ErrCodeValidationFailed, "recurring_weeks must be between 4 and 12")
-		return
-	}
-
 	user, ok := middleware.GetUserFromContext(r.Context())
 	if !ok {
 		response.Unauthorized(w, "Authentication required")
 		return
 	}
 
-	result, err := h.lessonService.CreateRecurringSeriesFromLesson(r.Context(), lessonID, req.RecurringWeeks, user.ID)
+	result, err := h.lessonService.CreateRecurringSeriesFromLesson(r.Context(), lessonID, user.ID)
 	if err != nil {
 		log.Error().Err(err).Str("lesson_id", lessonID.String()).Msg("Failed to create recurring series")
 		response.InternalError(w, "Failed to create recurring series")

@@ -297,6 +297,14 @@ func (m *MockTelegramUserRepository) GetByRoleWithUserInfo(ctx context.Context, 
 	return args.Get(0).([]*models.TelegramUser), args.Error(1)
 }
 
+func (m *MockTelegramUserRepository) GetSubscribedUserIDs(ctx context.Context, userIDs []uuid.UUID) ([]uuid.UUID, error) {
+	args := m.Called(ctx, userIDs)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]uuid.UUID), args.Error(1)
+}
+
 // MockTelegramClient - мок для Telegram клиента
 type MockTelegramClient struct {
 	mock.Mock
@@ -326,11 +334,11 @@ func TestBroadcastService_CreateBroadcastList_Success(t *testing.T) {
 	// Настройка моков - проверяем существование и привязку каждого пользователя
 	for _, userID := range userIDs {
 		mockUserRepo.On("GetByID", ctx, userID).Return(&models.User{
-			ID:       userID,
-			Email:    "user@example.com",
+			ID:        userID,
+			Email:     "user@example.com",
 			FirstName: "Test",
-		LastName: "User",
-			Role:     models.RoleStudent,
+			LastName:  "User",
+			Role:      models.RoleStudent,
 		}, nil)
 
 		mockTelegramUserRepo.On("GetByUserID", ctx, userID).Return(&models.TelegramUser{
@@ -452,11 +460,11 @@ func TestBroadcastService_CreateBroadcastList_UserNotLinked(t *testing.T) {
 
 	// Пользователь существует
 	mockUserRepo.On("GetByID", ctx, userID).Return(&models.User{
-		ID:       userID,
-		Email:    "user@example.com",
+		ID:        userID,
+		Email:     "user@example.com",
 		FirstName: "Test",
-		LastName: "User",
-		Role:     models.RoleStudent,
+		LastName:  "User",
+		Role:      models.RoleStudent,
 	}, nil)
 
 	// Но не привязан к Telegram

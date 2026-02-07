@@ -13,6 +13,7 @@ import {
   detectModificationType,
   getModificationDetails,
 } from "../../utils/lessonModificationDetector.js";
+import { DEFAULT_RECURRING_WEEKS } from "../../config/constants.js";
 import { createRecurringSeries } from "../../api/lessons.js";
 import * as bookingAPI from "../../api/bookings.js";
 import * as userAPI from "../../api/users.js";
@@ -101,7 +102,6 @@ export const LessonEditModal = ({
 
   // Recurring lesson states
   const [isRecurring, setIsRecurring] = useState(false);
-  const [recurringWeeks, setRecurringWeeks] = useState(4);
 
   // Form validation errors
   const [formErrors, setFormErrors] = useState({});
@@ -598,19 +598,19 @@ export const LessonEditModal = ({
       // Для методиста показываем только его самого
       const isUserMethodologist = user?.role === ROLES.METHODOLOGIST;
       let teachersList;
-      
+
       if (isUserMethodologist && user?.id) {
         // Методист видит только себя в списке
-        teachersList = [{
-          id: user.id,
-          full_name: user.full_name || user.name || user.email
-        }];
+        teachersList = [
+          {
+            id: user.id,
+            full_name: user.full_name || user.name || user.email,
+          },
+        ];
       } else {
-        teachersList = Array.isArray(teachersResponse)
-          ? teachersResponse
-          : [];
+        teachersList = Array.isArray(teachersResponse) ? teachersResponse : [];
       }
-      
+
       setTeachers(teachersList);
       setSelectedTeacherId(lesson.teacher_id || "");
 
@@ -1054,17 +1054,22 @@ export const LessonEditModal = ({
    */
   const handleCreateRecurringSeries = async () => {
     if (!lesson?.id) return;
-    const confirmed = window.confirm(`Создать серию из ${recurringWeeks} повторяющихся занятий?`);
+    const confirmed = window.confirm(
+      `Создать серию из ${DEFAULT_RECURRING_WEEKS} повторяющихся занятий?`,
+    );
     if (!confirmed) return;
     try {
-      const result = await createRecurringSeries(lesson.id, recurringWeeks);
-      showNotification(`Создано ${result.data?.count || 0} занятий`, 'success');
+      const result = await createRecurringSeries(
+        lesson.id,
+        DEFAULT_RECURRING_WEEKS,
+      );
+      showNotification(`Создано ${result.data?.count || 0} занятий`, "success");
       await loadLessonData();
       invalidateLessonData(queryClient);
       onClose();
       onLessonUpdated?.(lesson);
     } catch (error) {
-      showNotification(error.response?.data?.message || error.message, 'error');
+      showNotification(error.response?.data?.message || error.message, "error");
     }
   };
 
@@ -1145,13 +1150,14 @@ export const LessonEditModal = ({
   }
   const isPastLesson = checkStartTime < new Date();
   const isMethodologist = user?.role === ROLES.METHODOLOGIST;
-  
+
   // Проверка: методист может редактировать только свои занятия
   const isOwnLesson = !isMethodologist || lesson.teacher_id === user?.id;
   const canEditLesson = isOwnLesson;
-  
+
   // Заморозка редактирования: прошедшее занятие для методиста ИЛИ чужое занятие для методиста
-  const shouldFreezeInfoTab = (isPastLesson && isMethodologist) || (isMethodologist && !isOwnLesson);
+  const shouldFreezeInfoTab =
+    (isPastLesson && isMethodologist) || (isMethodologist && !isOwnLesson);
 
   // Скрыть recurring UI для занятий в серии
   const showRecurringControls = !lesson?.recurring_group_id;
@@ -1276,7 +1282,8 @@ export const LessonEditModal = ({
                       </svg>
                     </span>
                     <span className="warning-text">
-                      Это занятие другого преподавателя. Редактирование недоступно.
+                      Это занятие другого преподавателя. Редактирование
+                      недоступно.
                     </span>
                   </div>
                 )}
@@ -1324,8 +1331,16 @@ export const LessonEditModal = ({
                               teacher_id: "",
                             }));
                           }}
-                          disabled={shouldFreezeInfoTab || teachers.length === 0 || isMethodologist}
-                          title={isMethodologist ? 'Вы можете назначать только себя' : ''}
+                          disabled={
+                            shouldFreezeInfoTab ||
+                            teachers.length === 0 ||
+                            isMethodologist
+                          }
+                          title={
+                            isMethodologist
+                              ? "Вы можете назначать только себя"
+                              : ""
+                          }
                         >
                           <option value="">Выберите преподавателя</option>
                           {teachers.map((teacher) => (
@@ -1340,7 +1355,9 @@ export const LessonEditModal = ({
                           </span>
                         )}
                         {isMethodologist && isOwnLesson && (
-                          <small className="form-hint">Вы можете назначать только себя</small>
+                          <small className="form-hint">
+                            Вы можете назначать только себя
+                          </small>
                         )}
                       </div>
 
@@ -1416,47 +1433,35 @@ export const LessonEditModal = ({
                     </div>
 
                     {showRecurringControls && (
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label className="recurring-label">
-                          <input
-                            type="checkbox"
-                            checked={isRecurring}
-                            onChange={(e) => setIsRecurring(e.target.checked)}
-                            disabled={shouldFreezeInfoTab}
-                          />
-                          <span>Повторять еженедельно</span>
-                        </label>
-                      </div>
-
-                      {isRecurring && (
-                        <>
-                          <div className="form-group">
-                            <label className="form-label">Количество недель</label>
-                            <select
-                              className="form-select"
-                              value={recurringWeeks}
-                              onChange={(e) => setRecurringWeeks(parseInt(e.target.value))}
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label className="recurring-label">
+                            <input
+                              type="checkbox"
+                              checked={isRecurring}
+                              onChange={(e) => setIsRecurring(e.target.checked)}
                               disabled={shouldFreezeInfoTab}
-                            >
-                              <option value={4}>4 недели</option>
-                              <option value={8}>8 недель</option>
-                              <option value={12}>12 недель</option>
-                            </select>
-                          </div>
-                          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                            />
+                            <span>Повторять еженедельно</span>
+                          </label>
+                        </div>
+
+                        {isRecurring && (
+                          <div
+                            className="form-group"
+                            style={{ gridColumn: "1 / -1" }}
+                          >
                             <Button
                               variant="secondary"
                               onClick={handleCreateRecurringSeries}
-                              disabled={!isRecurring || recurringWeeks === 0 || shouldFreezeInfoTab}
+                              disabled={!isRecurring || shouldFreezeInfoTab}
                               className="create-recurring-series-btn"
                             >
-                              Создать серию ({recurringWeeks} недель)
+                              Создать серию
                             </Button>
                           </div>
-                        </>
-                      )}
-                    </div>
+                        )}
+                      </div>
                     )}
 
                     <div className="form-row">
@@ -1529,7 +1534,9 @@ export const LessonEditModal = ({
                         placeholder="Например: https://meet.google.com/..."
                         disabled={shouldFreezeInfoTab}
                       />
-                      <small className="form-hint">Ссылка на видеоконференцию или материалы</small>
+                      <small className="form-hint">
+                        Ссылка на видеоконференцию или материалы
+                      </small>
                     </div>
 
                     <div className="form-group">

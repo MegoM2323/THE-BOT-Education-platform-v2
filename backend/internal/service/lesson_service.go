@@ -379,37 +379,31 @@ func (s *LessonService) GetLessonBookingsForLessons(ctx context.Context, lessonI
 	return s.lessonRepo.GetLessonBookingsForLessons(ctx, lessonIDs)
 }
 
-// CreateRecurringLessons создает повторяющиеся занятия на несколько недель
+// CreateRecurringLessons создает повторяющиеся занятия еженедельно до recurring_end_date или до конца семестра
 func (s *LessonService) CreateRecurringLessons(ctx context.Context, req *models.CreateLessonRequest) ([]*models.Lesson, error) {
 	if !req.IsRecurring {
 		return s.createSingleLesson(ctx, req)
 	}
 
-	weeks := config.DefaultRecurringWeeks
-	if req.RecurringWeeks != nil {
-		if *req.RecurringWeeks > config.MaxRecurringWeeks {
-			return nil, fmt.Errorf("max recurring weeks is %d", config.MaxRecurringWeeks)
-		}
-		if *req.RecurringWeeks <= 0 {
-			return nil, fmt.Errorf("recurring weeks must be positive")
-		}
-		weeks = *req.RecurringWeeks
+	endDate := req.StartTime.AddDate(0, config.DefaultRecurringSemesterMonths, 0)
+	if req.RecurringEndDate != nil {
+		endDate = *req.RecurringEndDate
 	}
 
 	groupID := uuid.New()
 	var lessons []*models.Lesson
 
-	for i := 0; i < weeks; i++ {
+	for currentDate := req.StartTime; currentDate.Before(endDate) || currentDate.Equal(endDate); currentDate = currentDate.AddDate(0, 0, 7) {
 		weekReq := *req
-		weekReq.StartTime = req.StartTime.AddDate(0, 0, i*7)
-		weekReq.EndTime = req.EndTime.AddDate(0, 0, i*7)
+		duration := req.EndTime.Sub(req.StartTime)
+		weekReq.StartTime = currentDate
+		weekReq.EndTime = currentDate.Add(duration)
 		weekReq.IsRecurring = true
-		weekReq.RecurringWeeks = nil
 		weekReq.RecurringEndDate = req.RecurringEndDate
 
 		lesson, err := s.createLessonWithGroup(ctx, &weekReq, &groupID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create week %d lesson: %w", i+1, err)
+			return nil, fmt.Errorf("failed to create recurring lesson at %s: %w", currentDate.Format("2006-01-02"), err)
 		}
 		lessons = append(lessons, lesson)
 	}
@@ -418,11 +412,19 @@ func (s *LessonService) CreateRecurringLessons(ctx context.Context, req *models.
 }
 
 // CreateRecurringSeriesFromLesson создаёт серию повторяющихся занятий на основе существующего
-func (s *LessonService) CreateRecurringSeriesFromLesson(ctx context.Context, lessonID uuid.UUID, weeks int, requestingUserID uuid.UUID) (*models.RecurringSeriesResponse, error) {
+func (s *LessonService) CreateRecurringSeriesFromLesson(ctx context.Context, lessonID uuid.UUID, requestingUserID uuid.UUID) (*models.RecurringSeriesResponse, error) {
 	// Получить оригинальное занятие
 	lesson, err := s.lessonRepo.GetByID(ctx, lessonID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get lesson: %w", err)
+	}
+
+	// Автоматически вычисляем количество недель до конца семестра
+	semesterEndDate := lesson.StartTime.AddDate(0, config.DefaultRecurringSemesterMonths, 0)
+	weeks := int(semesterEndDate.Sub(lesson.StartTime).Hours() / (24 * 7))
+
+	if weeks < 1 {
+		weeks = 1
 	}
 
 	// Создать новый recurring_group_id
@@ -469,7 +471,7 @@ func (s *LessonService) CreateRecurringSeriesFromLesson(ctx context.Context, les
 
 	return &models.RecurringSeriesResponse{
 		RecurringGroupID: groupID,
-		Lessons:           lessons,
+		Lessons:          lessons,
 	}, nil
 }
 
@@ -502,14 +504,14 @@ func (s *LessonService) createLessonWithGroup(ctx context.Context, req *models.C
 	}
 
 	lesson := &models.Lesson{
-		TeacherID:         req.TeacherID,
-		StartTime:         req.StartTime,
-		EndTime:           req.EndTime,
-		MaxStudents:       req.MaxStudents,
-		CreditsCost:       req.CreditsCost,
-		Color:             req.Color,
-		IsRecurring:       req.IsRecurring,
-		RecurringGroupID:  groupID,
+		TeacherID:        req.TeacherID,
+		StartTime:        req.StartTime,
+		EndTime:          req.EndTime,
+		MaxStudents:      req.MaxStudents,
+		CreditsCost:      req.CreditsCost,
+		Color:            req.Color,
+		IsRecurring:      req.IsRecurring,
+		RecurringGroupID: groupID,
 	}
 
 	if req.Subject != nil && *req.Subject != "" {
