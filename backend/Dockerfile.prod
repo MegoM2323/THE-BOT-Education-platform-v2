@@ -1,6 +1,7 @@
 # Stage 1: Builder
 FROM golang:1.23-alpine AS builder
 
+RUN sed -i 's/https:\/\/dl-cdn.alpinelinux.org/http:\/\/dl-cdn.alpinelinux.org/g' /etc/apk/repositories
 RUN apk add --no-cache git ca-certificates
 
 WORKDIR /build
