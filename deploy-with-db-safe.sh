@@ -150,20 +150,32 @@ BACKUP_SCRIPT
     fi
 }
 
-# Prepare backend source for remote build
-prepare_backend_source() {
-    log_step "Preparing backend source for remote build..."
+# Build backend locally
+build_backend() {
+    log_step "Building backend binary locally..."
 
+    cd "$PROJECT_DIR/backend"
+
+    if ! command -v go &> /dev/null; then
+        log_error "Go is not installed"
+        exit 1
+    fi
+
+    mkdir -p bin
+
+    log_info "Cross-compiling for Linux amd64..."
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-w -s" -o bin/server ./cmd/server
+
+    if [ ! -f "bin/server" ]; then
+        log_error "Failed to build backend binary"
+        exit 1
+    fi
+
+    chmod +x bin/server
+
+    BINARY_SIZE=$(du -h bin/server | cut -f1)
+    log_success "Backend built successfully (size: $BINARY_SIZE)"
     cd "$PROJECT_DIR"
-
-    log_info "Creating backend source package..."
-    tar -czf /tmp/backend-source.tar.gz \
-        --exclude='bin' \
-        --exclude='*.log' \
-        backend/ 2>/dev/null || true
-
-    local SIZE=$(du -h /tmp/backend-source.tar.gz | cut -f1)
-    log_success "Backend source packaged (size: $SIZE)"
 }
 
 # Build frontend
@@ -200,6 +212,11 @@ check_rsync() {
 deploy_docker_safe() {
     log_step "Starting Docker deployment (with database preservation)..."
 
+    if [ ! -f "$PROJECT_DIR/backend/bin/server" ]; then
+        log_error "backend/bin/server не существует. Выполните сборку сначала."
+        exit 1
+    fi
+
     if [ ! -d "$PROJECT_DIR/frontend/dist" ]; then
         log_error "frontend/dist не существует"
         exit 1
@@ -214,17 +231,9 @@ deploy_docker_safe() {
     scp "$PROJECT_DIR/docker-compose.prod.yml" "$REMOTE_HOST:$REMOTE_DIR/"
 
     log_info "Creating directory structure on server..."
-    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend"
+    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend/bin $REMOTE_DIR/backend/internal/database/migrations"
 
-    log_info "Fetching existing .env from server (before stopping containers)..."
-    if ssh "$REMOTE_HOST" "[[ -f $REMOTE_DIR/.env ]]" 2>/dev/null; then
-        scp "$REMOTE_HOST:$REMOTE_DIR/.env" /tmp/existing.env 2>/dev/null || true
-        log_info "Existing .env copied to /tmp/existing.env"
-    else
-        log_info "No existing .env found on server"
-    fi
-
-    log_info "Stopping containers before deployment..."
+    log_info "Stopping containers before copying binary..."
     ssh "$REMOTE_HOST" bash -s << 'STOP_SCRIPT'
 set -euo pipefail
 REMOTE_DIR="/opt/THE_BOT_platform"
@@ -241,16 +250,16 @@ sleep 2
 echo "Containers stopped"
 STOP_SCRIPT
 
-    log_info "Copying backend source to server..."
-    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_DIR/backend"
-    scp /tmp/backend-source.tar.gz "$REMOTE_HOST:$REMOTE_DIR/"
-    ssh "$REMOTE_HOST" "cd $REMOTE_DIR && tar -xzf backend-source.tar.gz && rm backend-source.tar.gz"
+    log_info "Copying backend binary..."
+    scp "$PROJECT_DIR/backend/bin/server" "$REMOTE_HOST:$REMOTE_DIR/backend/bin/"
 
     log_info "Copying entrypoint script..."
     scp "$PROJECT_DIR/backend/entrypoint.sh" "$REMOTE_HOST:$REMOTE_DIR/backend/"
 
-    log_info "Copying migrations (redundant but safe)..."
-    rsync -avz "$PROJECT_DIR/backend/internal/database/migrations/" "$REMOTE_HOST:$REMOTE_DIR/backend/internal/database/migrations/"
+    log_info "Copying migrations..."
+    rsync -avz --delete \
+        "$PROJECT_DIR/backend/internal/database/migrations/" \
+        "$REMOTE_HOST:$REMOTE_DIR/backend/internal/database/migrations/"
 
     log_info "Copying frontend files..."
     rsync -avz \
@@ -266,6 +275,11 @@ STOP_SCRIPT
     git checkout "$PROJECT_DIR/frontend/nginx.conf" 2>/dev/null || true
 
     log_info "Managing .env configuration..."
+    if ssh "$REMOTE_HOST" "[[ -f $REMOTE_DIR/.env ]]" 2>/dev/null; then
+        log_info "Fetching existing .env from server..."
+        scp "$REMOTE_HOST:$REMOTE_DIR/.env" /tmp/existing.env 2>/dev/null || true
+    fi
+
     if [[ -f "$PROJECT_DIR/backend/.env" ]]; then
         if [[ -f /tmp/existing.env ]]; then
             BASE_ENV="/tmp/existing.env"
@@ -276,44 +290,21 @@ STOP_SCRIPT
         fi
 
         DB_PASSWORD=$(grep "^DB_PASSWORD=" "$BASE_ENV" 2>/dev/null | cut -d'=' -f2 | tr -d '"' || openssl rand -hex 24)
-
-        # Сохраняем существующий SESSION_SECRET с сервера или генерируем новый
-        EXISTING_SECRET=$(grep "^SESSION_SECRET=" /tmp/existing.env 2>/dev/null | cut -d'=' -f2 | tr -d '"')
-
-        if [ -n "$EXISTING_SECRET" ]; then
-            # Секрет существует на сервере - сохраняем его
-            SESSION_SECRET="$EXISTING_SECRET"
-            log_info "Preserving existing SESSION_SECRET from server"
-        else
-            # Первая установка или секрет отсутствует - генерируем
-            SESSION_SECRET=$(grep "^SESSION_SECRET=" "$BASE_ENV" 2>/dev/null | cut -d'=' -f2 | tr -d '"' || openssl rand -base64 64 | tr -d '\n')
-            if [ -n "$SESSION_SECRET" ]; then
-                log_info "Using SESSION_SECRET from base env"
-            else
-                log_info "Generated new SESSION_SECRET (first deployment)"
-            fi
-        fi
-
-        # Сохраняем PRODUCTION_DOMAIN, SESSION_SAME_SITE и DB_SSL_MODE из .env
-        PRODUCTION_DOMAIN=$(grep "^PRODUCTION_DOMAIN=" "$BASE_ENV" 2>/dev/null | cut -d'=' -f2 | tr -d '"' || echo "https://the-bot.ru")
-        SESSION_SAME_SITE=$(grep "^SESSION_SAME_SITE=" "$BASE_ENV" 2>/dev/null | cut -d'=' -f2 | tr -d '"' || echo "Lax")
-        DB_SSL_MODE=$(grep "^DB_SSL_MODE=" "$BASE_ENV" 2>/dev/null | cut -d'=' -f2 | tr -d '"' || echo "require")
+        SESSION_SECRET=$(grep "^SESSION_SECRET=" "$BASE_ENV" 2>/dev/null | cut -d'=' -f2 | tr -d '"' || openssl rand -base64 64 | tr -d '\n')
 
         awk -v db_host="postgres" \
             -v db_user="tutoring" \
             -v db_password="$DB_PASSWORD" \
             -v session_secret="$SESSION_SECRET" \
-            -v production_domain="$PRODUCTION_DOMAIN" \
-            -v session_same_site="$SESSION_SAME_SITE" \
+            -v production_domain="https://the-bot.ru" \
             -v env_mode="production" \
-            -v ssl_mode="$DB_SSL_MODE" '
+            -v ssl_mode="prefer" '
             /^DB_HOST=/ { print "DB_HOST=" db_host; next }
             /^DB_USER=/ { print "DB_USER=" db_user; next }
             /^DB_PASSWORD=/ { print "DB_PASSWORD=\"" db_password "\""; next }
             /^DB_SSL_MODE=/ { print "DB_SSL_MODE=" ssl_mode; next }
             /^SESSION_SECRET=/ { print "SESSION_SECRET=\"" session_secret "\""; next }
             /^PRODUCTION_DOMAIN=/ { print "PRODUCTION_DOMAIN=" production_domain; next }
-            /^SESSION_SAME_SITE=/ { print "SESSION_SAME_SITE=" session_same_site; next }
             /^ENV=/ { print "ENV=" env_mode; next }
             { print }
         ' "$BASE_ENV" > /tmp/docker.env
@@ -325,23 +316,23 @@ STOP_SCRIPT
     fi
 
     log_step "Deploying on remote server..."
-    ssh "$REMOTE_HOST" bash -s << DOCKER_SCRIPT
+    ssh "$REMOTE_HOST" bash -s "$REMOTE_DIR" << 'DOCKER_SCRIPT'
+REMOTE_DIR="$1"
 set -euo pipefail
 
-REMOTE_DIR="/opt/THE_BOT_platform"
-cd "\$REMOTE_DIR"
+cd "$REMOTE_DIR"
 
 echo "=== Docker Safe Deployment ==="
 
 if ! command -v docker &> /dev/null; then
     echo "Installing Docker..."
     curl -fsSL https://get.docker.com | sudo sh
-    sudo usermod -aG docker \$USER
+    sudo usermod -aG docker $USER
 fi
 
 if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
     echo "Installing Docker Compose..."
-    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-\$(uname -s)-\$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
 fi
 
@@ -382,12 +373,12 @@ fi
 echo ""
 echo "=== Starting containers ==="
 
-\$COMPOSE_CMD -f docker-compose.prod.yml up -d
+$COMPOSE_CMD -f docker-compose.prod.yml up -d
 
 sleep 5
-if ! \$COMPOSE_CMD -f docker-compose.prod.yml ps | grep -q "Up"; then
+if ! $COMPOSE_CMD -f docker-compose.prod.yml ps | grep -q "Up"; then
     echo "Ошибка: контейнеры не запустились"
-    \$COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30
+    $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30
     exit 1
 fi
 
@@ -398,7 +389,7 @@ echo ""
 echo "=== Post-deployment verification ==="
 
 echo "Container status:"
-\$COMPOSE_CMD -f docker-compose.prod.yml ps
+$COMPOSE_CMD -f docker-compose.prod.yml ps
 
 echo ""
 echo "Checking service health..."
@@ -409,9 +400,9 @@ for i in {1..30}; do
         echo ""
         break
     fi
-    if [ \$i -eq 30 ]; then
+    if [ $i -eq 30 ]; then
         echo "⚠ Health check timeout"
-        \$COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30 backend
+        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=30 backend
     fi
     sleep 2
 done
@@ -419,7 +410,7 @@ done
 echo ""
 echo "=== Deployment Complete ==="
 echo "Platform available at:"
-echo "  $PRODUCTION_DOMAIN"
+echo "  https://the-bot.ru"
 DOCKER_SCRIPT
 
     log_success "Docker deployment completed"
@@ -469,7 +460,7 @@ main() {
         log_info "Skipping database backup (--no-backup flag used)"
     fi
 
-    prepare_backend_source
+    build_backend
     build_frontend
     deploy_docker_safe
     verify_database
@@ -478,13 +469,13 @@ main() {
     echo -e "${GREEN}=== ✓ Safe Deployment Successful ===${NC}"
     echo ""
     echo "Summary:"
-    echo "  ✓ Backend source prepared for remote build"
+    echo "  ✓ Backend built locally and deployed"
     echo "  ✓ Frontend built and deployed"
     echo "  ✓ Database preserved from previous deployment"
     echo "  ✓ Services verified and healthy"
     echo ""
     echo "Platform available at:"
-    echo "  $PRODUCTION_DOMAIN"
+    echo "  https://the-bot.ru"
     echo ""
 }
 

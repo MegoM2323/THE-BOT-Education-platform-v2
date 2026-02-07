@@ -1,41 +1,13 @@
-# Stage 1: Builder
-FROM golang:1.23-alpine AS builder
-
-RUN sed -i 's/https:\/\/dl-cdn.alpinelinux.org/http:\/\/dl-cdn.alpinelinux.org/g' /etc/apk/repositories
-RUN apk add --no-cache git ca-certificates
-
-WORKDIR /build
-
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /build/server ./cmd/server
-
-# Stage 2: Runtime
 FROM alpine:3.19
 
-RUN apk add --no-cache ca-certificates tzdata postgresql-client bash
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirror.yandex.ru/g' /etc/apk/repositories && \
+    apk add --no-cache \
+        postgresql-client \
+        wget \
+        ca-certificates \
+        bash
 
 WORKDIR /app
 
-COPY --from=builder /build/server /app/server
-COPY --from=builder /build/internal/database/migrations /app/migrations
-COPY entrypoint.sh /app/entrypoint.sh
-
-RUN mkdir -p /app/uploads /app/migrations && \
-    chown -R appuser:appgroup /app && \
-    chmod -R u+rwX,go+rX /app && \
-    chmod +x /app/entrypoint.sh /app/server
-
-USER appuser
-
-EXPOSE 8080
-
-ENTRYPOINT ["/app/entrypoint.sh"]
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD wget -q --spider http://localhost:8080/health || exit 1
+ENTRYPOINT ["/bin/sh"]
+CMD []
