@@ -311,15 +311,15 @@ export const sendReportToParents = async (lessonId, options = {}) => {
 /**
  * Создать серию повторяющихся занятий
  * @param {string} lessonId - ID исходного занятия
- * @param {number} weeks - Количество недель для повтора
  * @param {Object} [options] - Опции запроса (включая signal для отмены)
  * @returns {Promise<Object>} { count: number, lessons: [] }
+ * Backend автоматически создаст серию на 4 месяца (семестр)
  */
-export const createRecurringSeries = async (lessonId, weeks, options = {}) => {
+export const createRecurringSeries = async (lessonId, options = {}) => {
   try {
     return await apiClient.post(
       `/lessons/${lessonId}/recurring`,
-      { recurring_weeks: weeks },
+      {}, // Backend вычисляет количество недель автоматически
       options,
     );
   } catch (error) {

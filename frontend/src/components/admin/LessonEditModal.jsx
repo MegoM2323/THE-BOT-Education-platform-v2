@@ -13,7 +13,6 @@ import {
   detectModificationType,
   getModificationDetails,
 } from "../../utils/lessonModificationDetector.js";
-import { DEFAULT_RECURRING_WEEKS } from "../../config/constants.js";
 import { createRecurringSeries } from "../../api/lessons.js";
 import * as bookingAPI from "../../api/bookings.js";
 import * as userAPI from "../../api/users.js";
@@ -1055,14 +1054,11 @@ export const LessonEditModal = ({
   const handleCreateRecurringSeries = async () => {
     if (!lesson?.id) return;
     const confirmed = window.confirm(
-      `Создать серию из ${DEFAULT_RECURRING_WEEKS} повторяющихся занятий?`,
+      `Создать серию повторяющихся занятий до конца семестра (4 месяца)?`,
     );
     if (!confirmed) return;
     try {
-      const result = await createRecurringSeries(
-        lesson.id,
-        DEFAULT_RECURRING_WEEKS,
-      );
+      const result = await createRecurringSeries(lesson.id);
       showNotification(`Создано ${result.data?.count || 0} занятий`, "success");
       await loadLessonData();
       invalidateLessonData(queryClient);

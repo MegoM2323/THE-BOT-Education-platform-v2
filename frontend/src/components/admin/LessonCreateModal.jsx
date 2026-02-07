@@ -8,7 +8,7 @@ import StudentCheckboxList from "./StudentCheckboxList.jsx";
 import { useNotification } from "../../hooks/useNotification.js";
 import { useAuth } from "../../hooks/useAuth.js";
 import { ROLES } from "../../utils/constants.js";
-import { DEFAULT_RECURRING_WEEKS } from "../../config/constants.js";
+// DEFAULT_RECURRING_WEEKS больше не используется - backend управляет длительностью серии
 import * as lessonAPI from "../../api/lessons.js";
 import * as userAPI from "../../api/users.js";
 import * as creditAPI from "../../api/credits.js";
@@ -365,7 +365,7 @@ export const LessonCreateModal = ({
       // Добавить параметры повторяющихся занятий
       if (isRecurring) {
         requestData.is_recurring = true;
-        requestData.recurring_weeks = DEFAULT_RECURRING_WEEKS;
+        // Backend автоматически создаст серию на 4 месяца (семестр)
       }
 
       // Добавить выбранных студентов

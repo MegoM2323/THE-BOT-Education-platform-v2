@@ -1,1 +1,0 @@
-export const DEFAULT_RECURRING_WEEKS = 4;
