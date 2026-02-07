@@ -101,11 +101,7 @@ const LessonCard = memo(({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       data-testid="calendar-lesson"
-      title={
-        lesson.applied_from_template
-          ? 'Из шаблона. Нажмите для просмотра, ПКМ для редактирования'
-          : 'Нажмите для просмотра'
-      }
+      title="Нажмите для просмотра"
     >
       {renderLessonContent
         ? renderLessonContent(lesson)
@@ -123,7 +119,6 @@ const LessonCard = memo(({
     prevProps.lesson.color === nextProps.lesson.color &&
     prevProps.lesson.start_time === nextProps.lesson.start_time &&
     prevProps.lesson.isFiltered === nextProps.lesson.isFiltered &&
-    prevProps.lesson.applied_from_template === nextProps.lesson.applied_from_template &&
     prevProps.lesson.homework_text === nextProps.lesson.homework_text &&
     prevProps.lesson.homework_count === nextProps.lesson.homework_count &&
     prevProps.lesson.broadcasts_count === nextProps.lesson.broadcasts_count &&

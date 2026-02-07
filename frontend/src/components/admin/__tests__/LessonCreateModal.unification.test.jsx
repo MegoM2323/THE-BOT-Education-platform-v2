@@ -230,45 +230,6 @@ describe('LessonCreateModal - Student Selection Unification', () => {
       }
     });
 
-    it('should pass maxStudents prop to TemplateStudentAssignmentModal', async () => {
-      const user = userEvent.setup();
-      try {
-        render(
-          <LessonCreateModal
-            isOpen={true}
-            onClose={vi.fn()}
-            selectedDate={mockDate}
-            onLessonCreated={vi.fn()}
-          />,
-          { wrapper: createWrapper() }
-        );
-
-        await waitFor(() => {
-          const input = screen.getByLabelText('Максимум студентов:');
-          expect(input).toBeInTheDocument();
-        });
-
-        // Set max_students to 5
-        const maxInput = screen.getByLabelText('Максимум студентов:');
-        await user.clear(maxInput);
-        await user.type(maxInput, '5');
-
-        // Open modal
-        const button = screen.getByRole('button', { name: /Управление студентами/i });
-        await user.click(button);
-
-        // Modal should show capacity info based on maxStudents
-        await waitFor(() => {
-          const capacityText = screen.queryByText(/Вместимость:/);
-          // If modal opened, it should show capacity
-          if (capacityText) {
-            expect(capacityText).toBeInTheDocument();
-          }
-        });
-      } catch (error) {
-        expect(true).toBe(true);
-      }
-    });
   });
 
   describe('Student Data Handling', () => {
@@ -469,14 +430,5 @@ describe('LessonCreateModal - Student Selection Unification', () => {
       expect(true).toBe(true); // Component implementation is correct
     });
 
-    it('should support TemplateStudentAssignmentModal integration', async () => {
-      // Component passes:
-      // - isOpen={showStudentModal}
-      // - onClose={() => setShowStudentModal(false)}
-      // - selectedStudents={formData.student_ids}
-      // - onStudentsAssigned={handleStudentsAssigned}
-      // - maxStudents={formData.max_students}
-      expect(true).toBe(true); // Component implementation is correct
-    });
   });
 });

@@ -74,6 +74,11 @@ export const Sidebar = ({
                     `nav-${link.label.toLowerCase().replace(/\s+/g, "-")}`
                   }
                   title={collapsed ? link.label : ""}
+                  onClick={() => {
+                    if (!isDesktop && isOpen) {
+                      onClose();
+                    }
+                  }}
                 >
                   {link.icon && (
                     <span className="sidebar-icon">{link.icon}</span>

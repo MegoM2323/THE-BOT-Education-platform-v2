@@ -1314,7 +1314,6 @@ export const LessonEditModal = ({
                   </div>
                 )}
 
-                {/* Информация о занятии - унифицировано с TemplateLessonForm */}
                 <section className="lesson-edit-section">
                   <h4 className="section-title">Основное</h4>
                   <form data-testid="lesson-edit-form">

@@ -32,10 +32,6 @@ vi.mock('../LessonCreateModal.jsx', () => ({
   default: () => null,
 }));
 
-vi.mock('../TemplateApplyButton.jsx', () => ({
-  default: () => null,
-}));
-
 vi.mock('../../common/SkeletonLoader.jsx', () => {
   const React = require('react');
   return {
