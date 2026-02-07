@@ -75,7 +75,7 @@ const LessonCard = memo(({
   return (
     <div
       className={`calendar-lesson ${lessonClassName} ${
-        lesson.applied_from_template ? 'lesson-from-template' : ''
+        lesson.is_recurring ? 'lesson-recurring' : ''
       } ${lesson.isFiltered ? 'calendar-lesson-filtered' : ''} ${
         isOwned ? 'calendar-lesson-owned' : ''
       }`}

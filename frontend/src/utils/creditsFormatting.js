@@ -15,9 +15,9 @@ export const REASON_LABELS = {
 export const translateReason = (reason) => {
   if (!reason) return '—';
   if (REASON_LABELS[reason]) return REASON_LABELS[reason];
-  if (reason.startsWith('Lesson booking (template')) return 'Запись по шаблону';
-  if (reason.startsWith('Template rollback')) return 'Откат шаблона';
-  if (reason.startsWith('Lesson cancelled during')) return 'Отмена при замене шаблона';
+  if (reason.startsWith('Lesson booking (recurring')) return 'Запись на повторяющееся занятие';
+  if (reason.startsWith('Recurring rollback')) return 'Откат повторяющейся серии';
+  if (reason.startsWith('Lesson cancelled during')) return 'Отмена при замене';
   return reason;
 };
 

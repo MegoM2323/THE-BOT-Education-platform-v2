@@ -360,23 +360,24 @@ func TestLesson_MarshalJSON_ConvertsSqlNullString(t *testing.T) {
 			shouldExist: []string{"id", "deleted_at"},
 		},
 		{
-			name: "With template_application_id",
+			name: "With recurring_group_id",
 			lesson: &Lesson{
-				ID:                    uuid.New(),
-				TeacherID:             uuid.New(),
-				StartTime:             time.Now(),
-				EndTime:               time.Now().Add(2 * time.Hour),
-				MaxStudents:           4,
-				CurrentStudents:       0,
-				Color:                 "#3B82F6",
-				Subject:               sql.NullString{Valid: false},
-				HomeworkText:          sql.NullString{Valid: false},
-				TemplateApplicationID: func() *uuid.UUID { u := uuid.New(); return &u }(),
-				CreatedAt:             time.Now(),
-				UpdatedAt:             time.Now(),
-				DeletedAt:             sql.NullTime{Valid: false},
+				ID:               uuid.New(),
+				TeacherID:        uuid.New(),
+				StartTime:        time.Now(),
+				EndTime:          time.Now().Add(2 * time.Hour),
+				MaxStudents:      4,
+				CurrentStudents:  0,
+				Color:            "#3B82F6",
+				Subject:          sql.NullString{Valid: false},
+				HomeworkText:     sql.NullString{Valid: false},
+				IsRecurring:      true,
+				RecurringGroupID: func() *uuid.UUID { u := uuid.New(); return &u }(),
+				CreatedAt:        time.Now(),
+				UpdatedAt:        time.Now(),
+				DeletedAt:        sql.NullTime{Valid: false},
 			},
-			shouldExist: []string{"template_application_id"},
+			shouldExist: []string{"recurring_group_id"},
 		},
 	}
 
@@ -572,22 +573,22 @@ func TestLesson_MarshalJSON_Consistency(t *testing.T) {
 
 // TestLessonMarshalJSON_TypeCorrectness verifies all fields have correct JSON types
 func TestLessonMarshalJSON_TypeCorrectness(t *testing.T) {
-	templateID := uuid.New()
+	recurringID := uuid.New()
 	lesson := &Lesson{
-		ID:                    uuid.New(),
-		TeacherID:             uuid.New(),
-		StartTime:             time.Now(),
-		EndTime:               time.Now().Add(2 * time.Hour),
-		MaxStudents:           4,
-		CurrentStudents:       2,
-		Color:                 "#3B82F6",
-		Subject:               sql.NullString{String: "Art", Valid: true},
-		HomeworkText:          sql.NullString{String: "Sketch", Valid: true},
-		AppliedFromTemplate:   true,
-		TemplateApplicationID: &templateID,
-		CreatedAt:             time.Now(),
-		UpdatedAt:             time.Now(),
-		DeletedAt:             sql.NullTime{Time: time.Now(), Valid: true},
+		ID:               uuid.New(),
+		TeacherID:        uuid.New(),
+		StartTime:        time.Now(),
+		EndTime:          time.Now().Add(2 * time.Hour),
+		MaxStudents:      4,
+		CurrentStudents:  2,
+		Color:            "#3B82F6",
+		Subject:          sql.NullString{String: "Art", Valid: true},
+		HomeworkText:     sql.NullString{String: "Sketch", Valid: true},
+		IsRecurring:      true,
+		RecurringGroupID: &recurringID,
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
+		DeletedAt:        sql.NullTime{Time: time.Now(), Valid: true},
 	}
 
 	data, err := json.Marshal(lesson)
@@ -612,8 +613,8 @@ func TestLessonMarshalJSON_TypeCorrectness(t *testing.T) {
 		{"color", "string"},
 		{"subject", "string"},
 		{"homework_text", "string"},
-		{"applied_from_template", "bool"},
-		{"template_application_id", "string"},
+		{"is_recurring", "bool"},
+		{"recurring_group_id", "string"},
 		{"created_at", "string"}, // Time marshals to string
 		{"updated_at", "string"},
 		{"deleted_at", "string"},

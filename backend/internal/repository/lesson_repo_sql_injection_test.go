@@ -180,8 +180,8 @@ func TestLessonRepositoryUpdateWhitelistValidation(t *testing.T) {
 		{"deleted_at": time.Now()},
 		{"created_at": time.Now()},
 		{"updated_at": time.Now()},
-		{"applied_from_template": false},
-		{"template_application_id": uuid.New()},
+		{"is_recurring": false},
+		{"recurring_group_id": uuid.New()},
 	}
 
 	for _, updates := range invalidUpdates {
