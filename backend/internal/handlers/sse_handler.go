@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	heartbeatInterval = 30 * time.Second
+	heartbeatInterval = 15 * time.Second
 )
 
 type SSEHandler struct {

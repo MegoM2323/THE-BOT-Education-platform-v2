@@ -45,6 +45,28 @@ server {
         }
     }
 
+    # SSE endpoint - no buffering, long timeouts
+    location /api/v1/events {
+        rewrite ^/api/(?!v1/)(.*)$ /api/v1/$1 break;
+
+        proxy_pass http://$backend_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection '';
+
+        # Disable buffering for SSE streaming
+        proxy_buffering off;
+        proxy_cache off;
+
+        # Long timeouts for SSE streaming
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 3600s;
+        proxy_read_timeout 3600s;
+    }
+
     # Backend API - rewrite /api/* to /api/v1/* if not already versioned
     location /api {
         # Add /v1 prefix if not present (frontend calls /api/auth, backend expects /api/v1/auth)
