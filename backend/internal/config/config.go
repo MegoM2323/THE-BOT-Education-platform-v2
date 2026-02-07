@@ -365,7 +365,7 @@ func Load() (*Config, error) {
 			Name:     getEnv("DB_NAME", "tutoring_platform"),
 			User:     getEnv("DB_USER", "postgres"),
 			Password: getEnv("DB_PASSWORD", ""),
-			SSLMode:  getEnv("DB_SSL_MODE", "disable"),
+			SSLMode:  getEnv("DB_SSL_MODE", "require"),
 		},
 		Server: ServerConfig{
 			Port:             getEnv("SERVER_PORT", "8080"),
@@ -434,10 +434,6 @@ func (c *Config) Validate() error {
 	}
 
 	if c.IsProduction() {
-		// In production, require SSL for database
-		if c.Database.SSLMode == "disable" {
-			return fmt.Errorf("SAFETY: Database SSL must be enabled in production (DB_SSL_MODE cannot be 'disable')")
-		}
 		// In production, require production domain
 		if c.Server.ProductionDomain == "" {
 			return fmt.Errorf("PRODUCTION_DOMAIN is required in production mode")

@@ -20,10 +20,11 @@ services:
       - tutoring-network
 
   backend:
-    image: postgres:15-alpine
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
     container_name: tutoring-backend
     restart: unless-stopped
-    command: ["/app/entrypoint.sh"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -34,7 +35,7 @@ services:
       DB_NAME: ${DB_NAME:-tutoring_platform}
       DB_USER: ${DB_USER:-tutoring}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_SSL_MODE: prefer
+      DB_SSL_MODE: ${DB_SSL_MODE:-require}
       SERVER_PORT: 8080
       ENV: ${ENV:-production}
       PRODUCTION_DOMAIN: ${PRODUCTION_DOMAIN:-https://the-bot.ru}
@@ -48,11 +49,8 @@ services:
       YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY:-}
       MIGRATIONS_DIR: /app/migrations
     volumes:
-      - ./backend/bin/server:/app/server:ro
-      - ./backend/entrypoint.sh:/app/entrypoint.sh:ro
       - ./backend/internal/database/migrations:/app/migrations:ro
       - backend_uploads:/app/uploads
-    working_dir: /app
     expose:
       - "8080"
     networks:
