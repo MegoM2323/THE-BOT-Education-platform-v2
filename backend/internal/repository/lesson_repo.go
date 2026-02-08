@@ -547,9 +547,16 @@ func (r *LessonRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// DeleteByRecurringGroupID выполняет мягкое удаление всех занятий с указанным recurring_group_id
+// DeleteByRecurringGroupID выполняет мягкое удаление всех занятий с указанным recurring_group_id,
+// пропуская занятия с активными бронированиями
 func (r *LessonRepository) DeleteByRecurringGroupID(ctx context.Context, recurringGroupID uuid.UUID) (int64, error) {
-	query := `UPDATE lessons SET deleted_at = NOW(), updated_at = NOW() WHERE recurring_group_id = $1 AND deleted_at IS NULL`
+	query := `
+		UPDATE lessons SET deleted_at = NOW(), updated_at = NOW()
+		WHERE recurring_group_id = $1 AND deleted_at IS NULL
+		AND id NOT IN (
+			SELECT DISTINCT lesson_id FROM bookings WHERE status = 'active'
+		)
+	`
 	result, err := r.db.ExecContext(ctx, query, recurringGroupID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to delete recurring series: %w", err)
@@ -1021,6 +1028,59 @@ func (r *LessonRepository) GetLessonBookingsForLessons(ctx context.Context, less
 	}
 
 	return result, nil
+}
+
+// UpdateRecurringInfo обновляет recurring-поля занятия (recurring_group_id, is_recurring, recurring_end_date)
+func (r *LessonRepository) UpdateRecurringInfo(ctx context.Context, lessonID uuid.UUID, groupID uuid.UUID, isRecurring bool, recurringEndDate time.Time) error {
+	query := `
+		UPDATE lessons
+		SET recurring_group_id = $1, is_recurring = $2, recurring_end_date = $3, updated_at = $4
+		WHERE id = $5 AND deleted_at IS NULL
+	`
+
+	result, err := r.db.ExecContext(ctx, query, groupID, isRecurring, recurringEndDate, time.Now(), lessonID)
+	if err != nil {
+		return fmt.Errorf("failed to update recurring info: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rows == 0 {
+		return ErrLessonNotFound
+	}
+
+	return nil
+}
+
+// DeleteFutureRecurringLessons deletes all lessons in a recurring group that start AFTER the given lesson's start time
+// Returns the number of deleted lessons
+func (r *LessonRepository) DeleteFutureRecurringLessons(ctx context.Context, recurringGroupID uuid.UUID, afterTime time.Time) (int64, error) {
+	query := `UPDATE lessons SET deleted_at = NOW(), updated_at = NOW()
+              WHERE recurring_group_id = $1
+              AND start_time > $2
+              AND deleted_at IS NULL
+              AND id NOT IN (SELECT DISTINCT lesson_id FROM bookings WHERE status = 'active')`
+	result, err := r.db.ExecContext(ctx, query, recurringGroupID, afterTime)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete future recurring lessons: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	return rows, nil
+}
+
+// ClearRecurringInfo removes recurring info from a lesson
+func (r *LessonRepository) ClearRecurringInfo(ctx context.Context, lessonID uuid.UUID) error {
+	query := `UPDATE lessons SET is_recurring = false, recurring_group_id = NULL, recurring_end_date = NULL, updated_at = NOW() WHERE id = $1`
+	_, err := r.db.ExecContext(ctx, query, lessonID)
+	if err != nil {
+		return fmt.Errorf("failed to clear recurring info: %w", err)
+	}
+	return nil
 }
 
 // GetAllTeachersSchedule получает расписание ВСЕХ преподавателей за период (для админа)

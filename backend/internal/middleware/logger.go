@@ -9,8 +9,9 @@ import (
 // responseWriter оборачивает http.ResponseWriter для захвата кода состояния
 type responseWriter struct {
 	http.ResponseWriter
-	statusCode   int
-	bytesWritten int
+	statusCode    int
+	bytesWritten  int
+	headerWritten bool
 }
 
 func newResponseWriter(w http.ResponseWriter) *responseWriter {
@@ -18,15 +19,23 @@ func newResponseWriter(w http.ResponseWriter) *responseWriter {
 		ResponseWriter: w,
 		statusCode:     http.StatusOK,
 		bytesWritten:   0,
+		headerWritten:  false,
 	}
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
+	if rw.headerWritten {
+		return
+	}
+	rw.headerWritten = true
 	rw.statusCode = code
 	rw.ResponseWriter.WriteHeader(code)
 }
 
 func (rw *responseWriter) Write(b []byte) (int, error) {
+	if !rw.headerWritten {
+		rw.headerWritten = true
+	}
 	n, err := rw.ResponseWriter.Write(b)
 	rw.bytesWritten += n
 	return n, err

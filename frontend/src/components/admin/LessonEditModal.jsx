@@ -13,7 +13,7 @@ import {
   detectModificationType,
   getModificationDetails,
 } from "../../utils/lessonModificationDetector.js";
-import { createRecurringSeries } from "../../api/lessons.js";
+import * as lessonAPI from "../../api/lessons.js";
 import * as bookingAPI from "../../api/bookings.js";
 import * as userAPI from "../../api/users.js";
 import * as creditAPI from "../../api/credits.js";
@@ -101,6 +101,7 @@ export const LessonEditModal = ({
 
   // Recurring lesson states
   const [isRecurring, setIsRecurring] = useState(false);
+  const [creatingSeries, setCreatingSeries] = useState(false);
 
   // Form validation errors
   const [formErrors, setFormErrors] = useState({});
@@ -149,6 +150,7 @@ export const LessonEditModal = ({
       setEndTime(endTimeStr);
       setMaxStudents(lesson.max_students || 1);
       setCreditsCost(lesson.credits_cost || 1);
+      setIsRecurring(!!lesson?.is_recurring || !!lesson?.recurring_group_id);
     }
   }, [lesson]);
 
@@ -1152,7 +1154,7 @@ export const LessonEditModal = ({
     (isPastLesson && isTeacher) || (isTeacher && !isOwnLesson);
 
   // Скрыть recurring UI для занятий в серии
-  const showRecurringControls = !lesson?.recurring_group_id;
+  const showRecurringControls = true;
 
   /**
    * Получить заголовок модального окна с бейджами
@@ -1432,30 +1434,40 @@ export const LessonEditModal = ({
                               checked={isRecurring}
                               onChange={async (e) => {
                                 const checked = e.target.checked;
-                                setIsRecurring(checked);
 
-                                // Автоматически создать серию при включении галочки (как в Google Calendar)
-                                if (checked && lesson?.id) {
-                                  const confirmed = window.confirm(
-                                    `Создать серию повторяющихся занятий на 2 года вперёд?`
-                                  );
-                                  if (confirmed) {
-                                    try {
-                                      const result = await createRecurringSeries(lesson.id);
-                                      showNotification(`Создано ${result.data?.count || 0} занятий`, "success");
-                                      await loadLessonData();
-                                      invalidateLessonData(queryClient);
-                                      onLessonUpdated?.(lesson);
-                                    } catch (error) {
-                                      showNotification(error.response?.data?.message || error.message, "error");
-                                      setIsRecurring(false); // Вернуть галочку обратно если ошибка
-                                    }
-                                  } else {
-                                    setIsRecurring(false); // Отменить если пользователь нажал "Отмена"
+                                if (checked && lesson?.id && !lesson?.recurring_group_id) {
+                                  setCreatingSeries(true);
+                                  setIsRecurring(true);
+                                  try {
+                                    const result = await lessonAPI.createRecurringSeries(lesson.id);
+                                    showNotification(`Создано ${result?.count || 0} занятий`, "success");
+                                    await loadLessonData();
+                                    invalidateLessonData(queryClient);
+                                    onLessonUpdated?.(lesson);
+                                  } catch (error) {
+                                    showNotification(error.message || "Ошибка создания серии", "error");
+                                    setIsRecurring(false);
+                                  } finally {
+                                    setCreatingSeries(false);
+                                  }
+                                } else if (!checked && lesson?.id && lesson?.recurring_group_id) {
+                                  setCreatingSeries(true);
+                                  setIsRecurring(false);
+                                  try {
+                                    const result = await lessonAPI.cancelRecurringSeries(lesson.id);
+                                    showNotification(result?.message || "Будущие занятия удалены", "success");
+                                    await loadLessonData();
+                                    invalidateLessonData(queryClient);
+                                    onLessonUpdated?.(lesson);
+                                  } catch (error) {
+                                    showNotification(error.message || "Ошибка отмены серии", "error");
+                                    setIsRecurring(true);
+                                  } finally {
+                                    setCreatingSeries(false);
                                   }
                                 }
                               }}
-                              disabled={shouldFreezeInfoTab}
+                              disabled={shouldFreezeInfoTab || creatingSeries}
                             />
                             <span>Повторять еженедельно</span>
                           </label>

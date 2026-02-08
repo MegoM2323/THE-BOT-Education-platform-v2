@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -715,17 +716,44 @@ func (h *LessonHandler) SendReportToParents(w http.ResponseWriter, r *http.Reque
 	response.Created(w, result)
 }
 
-// CreateRecurringSeriesFromLesson создаёт серию повторяющихся занятий на основе существующего
-func (h *LessonHandler) CreateRecurringSeriesFromLesson(w http.ResponseWriter, r *http.Request) {
+// CancelRecurringFromLesson отменяет серию повторяющихся занятий начиная с указанного
+func (h *LessonHandler) CancelRecurringFromLesson(w http.ResponseWriter, r *http.Request) {
 	lessonID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid lesson ID")
 		return
 	}
 
-	var req models.CreateRecurringSeriesRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid request body")
+	user, ok := middleware.GetUserFromContext(r.Context())
+	if !ok {
+		response.Unauthorized(w, "Authentication required")
+		return
+	}
+	_ = user
+
+	deletedCount, err := h.lessonService.CancelRecurringFromLesson(r.Context(), lessonID)
+	if err != nil {
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "not part of a recurring series") {
+			response.BadRequest(w, response.ErrCodeInvalidInput, errMsg)
+			return
+		}
+		log.Error().Err(err).Str("lesson_id", lessonID.String()).Msg("Failed to cancel recurring series")
+		response.InternalError(w, "Failed to cancel recurring series")
+		return
+	}
+
+	response.OK(w, map[string]interface{}{
+		"deleted_count": deletedCount,
+		"message":       fmt.Sprintf("Удалено %d будущих занятий", deletedCount),
+	})
+}
+
+// CreateRecurringSeriesFromLesson создаёт серию повторяющихся занятий на основе существующего
+func (h *LessonHandler) CreateRecurringSeriesFromLesson(w http.ResponseWriter, r *http.Request) {
+	lessonID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		response.BadRequest(w, response.ErrCodeInvalidInput, "Invalid lesson ID")
 		return
 	}
 
@@ -737,17 +765,19 @@ func (h *LessonHandler) CreateRecurringSeriesFromLesson(w http.ResponseWriter, r
 
 	result, err := h.lessonService.CreateRecurringSeriesFromLesson(r.Context(), lessonID, user.ID)
 	if err != nil {
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "already part of a recurring series") {
+			response.BadRequest(w, response.ErrCodeInvalidInput, errMsg)
+			return
+		}
 		log.Error().Err(err).Str("lesson_id", lessonID.String()).Msg("Failed to create recurring series")
 		response.InternalError(w, "Failed to create recurring series")
 		return
 	}
 
-	response.Created(w, map[string]interface{}{
+	response.OK(w, map[string]interface{}{
 		"recurring_group_id": result.RecurringGroupID,
-		"lessons":            result.Lessons,
 		"count":              len(result.Lessons),
 		"message":            fmt.Sprintf("Создано %d повторяющихся занятий", len(result.Lessons)),
 	})
-
-	response.OK(w, result)
 }

@@ -647,6 +647,7 @@ func initializeApp(cfg *config.Config, db *database.DB) error {
 					r.Post("/{id}/apply-to-all", lessonHandler.ApplyToAllSubsequent)
 					r.Post("/{id}/report/send-to-parents", lessonHandler.SendReportToParents)
 					r.Post("/{id}/recurring", lessonHandler.CreateRecurringSeriesFromLesson)
+					r.Delete("/{id}/recurring", lessonHandler.CancelRecurringFromLesson)
 				})
 
 				// Update lesson - доступно admin и teacher (проверка прав внутри обработчика)

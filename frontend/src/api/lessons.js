@@ -334,6 +334,23 @@ export const createRecurringSeries = async (lessonId, options = {}) => {
   }
 };
 
+/**
+ * Отменить серию повторяющихся занятий (удалить будущие)
+ * @param {string} lessonId - ID занятия из серии
+ * @param {Object} [options] - Опции запроса (включая signal для отмены)
+ * @returns {Promise<Object>} { message: string, deleted_count: number }
+ */
+export const cancelRecurringSeries = async (lessonId, options = {}) => {
+  try {
+    return await apiClient.delete(`/lessons/${lessonId}/recurring`, options);
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      console.error("Error cancelling recurring series:", error);
+    }
+    throw error;
+  }
+};
+
 export default {
   getLessons,
   getMyLessons,
@@ -346,4 +363,5 @@ export default {
   getLessonStudents,
   sendReportToParents,
   createRecurringSeries,
+  cancelRecurringSeries,
 };

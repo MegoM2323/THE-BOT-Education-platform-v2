@@ -384,6 +384,32 @@ func (s *LessonService) GetLessonBookingsForLessons(ctx context.Context, lessonI
 	return s.lessonRepo.GetLessonBookingsForLessons(ctx, lessonIDs)
 }
 
+// CancelRecurringFromLesson cancels recurring series from a specific lesson forward
+// Deletes all future lessons in the series and clears recurring info from the current lesson
+func (s *LessonService) CancelRecurringFromLesson(ctx context.Context, lessonID uuid.UUID) (int64, error) {
+	lesson, err := s.lessonRepo.GetByID(ctx, lessonID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get lesson: %w", err)
+	}
+
+	if lesson.RecurringGroupID == nil {
+		return 0, fmt.Errorf("lesson is not part of a recurring series")
+	}
+
+	// Delete future lessons
+	deletedCount, err := s.lessonRepo.DeleteFutureRecurringLessons(ctx, *lesson.RecurringGroupID, lesson.StartTime)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete future lessons: %w", err)
+	}
+
+	// Clear recurring info from current lesson
+	if err := s.lessonRepo.ClearRecurringInfo(ctx, lessonID); err != nil {
+		return deletedCount, fmt.Errorf("failed to clear recurring info: %w", err)
+	}
+
+	return deletedCount, nil
+}
+
 // CreateRecurringLessons создает повторяющиеся занятия еженедельно до recurring_end_date или до конца семестра
 func (s *LessonService) CreateRecurringLessons(ctx context.Context, req *models.CreateLessonRequest) ([]*models.Lesson, error) {
 	if !req.IsRecurring {
@@ -424,6 +450,10 @@ func (s *LessonService) CreateRecurringSeriesFromLesson(ctx context.Context, les
 		return nil, fmt.Errorf("failed to get lesson: %w", err)
 	}
 
+	if lesson.RecurringGroupID != nil {
+		return nil, fmt.Errorf("lesson is already part of a recurring series")
+	}
+
 	// Автоматически вычисляем количество недель до конца семестра
 	semesterEndDate := lesson.StartTime.AddDate(0, config.DefaultRecurringMonths, 0)
 	weeks := int(semesterEndDate.Sub(lesson.StartTime).Hours() / (24 * 7))
@@ -434,6 +464,11 @@ func (s *LessonService) CreateRecurringSeriesFromLesson(ctx context.Context, les
 
 	// Создать новый recurring_group_id
 	groupID := uuid.New()
+
+	// Обновить оригинальное занятие с recurring-информацией
+	if err := s.lessonRepo.UpdateRecurringInfo(ctx, lesson.ID, groupID, true, semesterEndDate); err != nil {
+		return nil, fmt.Errorf("failed to update original lesson with recurring info: %w", err)
+	}
 
 	// Создать запрос на основе существующего занятия
 	var lessons []*models.LessonWithTeacher
