@@ -66,8 +66,10 @@ type LessonResponse struct {
 	Subject         string        `json:"subject"`
 	HomeworkText    string        `json:"homework_text,omitempty"`
 	ReportText      string        `json:"report_text,omitempty"`
-	Link            string        `json:"link,omitempty"`
-	IsPast          bool          `json:"is_past"` // Вычисляемое поле: занятие уже прошло
+	Link             string        `json:"link,omitempty"`
+	IsRecurring      bool          `json:"is_recurring"`
+	RecurringGroupID *uuid.UUID    `json:"recurring_group_id,omitempty"`
+	IsPast           bool          `json:"is_past"` // Вычисляемое поле: занятие уже прошло
 	Bookings        []BookingInfo `json:"bookings,omitempty"`
 	CreatedAt       time.Time     `json:"created_at"`
 	UpdatedAt       time.Time     `json:"updated_at"`
@@ -114,11 +116,13 @@ func (l *LessonWithTeacher) ToResponse() *LessonResponse {
 		Subject:         subject,
 		HomeworkText:    homeworkText,
 		ReportText:      reportText,
-		Link:            link,
-		IsPast:          l.IsInPast(),
-		CreatedAt:       l.CreatedAt,
-		UpdatedAt:       l.UpdatedAt,
-		DeletedAt:       deletedAt,
+		Link:             link,
+		IsRecurring:      l.IsRecurring,
+		RecurringGroupID: l.RecurringGroupID,
+		IsPast:           l.IsInPast(),
+		CreatedAt:        l.CreatedAt,
+		UpdatedAt:        l.UpdatedAt,
+		DeletedAt:        deletedAt,
 	}
 }
 
@@ -162,11 +166,13 @@ func (l *Lesson) ToResponseWithoutTeacher() *LessonResponse {
 		Subject:         subject,
 		HomeworkText:    homeworkText,
 		ReportText:      reportText,
-		Link:            link,
-		IsPast:          l.IsInPast(),
-		CreatedAt:       l.CreatedAt,
-		UpdatedAt:       l.UpdatedAt,
-		DeletedAt:       deletedAt,
+		Link:             link,
+		IsRecurring:      l.IsRecurring,
+		RecurringGroupID: l.RecurringGroupID,
+		IsPast:           l.IsInPast(),
+		CreatedAt:        l.CreatedAt,
+		UpdatedAt:        l.UpdatedAt,
+		DeletedAt:        deletedAt,
 	}
 }
 
@@ -501,8 +507,10 @@ func (l *TeacherScheduleLesson) ToResponse() map[string]interface{} {
 		"subject":                 subject,
 		"homework_text":           homeworkText,
 		"link":                    link,
-		"is_past":                 l.StartTime.Before(time.Now()),
-		"enrolled_students_count": l.EnrolledStudentsCount,
+		"is_recurring":             l.IsRecurring,
+		"recurring_group_id":       l.RecurringGroupID,
+		"is_past":                  l.StartTime.Before(time.Now()),
+		"enrolled_students_count":  l.EnrolledStudentsCount,
 		"enrolled_students":       enrolledStudents,
 		"homework_count":          l.HomeworkCount,
 		"broadcasts_count":        l.BroadcastsCount,
